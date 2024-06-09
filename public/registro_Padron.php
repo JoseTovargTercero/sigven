@@ -242,12 +242,7 @@ if ($_SESSION['comunidad_padron'] != "") {
               <h6 class="mb-0">Comunidad</h6>
             </div>
             <div class="card-body p-3">
-   
-
-
-
               <p style="color: #c5c5c5; margin-top: -15px;     opacity: 0.5 !important;">Seleccion de comunidad</p>
-
               <label>Municipio</label>
               <div class="mb-3">
                 <select class='form-control' id="municipio_id" name="municipio_id" required>
@@ -312,31 +307,20 @@ if ($_SESSION['comunidad_padron'] != "") {
             </div>
           </div>
         </div>
-
-
-
         <div class="col-lg-8">
           <div class="card h-100  cblur shadow-blu ">
             <div class="card-header pb-0 p-3">
               <h6 class="mb-0">Información de la Persona</h6>
             </div>
             <div class="card-body p-3 row">
-
               <p style="color: #c5c5c5; margin-top: -15px;  opacity: 0.5 !important;">Información del Elector</p>
-
-
-
               <div class="col-lg-6">
-
                 <label>Cedula</label>
                 <div class="col-lg-12">
                   <input style="    margin-bottom: 16px;" name="busqueda" id="busqueda" class="form-control" required placeholder="Cedula de Identidad">
                 </div>
-
                 <section id="tabla_resultado"> </section>
               </div>
-              
-              
               <div class="col-lg-6">
                 <section id="tabla_resultado3"> </section>
 
@@ -349,47 +333,22 @@ if ($_SESSION['comunidad_padron'] != "") {
                     <option value="OP">OPOSITOR</option>
                   </select>
                 </div>
-
-                
-
-                
-                
-                
-
-                
                 <div style="margin-top: 16px;" class="col-lg-12">
                   <label>Telefono</label>
                   <input name="telefono" id="telefono"  type="number" pattern="[0-9]{11}"   class="form-control" required='required' placeholder="telefono">
                 </div>
-
-                
-                
-                
                 <div style="margin-top: 22px;" class="text-center">
-
                   <input type="submit" class="btn bg-gradient-primary w-100 mt-4 mb-0" value="registrar" />
                 </div>
-
-                
               </div>
-              
             </div>
           </div>
-
-
-          
       </form>
-      
-
-      
     </div>
-    
   </div>
-  
   <!-- aqui se desplega la tabla con la info de los integrantes de la estructura o padron electoral -->
   <section id="tabla_resultado2"> </section>
   <!-- aqui se desplega la tabla con la info de los integrantes de la estructura o padron electoral -->
-  
   <footer class="footer pt-3  ">
     <div class="container-fluid">
       <div class="row align-items-center justify-content-lg-between">

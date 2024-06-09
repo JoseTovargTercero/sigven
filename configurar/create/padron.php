@@ -28,7 +28,7 @@ $_SESSION['comunidad_padron'] = $comunidad;
 $_SESSION['calle_padron'] = $calle;
 
 $origenDatos = 2;
-$query="SELECT ciudad.name, padronelectoral.calle FROM `padronelectoral` LEFT JOIN ciudad ON padronelectoral.comunidad=ciudad.id WHERE padronelectoral.cedula='$ci'"; 
+$query="SELECT ciudad.name, padronelectoral.calle, padronelectoral.origenDatos FROM `padronelectoral` LEFT JOIN ciudad ON padronelectoral.comunidad=ciudad.id WHERE padronelectoral.cedula='$ci'"; 
 $buscarCedula = $conexion->query( $query );
 if ( $buscarCedula->num_rows > 0 ) {
     while( $filaEncontrada = $buscarCedula->fetch_assoc() ) {
@@ -42,19 +42,37 @@ if ( $buscarCedula->num_rows > 0 ) {
 switch($origenDatos){
 
     case(0):
-        $_SESSION['noticia'] = "¡No se completó!/La persona ya se encuetra registrada en ".$name."/error/4000";
-       define( 'PAGINA_RETORNO', '../../public/registro_Padron.php' );
-       header( 'Location: '.PAGINA_RETORNO );
+
+       $update = "UPDATE padronelectoral SET municipio='$municipio', parroquia='$parroquia', ubch='$ubch', comunidad='$comunidad', voto='$voto', calle='$calle', registradopor='$ap', telefono='$telefono', cv='$cv' WHERE cedula='$ci'";
+       $result = mysqli_query( $conexion, $update );
+       if ( $result ) {
+               $_SESSION['noticia'] = "¡Actualizado!/Fue actualizado correctamente/success/3000";
+               define( 'PAGINA_RETORNO', '../../public/registro_Padron.php' );
+               header( 'Location: '.PAGINA_RETORNO );
+               exit(); // Detener la ejecución del script después de redirigir
+           
+            } else {
+            // Manejo de error si la consulta falla
+            echo "Error al actualizar: " . mysqli_error($conexion);
+            exit(); 
+            
+        }
+
     break;
 
     case(1):
-    $update = "UPDATE padronelectoral SET municipio_id='$municipio', parroquia='$parroquia', ubch='$ubch', comunidad='$comunidad', voto='$voto', calle='$calle', registradopor='$ap', origenDatos='0' WHERE cedula='$ci'";
+    $update = "UPDATE padronelectoral SET municipio='$municipio', parroquia='$parroquia', ubch='$ubch', comunidad='$comunidad', voto='$voto', calle='$calle', registradopor='$ap', origenDatos='0' WHERE cedula='$ci'";
     $result = mysqli_query( $conexion, $update );
         if ( $result ) {
             $_SESSION['noticia'] = "¡Perfecto!/Fue agregado correctamente/success/3000";
             define( 'PAGINA_RETORNO', '../../public/registro_Padron.php' );
             header( 'Location: '.PAGINA_RETORNO );
+        } else {
+            // Manejo de error si la consulta falla
+            echo "Error al actualizar: " . mysqli_error($conexion);
+            exit(); 
         }
+
     break;
 
     case(2):
@@ -69,6 +87,10 @@ switch($origenDatos){
         $_SESSION['noticia'] = "¡Perfecto!/Fue agregado correctamente/success/3000";
         define( 'PAGINA_RETORNO', '../../public/registro_Padron.php' );
         header( 'Location: '.PAGINA_RETORNO );
+        } else {
+            // Manejo de error si la consulta falla
+            echo "Error al actualizar: " . mysqli_error($conexion);
+            exit(); 
         }
     break;
 }

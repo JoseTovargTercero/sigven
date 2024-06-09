@@ -11,7 +11,8 @@ if($_SESSION['nivel'] == 1){
 
 function queryCerrar(){
   global $conexion; 
-  global $id; 
+  global $id;
+  $var1 = ''; 
   $query = "SELECT * FROM log_usuarios WHERE id_user='$id' ORDER BY id DESC LIMIT 1";
   $search = $conexion->query($query);
   if ($search->num_rows > 0) {
@@ -19,7 +20,7 @@ function queryCerrar(){
         $var1 = $fila["last_act"];
       }
   }
-return $var1;
+  return $var1;
 }
 
 
@@ -34,6 +35,7 @@ function query(){
   $time = time();
   global $conexion; 
   global $id; 
+  $var1 = '';
   $query = "SELECT * FROM log_usuarios WHERE id_user='$id' ORDER BY id DESC LIMIT 1";
   $search = $conexion->query($query);
   if ($search->num_rows > 0) {
@@ -109,9 +111,8 @@ $navbar = '
      
         <li class="nav-item dropdown pe-3 d-flex align-items-center">
           <a href="javascript:;" class="nav-link text-body p-0" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="line icon-user cursor-pointer"></i>
-           ';
-           if($_SESSION['info'] == "passVence"){
+            <i class="line icon-user cursor-pointer"></i>';
+           if(@$_SESSION['info'] == "passVence"){
             $navbar .= '   <i class="line icon-info noticia"></i>';
 
           }
@@ -158,7 +159,7 @@ $navbar = '
               </a>
             </li>';
 
-            if($_SESSION['info'] == "passVence"){
+            if(@$_SESSION['info'] == "passVence"){
             
 $navbar .= '
 <li>
