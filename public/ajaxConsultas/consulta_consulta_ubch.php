@@ -22,7 +22,7 @@ if (isset($_POST['ubch'])) {
   $buscarComunidades = $conexion->query($query2);
   if ($buscarComunidades->num_rows > 0) {
     while ($row = $buscarComunidades->fetch_assoc()) {
-        $resultado .='<li><a href="consultas_Comunidad.php?id='.$row['id'].'">'.$row['name'].'</a></li>';	
+        $resultado .='<li><a href="consultas_comunidad.php?id='.$row['id'].'">'.$row['name'].'</a></li>';	
 	  }
   }
 

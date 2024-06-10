@@ -22,7 +22,11 @@ if ( $buscarCedula->num_rows > 0 ) {
 
 if($pass == $pass2){
   
-	$contrasena = md5($_POST['pass']);
+
+
+	$contrasena = password_hash($_POST['pass'], PASSWORD_BCRYPT);
+
+
 
     $insertar = "INSERT INTO usuarios (nombre, cedula, contrasena, nivel) VALUES ('$nombre','$cedula','$contrasena','$nivel')";
     $result = mysqli_query( $conexion, $insertar );
