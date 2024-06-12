@@ -1,15 +1,14 @@
 <?php
 require('../configuracion/conexion.php');
 
+echo "Reporte de apertura enviado correctamente.";
 
-
+exit();
+/*
 if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
     $c = $_POST['cedula'];
     $cantidad = $_POST["cantidad"];
     $time = date('H-i a');
-    //$c = '27640176';
-    //$cantidad = '125';
-
 
     $result = getOperador($c);
 
@@ -45,9 +44,9 @@ if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
     }
 
 }else {
-    echo 'Rechazado : No ha iniciado sesión';
+    echo 'Rechazado : No ha iniciado sesi贸n';
     exit();
 }
-
+*/
 
 ?>

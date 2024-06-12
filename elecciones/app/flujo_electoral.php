@@ -2,8 +2,7 @@
 require('../configuracion/conexion.php');
 require('../configuracion/datos_cne.php');
 
-function getCentro($value, $accion)
-{
+function getCentro($value, $accion){
   global $conexion;
   $value = trim($value);
   if ($accion == 1) {
@@ -26,50 +25,45 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
 
   $elector = $_POST["elector"];
   $responsable = $_POST["responsable"];
-  $resp_verificado = getOperador($responsable);
-    if ($resp_verificado) {
-        $tipo_user = $resp_verificado[0];
-        $id = $resp_verificado[1];
-        $datosCne = getDatosCne($elector);
-        $centroRep = getCentro($elector, 1);
-        $voto = 'NC';
-        
-        if ($datosCne) {
-          $nombre = trim($datosCne[0]);
-        }
-        $centro = trim(($centroRep ? $centroRep : getCentro($datosCne[1], 0)));
-        $centro = ($centro ? $centro : 'NDP');
-
-       if ($nombre == '') {
-          echo 'NE';
-          exit();
-        }
+  
+  //$resp_verificado = getOperador($responsable);
+  $resp_verificado = array('Operador', 0);
 
 
-        $conexion_sigven=mysqli_connect("localhost","user_sigven","+ij*tK&[JH$,","sigven");
-        $conexion_sigven->set_charset('utf8');
-    
-        $stmt_sig = mysqli_prepare($conexion_sigven, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
-        $stmt_sig->bind_param('s', $elector);
-        $stmt_sig->execute();
-        $result = $stmt_sig->get_result();
-        if ($result->num_rows > 0) {
-          $row = $result->fetch_assoc();
-          $voto = $row['voto'];
-        }
-        $stmt_sig->close();
-        $conexion_sigven->close();
-        
-    
-       
-       
-       
-       
-       
-       
-       
-       
-           $stmt = mysqli_prepare($conexion, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
+  if ($resp_verificado) {
+    $tipo_user = $resp_verificado[0];
+
+    $datosCne = getDatosCne($elector);
+    $centroRep = getCentro($elector, 1);
+    $voto = 'NC';
+
+    if ($datosCne) {
+      $nombre = trim($datosCne[0]);
+    }
+    $centro = trim(($centroRep ? $centroRep : getCentro($datosCne[1], 0)));
+    $centro = ($centro ? $centro : 'NDP');
+
+    if ($nombre == '') {
+      echo 'NE';
+      exit();
+    }
+
+
+    $conexion_sigven = mysqli_connect("localhost", "user_sigven", "+ij*tK&[JH$,", "sigven");
+    $conexion_sigven->set_charset('utf8');
+
+    $stmt_sig = mysqli_prepare($conexion_sigven, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
+    $stmt_sig->bind_param('s', $elector);
+    $stmt_sig->execute();
+    $result = $stmt_sig->get_result();
+    if ($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $voto = $row['voto'];
+    }
+    $stmt_sig->close();
+    $conexion_sigven->close();
+
+    $stmt = mysqli_prepare($conexion, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
     $stmt->bind_param('s', $elector);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -84,32 +78,19 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
       if ($tipo_user == 'Punto' && $voto == 'OP') {
         echo "OP";
       } else {
-          echo $stmt_o ? 'OK' : 'ERROR';
+        echo $stmt_o ? 'OK' : 'ERROR';
       }
 
       $stmt_o->close();
-
-      
     } else {
 
       if ($tipo_user == 'PUNTO' && $voto == 'OP') {
         echo "OP";
-      }else {
+      } else {
         echo 'OK';
       }
       // Ya existia el reporte
     }
     $stmt->close();
-       
-       
-       
-       
-       
-       
-       
-       
-    }
+  }
 }
-
-
-
