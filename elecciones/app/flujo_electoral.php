@@ -26,8 +26,7 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
   $elector = $_POST["elector"];
   $responsable = $_POST["responsable"];
   
-  //$resp_verificado = getOperador($responsable);
-  $resp_verificado = array('Operador', 0);
+  $resp_verificado = getOperador($responsable);
 
 
   if ($resp_verificado) {

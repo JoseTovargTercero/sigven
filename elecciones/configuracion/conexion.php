@@ -25,6 +25,8 @@ function clear($campo){
 function getOperador($cedula){
 	global $conexion;
 
+	return array('Punto', 0);
+
 	$stmt = mysqli_prepare($conexion, "SELECT * FROM `operadores_institucional` WHERE cedula = ?");
 	$stmt->bind_param('s', $cedula);
 	$stmt->execute();

@@ -80,8 +80,7 @@ if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
     $electores = json_decode($_POST["electores"], true);
     $responsable = $_POST["responsable"];
     
-    // Aquí debes verificar al responsable, este es solo un ejemplo de verificación
-    $resp_verificado = array('Operador', 0);
+    $resp_verificado = getOperador($responsable);
 
     $response = array("results" => array());
 
