@@ -42,6 +42,14 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     $centro = trim(($centroRep ? $centroRep : getCentro($datosCne[1], 0)));
     $centro = ($centro ? $centro : 'NDP');
 
+
+    if ($centro == 'NDP') {
+      echo 'NE';
+      exit();
+    }
+
+
+
     if ($nombre == '') {
       echo 'NE';
       exit();
