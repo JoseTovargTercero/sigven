@@ -654,7 +654,6 @@ if ($_SESSION['nivel'] != 1) {
       </div>
       <div class="row mt-4">
       <div class="col-lg-6 mb-lg-0 mb-4">
-
         <div class="card h-100 p-3">
           <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
             <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
@@ -694,6 +693,46 @@ if ($_SESSION['nivel'] != 1) {
                         <td>' . $nombres[$row['responsable']][0] . '</td>
                         <td class="text-center">' . $row['Nrepeticiones'] . '</td>
                         <td class="text-center">' . number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',') . '% (' . $centroDatos[$row['centro']][1] . ')</td>
+                      </tr>';
+                        }
+                      }
+                    }
+                    $stmt->close();
+                    ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-lg-0 mb-4">
+        <div class="card h-100 p-3">
+          <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+            <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+              <h6 class="font-weight-bolder mb-4">Movilización de OP</h6>
+              <div class="table-responsive" >
+                <table class="table" id="table3">
+                  <thead>
+                    <tr>
+                      <th class="p-0">OP</th>
+                      <th class="text-center p-0">Movilizador</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+              
+                    $stmt = mysqli_prepare($conexion_app, "SELECT responsable, cedula FROM flujo_electoral
+                    WHERE voto='OP' ORDER BY responsable");
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($result->num_rows > 0) {
+                      while ($row = $result->fetch_assoc()) {
+                        if (@$nombres[$row['responsable']][0]) {
+                          echo '<tr>
+                        <td>' . $nombres[$row['cedula']][0] . '</td>
+                        <td>' . $nombres[$row['responsable']][0] . '</td>
                       </tr>';
                         }
                       }
@@ -916,6 +955,9 @@ if ($_SESSION['nivel'] != 1) {
     });
 
     $('#table2').DataTable({
+        language: languageSettings
+    });
+    $('#table3').DataTable({
         language: languageSettings
     });
 

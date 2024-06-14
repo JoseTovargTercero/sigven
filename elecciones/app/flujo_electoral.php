@@ -21,11 +21,14 @@ function getCentro($value, $accion){
   return false;
 }
 
-if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
-
+//if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
+if (true) {
+  $elector = '27640176';
+  $responsable = '27640176';
+  /*
   $elector = $_POST["elector"];
   $responsable = $_POST["responsable"];
-  
+  */
   $resp_verificado = getOperador($responsable);
 
 
@@ -56,7 +59,8 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     }
 
 
-    $conexion_sigven = mysqli_connect("localhost", "user_sigven", "+ij*tK&[JH$,", "sigven");
+    $conexion_sigven = mysqli_connect("localhost", "root", "", "sigven");
+    //$conexion_sigven = mysqli_connect("localhost", "user_sigven", "+ij*tK&[JH$,", "sigven");
     $conexion_sigven->set_charset('utf8');
 
     $stmt_sig = mysqli_prepare($conexion_sigven, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
@@ -77,8 +81,27 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     if ($result->num_rows == 0) {
 
 
-      $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto) VALUES (?, ?, ?, ?, ?)");
-      $stmt_o->bind_param("sssss", $elector, $nombre, $centro, $responsable, $voto);
+
+      
+    $idUnoX10 = '0';
+
+
+    $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id FROM `unox10` WHERE cdula = ?");
+    $stmt_unox10->bind_param('s', $elector);
+    $stmt_unox10->execute();
+    $result = $stmt_unox10->get_result();
+    if ($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $voto = 'VD';
+      $idUnoX10 = $row['id'];
+
+    }
+    $stmt_unox10->close();
+
+
+
+      $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez) VALUES (?, ?, ?, ?, ?, ?)");
+      $stmt_o->bind_param("ssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10);
       $stmt_o->execute();
 
 
