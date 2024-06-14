@@ -21,14 +21,9 @@ function getCentro($value, $accion){
   return false;
 }
 
-//if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
-if (true) {
-  $elector = '27640176';
-  $responsable = '27640176';
-  /*
+if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
   $elector = $_POST["elector"];
   $responsable = $_POST["responsable"];
-  */
   $resp_verificado = getOperador($responsable);
 
 
@@ -59,8 +54,7 @@ if (true) {
     }
 
 
-    $conexion_sigven = mysqli_connect("localhost", "root", "", "sigven");
-    //$conexion_sigven = mysqli_connect("localhost", "user_sigven", "+ij*tK&[JH$,", "sigven");
+    $conexion_sigven = mysqli_connect("localhost", "user_sigven", "+ij*tK&[JH$,", "sigven");
     $conexion_sigven->set_charset('utf8');
 
     $stmt_sig = mysqli_prepare($conexion_sigven, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
