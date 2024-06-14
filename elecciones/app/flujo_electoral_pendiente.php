@@ -3,12 +3,12 @@ require('../configuracion/conexion.php');
 require('../configuracion/datos_cne.php');
 
 function getCentro($value, $accion){
-  global $conexion;
+  global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion, "SELECT centro FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT centro FROM `rep_24` WHERE cedula = ?");
   } else {
-    $stmt = mysqli_prepare($conexion, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
   }
   $stmt->bind_param('s', $value);
   $stmt->execute();
@@ -22,7 +22,7 @@ function getCentro($value, $accion){
 }
 
 function verificarElector($elector, $responsable, $tipo_user) {
-    global $conexion;
+    global $conexion_app;
 
     $datosCne = getDatosCne($elector);
     $centroRep = getCentro($elector, 1);
@@ -52,12 +52,12 @@ function verificarElector($elector, $responsable, $tipo_user) {
     $stmt_sig->close();
     $conexion_sigven->close();
 
-    $stmt = mysqli_prepare($conexion, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
     $stmt->bind_param('s', $elector);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows == 0) {
-        $stmt_o = $conexion->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto) VALUES (?, ?, ?, ?, ?)");
+        $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto) VALUES (?, ?, ?, ?, ?)");
         $stmt_o->bind_param("sssss", $elector, $nombre, $centro, $responsable, $voto);
         $stmt_o->execute();
         $stmt_o->close();

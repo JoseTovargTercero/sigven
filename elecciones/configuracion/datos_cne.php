@@ -18,13 +18,13 @@ function getDatosCne($cedula){
         }
 
         if (
-            preg_match("/C¨¦dula:/", $linea) ||
+            preg_match("/Cï¿½ï¿½dula:/", $linea) ||
             preg_match("/Nombre:/", $linea) ||
             preg_match("/Estado:/", $linea) ||
             preg_match("/Municipio:/", $linea) ||
             preg_match("/Parroquia:/", $linea) ||
             preg_match("/Centro:/", $linea) ||
-            preg_match("/Direcci¨®n:/", $linea)
+            preg_match("/DirecciÃ³n:/", $linea)
         ) {
             $cuenta = 1;
         }

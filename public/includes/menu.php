@@ -1,6 +1,5 @@
-
 <?php 
-session_start();
+//session_start();
 $idUser = $_SESSION['id'];
 $nivel = $_SESSION['nivel'];
 if($idUser == ""){
@@ -53,6 +52,19 @@ if($_SESSION['nivel'] != 1){
           <span class="nav-link-text ms-1">Inicio</span>
         </a>
       </li>
+
+      <li class="nav-item dropdown" style="<?php echo $inicioDisplay ?>">
+        <a id="inicio" class="nav-link" href="../public/evento.php">
+          <div class="icon icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <i class="line icon-badge"></i>
+          </div>
+          <span class="nav-link-text ms-1">Evento electoral</span>
+        </a>
+      </li>
+
+
+
+
       <li class="nav-item dropdown" style="<?php echo $entidadDisplay ?>">
         
         <a id="entidad" class="nav-link sidebar-sub-toggle">

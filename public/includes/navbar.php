@@ -35,6 +35,7 @@ function query(){
   $time = time();
   global $conexion; 
   global $id; 
+  $last_id = '';
   $var1 = '';
   $query = "SELECT * FROM log_usuarios WHERE id_user='$id' ORDER BY id DESC LIMIT 1";
   $search = $conexion->query($query);
