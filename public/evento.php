@@ -33,7 +33,8 @@ if ($_SESSION['nivel'] != 1) {
   <link href="../assets/css/sidebar.css" rel="stylesheet" />
   <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.0.3" rel="stylesheet" />
   <script type="text/javascript" src="jquery.min.js"></script>
-
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
+  <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
   <style>
     .text-center {
       text-align: center !important;
@@ -578,8 +579,8 @@ if ($_SESSION['nivel'] != 1) {
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
                 <h6 class="font-weight-bolder mb-4">Reportes por Centro</h6>
-                <div class="table-responsive" style="height: 50vh; overflow-y: auto;">
-                  <table class="table">
+                <div class="table-responsive">
+                  <table class="table" id="table1">
                     <thead>
                       <tr>
                         <th class="p-0">Centro</th>
@@ -658,8 +659,8 @@ if ($_SESSION['nivel'] != 1) {
           <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
             <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
               <h6 class="font-weight-bolder mb-4">Reportes por usuario</h6>
-              <div class="table-responsive" style="height: 50vh; overflow-y: auto;">
-                <table class="table">
+              <div class="table-responsive" >
+                <table class="table" id="table2">
                   <thead>
                     <tr>
                       <th class="p-0">Centro</th>
@@ -888,6 +889,37 @@ if ($_SESSION['nivel'] != 1) {
   </main>
 
 
+  <script>
+   var languageSettings = {
+        "decimal": "",
+        "emptyTable": "No hay información",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+        "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+        "infoPostFix": "",
+        "thousands": ",",
+        "lengthMenu": "Mostrar _MENU_ Entradas",
+        "loadingRecords": "Cargando...",
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "zeroRecords": "Sin resultados encontrados",
+        "paginate": {
+            "first": "Primero",
+            "last": "Ultimo",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        }
+    };
+
+    $('#table1').DataTable({
+        language: languageSettings
+    });
+
+    $('#table2').DataTable({
+        language: languageSettings
+    });
+
+  </script>
 
   <?php require_once('includes/settings.php');  ?>
 
