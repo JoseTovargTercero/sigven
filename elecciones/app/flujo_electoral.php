@@ -41,14 +41,7 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     $centro = ($centro ? $centro : 'NDP');
 
 
-    if ($centro == 'NDP') {
-      echo 'NE';
-      exit();
-    }
-
-
-
-    if ($nombre == '') {
+    if ($nombre == '' || $centro == 'NDP') {
       echo 'NE';
       exit();
     }
@@ -78,8 +71,6 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
 
       
     $idUnoX10 = '0';
-
-
     $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id FROM `unox10` WHERE cdula = ?");
     $stmt_unox10->bind_param('s', $elector);
     $stmt_unox10->execute();
