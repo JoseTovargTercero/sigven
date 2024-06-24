@@ -407,8 +407,6 @@ if ($_SESSION['comunidad_padron'] != "") {
       function cargarComunidad() {
         $.get("dependencias/comunidades.php", "pais_id=" + $("#pais_id").val(), function(data) {
           $("#ciudad_id").html(data);
-          console.log(data);
-   
         });
       }
       $("#pais_id").change(cargarComunidad);
