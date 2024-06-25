@@ -46,11 +46,11 @@ if ($buscarAlumnos5555->num_rows > 0) {
           <input style="margin-bottom: 16px;" readonly name="cargo" id="cargo" class="form-control" required hidden value="'.$fila9855['cargo'].'">
             <div class="col-lg-3">
                 <label>Cedula</label>
-                <input style="margin-bottom: 16px;" readonly name="cedula" id="cedula" class="form-control" required  value="'.$fila9855['cedula'].'">
+                <input style="margin-bottom: 16px;" name="cedula" id="cedula" class="form-control" required  value="'.$fila9855['cedula'].'">
                 </div>
                 <div class="col-lg-3">
                   <label>Nombre</label>
-                  <input style="margin-bottom: 16px;" readonly name="nombre" id="nombre" class="form-control" required  value="'.$fila9855['nombre'].'">
+                  <input style="margin-bottom: 16px;" name="nombre" id="nombre" class="form-control" required  value="'.$fila9855['nombre'].'">
                 </div>
                 <div class="col-lg-3">
                   <label>Telefono</label>
@@ -206,11 +206,11 @@ if ($buscarAlumnos5555->num_rows > 0) {
           <input style="margin-bottom: 16px;" readonly name="cargo" id="cargo" class="form-control" required hidden value="'.$fila9855['cargo'].'">
             <div class="col-lg-3">
                 <label>Cedula</label>
-                <input style="margin-bottom: 16px;" readonly name="cedula" id="cedula" class="form-control" required  value="'.$fila9855['cedula'].'">
+                <input style="margin-bottom: 16px;"  name="cedula" id="cedula" class="form-control" required  value="'.$fila9855['cedula'].'">
                 </div>
                 <div class="col-lg-3">
                   <label>Nombre</label>
-                  <input style="margin-bottom: 16px;" readonly name="nombre" id="nombre" class="form-control" required  value="'.$fila9855['nombre'].'">
+                  <input style="margin-bottom: 16px;"  name="nombre" id="nombre" class="form-control" required  value="'.$fila9855['nombre'].'">
                 </div>
                 <div class="col-lg-3">
                   <label>Telefono</label>
