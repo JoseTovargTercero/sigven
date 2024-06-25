@@ -3,6 +3,8 @@
 /** Error reporting */
 error_reporting(0);
 include('../../configurar/configuracion.php');
+require '../../elecciones/configuracion/conexion.php';
+
 $municipio_id = $_POST['municipio_id'];
 $continente_id = $_POST['continente_id'];
 $pais_id = $_POST['pais_id'];
@@ -31,6 +33,30 @@ $search = $conexion->query($query);
         }
 }
 
+
+// Declarar la consulta
+$stmt = $conexion_app->prepare("SELECT cdula FROM `unox10`");
+// Ejecutar la consulta
+$stmt->execute();
+// Obtener los resultados
+$result = $stmt->get_result();
+$cdulas = array();
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $cdulas[] = $row['cdula'];
+    }
+}
+// Cerrar la conexión
+$stmt->close();
+$conexion_app->close();
+
+// Función para verificar si un valor existe en el array
+function verificarCdula($valor, $array) {
+    return in_array($valor, $array) ? 'X' : '';
+}
+
+
+
 $contador = 1;
 $rowA = 9;
 $rowB = 9;
@@ -40,6 +66,7 @@ $rowE = 9;
 $rowF = 9;
 $rowG = 9;
 $rowH = 9;
+$rowI = 9;
 
 
 /** Include PHPExcel */
@@ -99,7 +126,8 @@ foreach ($jefeCalleRegistrosArray as $registro) {
                 ->setCellValue('E'.$rowE++, $registro['telefono'])
                 ->setCellValue('F'.$rowF++, ucwords(mb_strtolower($registro['cv'])))
                 ->setCellValue('G'.$rowG++, 'VD')
-                ->setCellValue('H'.$rowH++, '');
+                ->setCellValue('H'.$rowH++, '')
+                ->setCellValue('I'.$rowI++, verificarCdula($registro['cedula'], $cdulas));
 
     
                 
@@ -133,7 +161,8 @@ foreach ($jefeCalleRegistrosArray as $registro) {
         ->setCellValue('E'.$rowE++, $rowPadron['telefono'])
         ->setCellValue('F'.$rowF++, ucwords(mb_strtolower($rowPadron['cv'])))
         ->setCellValue('G'.$rowG++, $rowPadron['voto'])
-        ->setCellValue('H'.$rowH++, ($rowPadron['act'] == '0' ? '' : '1'));
+        ->setCellValue('H'.$rowH++, ($rowPadron['act'] == '0' ? '' : '1'))
+        ->setCellValue('I'.$rowI++, verificarCdula($rowPadron['cedula'], $cdulas));
     }
 
 }

@@ -308,9 +308,28 @@ $datosSigven .= '</ul>';
                   <?php echo $datosSigven ?>
                 </div>
                 <di class="col-lg-4">
-                  <h6>GITCOM</h6>
+                  <h6>1x10</h6>
+                  <ul class="list">
 
-                  <P style="color: lightgray;">No Disponible</P>
+                  <?php 
+                  require '../elecciones/configuracion/conexion.php';
+
+                    $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `unox10` WHERE cdula = ? LIMIT 1");
+                    $stmt->bind_param('s', $cedula);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                      while ($row = $result->fetch_assoc()) {
+
+                        echo '<li>Encontrado</li>';
+                        echo '<li>Jefe: '.explode(';', $row['jefe'])[0].'</li>';
+                        echo '<li>Cedula Jefe: '.(explode(';', $row['jefe'])[1] == '' ? $row['jfcdula'] : explode(';', $row['jefe'])[1]).'</li>';
+                        
+                    }
+                    }
+                  ?>
+
+                  </ul>
 
               </div>
             </div>
