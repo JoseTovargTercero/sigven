@@ -56,28 +56,11 @@ $objPHPExcel->getProperties()->setCreator("SIGVEN Amazonas")
 
 
 
-$sql = "SELECT cedulaCarnet FROM psuv WHERE cedulaCarnet = ?";
-$carnetizado = $base->prepare($sql);
-
-
-
-$sql3 = "SELECT nombre, cedula, telefono, cv, calle, voto FROM padronelectoral WHERE comunidad='$ciudad_id' AND calle = ? ORDER BY `voto` DESC";
+$sql3 = "SELECT nombre, cedula, telefono, cv, calle, voto, act FROM padronelectoral WHERE comunidad='$ciudad_id' AND calle = ? ORDER BY `voto` DESC";
 $padron = $base->prepare($sql3);
 
 
 
-
-/*
-Tengo esta consulta que me recorre unos registro en la bd y dentro de la misma, se ejecuta otra consulta usando la info de sus calles... La cuestion es que tengo unos valores 'Sin calle' que deseo cargar, como hago para agregar un row al final del FETCH_ASSOC que sea Row: (No disponible, No disponible, No disponible, No disponible, Sin calle) 
-
-$sql2 = "SELECT nombre, cedula, telefono, cv, cargo FROM estructuraraas WHERE comunidad='$ciudad_id' AND tipocargo='1'";
-$jefeCalle = $base->prepare($sql2);
-$jefeCalle->execute(array());
-while ($jefeCalleRegistros = $jefeCalle->fetch(PDO::FETCH_ASSOC)) {
-.....
-}
-}
-*/
 
 $objPHPExcel->setActiveSheetIndex(0)
 ->setCellValue('A4', ucwords(mb_strtolower($nombreComunidad)))
@@ -107,16 +90,6 @@ $jefeCalleRegistrosArray[] = array(
 
 foreach ($jefeCalleRegistrosArray as $registro) {
 
-    
-    $cedula = $registro['cedula'];
-    $carnetizado->execute(array($cedula));
-    if ($carnetizado->fetchColumn() != '') {
-    $c = 'S';
-    }else {
-        $c = '';
-    }
- 
-    
     // Add some data
     $objPHPExcel->setActiveSheetIndex(0)
                 ->setCellValue('A'.$rowA++, $contador++)
@@ -126,7 +99,7 @@ foreach ($jefeCalleRegistrosArray as $registro) {
                 ->setCellValue('E'.$rowE++, $registro['telefono'])
                 ->setCellValue('F'.$rowF++, ucwords(mb_strtolower($registro['cv'])))
                 ->setCellValue('G'.$rowG++, 'VD')
-                ->setCellValue('H'.$rowH++, $c);
+                ->setCellValue('H'.$rowH++, '');
 
     
                 
@@ -152,15 +125,6 @@ foreach ($jefeCalleRegistrosArray as $registro) {
     $padron->execute(array($cargo));
     while ($rowPadron = $padron->fetch(PDO::FETCH_ASSOC)) {
 
-        $cedula = $rowPadron['cedula'];
-        $carnetizado->execute(array($cedula));
-        if ($carnetizado->fetchColumn() != '') {
-        $c = 'S';
-        }else {
-            $c = '';
-        }
-
-
         $objPHPExcel->setActiveSheetIndex(0)
         ->setCellValue('A'.$rowA++, $contador++)
         ->setCellValue('B'.$rowB++, ucwords(mb_strtolower($rowPadron['calle'])))
@@ -169,7 +133,7 @@ foreach ($jefeCalleRegistrosArray as $registro) {
         ->setCellValue('E'.$rowE++, $rowPadron['telefono'])
         ->setCellValue('F'.$rowF++, ucwords(mb_strtolower($rowPadron['cv'])))
         ->setCellValue('G'.$rowG++, $rowPadron['voto'])
-        ->setCellValue('H'.$rowH++, $c);
+        ->setCellValue('H'.$rowH++, ($rowPadron['act'] == '0' ? '' : '1'));
     }
 
 }
