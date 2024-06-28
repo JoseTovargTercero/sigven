@@ -16,7 +16,10 @@ function getCentro($value, $accion){
   $stmt->close();
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? $row['centro'] : $row['CODIGO'];
+    return ($accion == 1) ? array($row['centro'], $row['nombre']) : $row['CODIGO'];
+  }else {
+    return ($accion == 1) ? array(false, false) : false;
+
   }
   return false;
 }
@@ -24,17 +27,12 @@ function getCentro($value, $accion){
 function verificarElector($elector, $responsable, $tipo_user) {
     global $conexion_app;
 
-    $datosCne = getDatosCne($elector);
-    $centroRep = getCentro($elector, 1);
+    $datosCne = getCentro($elector, 1);
+    $centro = trim($datosCne[0]);
+    $nombre = trim($datosCne[1]);
     $voto = 'NC';
 
-    if ($datosCne) {
-        $nombre = trim($datosCne[0]);
-    }
-    $centro = trim(($centroRep ? $centroRep : getCentro($datosCne[1], 0)));
-    $centro = ($centro ? $centro : 'NDP');
-
-    if ($nombre == '' || $centro == 'NDP') {
+    if ($nombre == '' || $centro == false) {
         return array("elector" => $elector, "status" => "NE");
     }
 
