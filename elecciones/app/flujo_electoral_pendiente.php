@@ -6,7 +6,7 @@ function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT centro, nombre FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT mcp, centro, nombre FROM `rep_24` WHERE cedula = ?");
   } else {
     $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
   }
@@ -31,6 +31,7 @@ function verificarElector($elector, $responsable, $tipo_user) {
     $datosCne = getCentro($elector, 1);
     $centro = trim($datosCne[0]);
     $nombre = trim($datosCne[1]);
+    $mcp = trim($datosCne[2]);
     $voto = 'NC';
 
     if ($nombre == '' || $centro == false) {
@@ -73,8 +74,8 @@ function verificarElector($elector, $responsable, $tipo_user) {
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows == 0) {
-        $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt_o->bind_param("ssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10);
+        $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt_o->bind_param("sssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp);
         $stmt_o->execute();
         $stmt_o->close();
 
