@@ -755,7 +755,6 @@ if ($_SESSION["instancia"] != 0) {
         </div>
       </div>
 
-
       <div class="col-lg-6 mb-lg-0 mb-4 mt-4" style="display: none;">
         <div class="card h-100">
           <div class="card-body p-3">
@@ -764,7 +763,6 @@ if ($_SESSION["instancia"] != 0) {
                 <h6 class="font-weight-bolder mb-4 pt-2">Jefes de UBCH registrados</h6>
                 <div id="chartdivJefes" style="height: 50vh;"></div>
               </div>
-
             </div>
           </div>
         </div>
