@@ -6,9 +6,7 @@ function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT tablamesa.MUN, rep_24.centro, rep_24.nombre FROM `rep_24`
-    LEFT JOIN tablamesa ON tablamesa.CODIGO = rep_24.centro
-     WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT mcp, centro, nombre FROM `rep_24` WHERE cedula = ?");
 
   } else {
     $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
@@ -19,7 +17,7 @@ function getCentro($value, $accion){
   $stmt->close();
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['MUN']) : $row['CODIGO'];
+    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['mcp']) : $row['CODIGO'];
   }
   return false;
 }
