@@ -6,7 +6,9 @@ function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT centro, nombre FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT tablamesa.MUN, rep_24.centro, rep_24.nombre FROM `rep_24`
+    LEFT JOIN tablamesa ON tablamesa.CODIGO = rep_24.centro
+     WHERE cedula = ?");
 
   } else {
     $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
@@ -17,7 +19,7 @@ function getCentro($value, $accion){
   $stmt->close();
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? array($row['centro'], $row['nombre']) : $row['CODIGO'];
+    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['MUN']) : $row['CODIGO'];
   }
   return false;
 }
@@ -35,6 +37,7 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     $datosCne = getCentro($elector, 1);
     $centro = trim($datosCne[0]);
     $nombre = trim($datosCne[1]);
+    $mcp = trim($datosCne[2]);
     $voto = 'NC';
 
 
@@ -82,8 +85,8 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
 
 
 
-      $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez) VALUES (?, ?, ?, ?, ?, ?)");
-      $stmt_o->bind_param("ssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10);
+      $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp) VALUES (?, ?, ?, ?, ?, ?, ?)");
+      $stmt_o->bind_param("sssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp);
       $stmt_o->execute();
 
 
