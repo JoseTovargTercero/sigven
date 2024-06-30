@@ -9,6 +9,14 @@ if ($_SESSION['nivel'] != 1) {
   define('PAGINA_INICIO', '../index.php');
   header('Location: ' . PAGINA_INICIO);
 }
+
+if ($_SESSION["instancia"] != 0) {
+  $extraCondicion = 'AND mcp='.$_SESSION["instancia"];
+  $extraCondicionW = 'WHERE mcp='.$_SESSION["instancia"];
+}else {
+  $extraCondicion = '';
+  $extraCondicionW = '';
+}
 ?>
 
 
@@ -317,10 +325,10 @@ if ($_SESSION['nivel'] != 1) {
     }
 
 
-    $vd = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VD'");
-    $vb = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VB'");
-    $vo = contar("SELECT count(*) FROM flujo_electoral WHERE voto='OP'");
-    $nc = contar("SELECT count(*) FROM flujo_electoral WHERE voto='NC'");
+    $vd = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VD' $extraCondicion");
+    $vb = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VB' $extraCondicion");
+    $vo = contar("SELECT count(*) FROM flujo_electoral WHERE voto='OP' $extraCondicion");
+    $nc = contar("SELECT count(*) FROM flujo_electoral WHERE voto='NC' $extraCondicion");
 
 
 
@@ -627,7 +635,7 @@ if ($_SESSION['nivel'] != 1) {
 
 
                       $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones
-                    FROM flujo_electoral
+                    FROM flujo_electoral $extraCondicionW
                     GROUP BY centro
                     ORDER BY Nrepeticiones ASC");
                       $stmt->execute();
@@ -681,7 +689,7 @@ if ($_SESSION['nivel'] != 1) {
                     $stmt->close();
 
                     $stmt = mysqli_prepare($conexion_app, "SELECT responsable, centro, COUNT(*) AS Nrepeticiones
-                    FROM flujo_electoral
+                    FROM flujo_electoral $extraCondicionW
                     GROUP BY responsable
                     ORDER BY Nrepeticiones ASC");
                     $stmt->execute();
@@ -724,7 +732,7 @@ if ($_SESSION['nivel'] != 1) {
                     <?php
               
                     $stmt = mysqli_prepare($conexion_app, "SELECT responsable, cedula FROM flujo_electoral
-                    WHERE voto='OP' ORDER BY responsable");
+                    WHERE voto='OP' $extraCondicion ORDER BY responsable");
                     $stmt->execute();
                     $result = $stmt->get_result();
                     if ($result->num_rows > 0) {
@@ -748,7 +756,7 @@ if ($_SESSION['nivel'] != 1) {
       </div>
 
 
-      <div class="col-lg-6 mb-lg-0 mb-4">
+      <div class="col-lg-6 mb-lg-0 mb-4 mt-4" style="display: none;">
         <div class="card h-100">
           <div class="card-body p-3">
             <div class="row">
@@ -766,7 +774,7 @@ if ($_SESSION['nivel'] != 1) {
 
 
 
-    <div class="row my-4">
+    <div class="row my-4" style="display: none;">
 
       <div class="row">
         <div class="col-lg-8 mb-lg-0 mb-4">
@@ -802,7 +810,7 @@ if ($_SESSION['nivel'] != 1) {
 
     </div>
 
-    <div class="row my-4">
+    <div class="row my-4" style="display: none;">
 
       <div class="col-lg-4 col-md-6">
         <div class="card h-100">
