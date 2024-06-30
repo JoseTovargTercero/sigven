@@ -23,9 +23,7 @@ session_destroy();
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="assets/img/favicon.png">
-  <title>
-    Inicio de sesion
-  </title>
+  <title>Instituciones</title>
   <link rel="stylesheet" href="vendors/animatedLines/css/animate.css">
   <link rel="stylesheet" href="vendors/animatedLines/css/simple-line-icons.css">
 
@@ -170,7 +168,7 @@ session_destroy();
                 <div class="card-body">
                   <label>Cedula</label>
                   <div class="mb-3">
-                    <input type="number" class="form-control" placeholder="Cedula" autofocus aria-label="Cedula" id="cedula" value="27640176">
+                    <input type="number" class="form-control" placeholder="Cedula" autofocus aria-label="Cedula" id="cedula" >
                   </div>
                   <div class="text-center">
                     <button id="btn_verificar" class="btn bg-gradient-primary w-100 mt-4 mb-0">Verificar</button>

@@ -33,7 +33,7 @@ $stmt->close();
   <link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="assets/img/favicon.png">
   <title>
-    Inicio de sesion
+    <?php echo $institucion ?>
   </title>
   <link rel="stylesheet" href="vendors/animatedLines/css/animate.css">
   <link rel="stylesheet" href="vendors/animatedLines/css/simple-line-icons.css">
