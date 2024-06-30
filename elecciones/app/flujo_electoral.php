@@ -6,7 +6,8 @@ function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT centro FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT centro, nombre FROM `rep_24` WHERE cedula = ?");
+
   } else {
     $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
   }
@@ -16,7 +17,7 @@ function getCentro($value, $accion){
   $stmt->close();
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? $row['centro'] : $row['CODIGO'];
+    return ($accion == 1) ? array($row['centro'], $row['nombre']) : $row['CODIGO'];
   }
   return false;
 }
@@ -28,20 +29,16 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
 
 
   if ($resp_verificado) {
-    $tipo_user = $resp_verificado[0];
 
-    $datosCne = getDatosCne($elector);
-    $centroRep = getCentro($elector, 1);
+    $tipo_user = $resp_verificado[0];
+    
+    $datosCne = getCentro($elector, 1);
+    $centro = trim($datosCne[0]);
+    $nombre = trim($datosCne[1]);
     $voto = 'NC';
 
-    if ($datosCne) {
-      $nombre = trim($datosCne[0]);
-    }
-    $centro = trim(($centroRep ? $centroRep : getCentro($datosCne[1], 0)));
-    $centro = ($centro ? $centro : 'NDP');
 
-
-    if ($nombre == '' || $centro == 'NDP') {
+    if ($nombre == '' || $centro == 'NDP' || $centro == false) {
       echo 'NE';
       exit();
     }
