@@ -680,7 +680,6 @@ if ($_SESSION["instancia"] != 0) {
           </div>
         </div>
       </div>
-
       <div class="col-lg-12 mb-lg-0 mb-4 mt-4" >
         <div class="card h-100">
           <div class="card-body p-3">
@@ -693,9 +692,7 @@ if ($_SESSION["instancia"] != 0) {
           </div>
         </div>
       </div>
-
     </div>
-
 
     <?php 
     $municipios = array(
@@ -711,8 +708,10 @@ if ($_SESSION["instancia"] != 0) {
     
     foreach ($municipios as $key => $value) {
       $cantidadFlujo = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key'");
+      $cantidadFlujoUnod = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key' AND unodiez!='0'");
       $cantidadRep = contar("SELECT count(*) FROM rep_24 WHERE mcp='$key'");
-      array_push($municipios[$key], $cantidadFlujo, $cantidadRep);
+      
+      array_push($municipios[$key], $cantidadFlujo, $cantidadRep, $cantidadFlujoUnod);
     }
 
   
@@ -1074,6 +1073,7 @@ if ($_SESSION["instancia"] != 0) {
           "Municipio": "'.$value[0].'",
           "total": '.$value[2].',
           "avance": '.$value[1].',
+          "unoxdiez": '.$value[3].'
         });';
       }
     ?>
@@ -1138,6 +1138,7 @@ if ($_SESSION["instancia"] != 0) {
 
     makeSeries("Total", "total");
     makeSeries("Avance", "avance");
+    makeSeries("Uno x diez", "unoxdiez");
     // jefes de ubch //
 
 
