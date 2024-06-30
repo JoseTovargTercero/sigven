@@ -16,7 +16,7 @@ function getCentro($value, $accion){
   $stmt->close();
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? array($row['centro'], $row['nombre']) : $row['CODIGO'];
+    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['mcp']) : $row['CODIGO'];
   }else {
     return ($accion == 1) ? array(false, false) : false;
 
