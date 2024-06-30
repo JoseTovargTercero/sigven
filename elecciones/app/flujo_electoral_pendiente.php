@@ -6,7 +6,7 @@ function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT centro FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT centro, nombre FROM `rep_24` WHERE cedula = ?");
   } else {
     $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
   }
@@ -23,6 +23,7 @@ function getCentro($value, $accion){
   }
   return false;
 }
+
 
 function verificarElector($elector, $responsable, $tipo_user) {
     global $conexion_app;

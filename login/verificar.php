@@ -37,6 +37,7 @@
 				$_SESSION['reportes']=$registro['reportes'];
 				$_SESSION['consulta']=$registro['consulta'];
 				$_SESSION['respaldos']=$registro['respaldos'];
+				$_SESSION['instancia']=$registro['instancia'];
 
 				$id = $_SESSION['id'];
 				$nombre = $_SESSION['nombre'];
@@ -49,7 +50,8 @@
 				}
 
 				if($_SESSION['nivel'] == '1'){
-					define('PAGINA_INICIO','../public/index.php');
+				//	define('PAGINA_INICIO','../public/index.php');
+					define('PAGINA_INICIO','../public/evento.php');
 					header('Location: '.PAGINA_INICIO);
 				}else{
 					define('PAGINA_INICIO','../public/perfil.php');
