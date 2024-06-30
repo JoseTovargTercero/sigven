@@ -11,9 +11,9 @@ if ($_SESSION['nivel'] != 1) {
 }
 
 if ($_SESSION["instancia"] != 0) {
-  $extraCondicion = 'AND mcp='.$_SESSION["instancia"];
-  $extraCondicionW = 'WHERE mcp='.$_SESSION["instancia"];
-}else {
+  $extraCondicion = 'AND mcp=' . $_SESSION["instancia"];
+  $extraCondicionW = 'WHERE mcp=' . $_SESSION["instancia"];
+} else {
   $extraCondicion = '';
   $extraCondicionW = '';
 }
@@ -135,7 +135,7 @@ if ($_SESSION["instancia"] != 0) {
 
     ////////////////////////////// Contar el total de jefes de ubch registrados//////////////////////////
 
-   
+
 
     $edadPsuv_20 = 0;
     $edadPsuv_30 = 0;
@@ -519,6 +519,7 @@ if ($_SESSION["instancia"] != 0) {
                       <tr>
                         <th class="p-0">Centro</th>
                         <th class="text-center p-0">R</th>
+                        <th class="text-center p-0">1*10</th>
                         <th class="text-center p-0">Porcentaje</th>
                       </tr>
                     </thead>
@@ -555,15 +556,12 @@ if ($_SESSION["instancia"] != 0) {
                         }
                       }
                       $stmt->close();
-
+                
 
                       $participacionCentro = array();
+                      //SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral GROUP BY centro ORDER BY `unodiez_diferente_de_cero` DESC
 
-
-                      $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones
-                    FROM flujo_electoral $extraCondicionW
-                    GROUP BY centro
-                    ORDER BY Nrepeticiones ASC");
+                      $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral  $extraCondicionW GROUP BY centro ORDER BY `Nrepeticiones` ASC");
                       $stmt->execute();
                       $result = $stmt->get_result();
                       if ($result->num_rows > 0) {
@@ -572,6 +570,7 @@ if ($_SESSION["instancia"] != 0) {
                           echo '<tr>
                         <td>' . abrev($centroDatos[$row['centro']][0]) . '</td>
                         <td class="text-center">' . $row['Nrepeticiones'] . '</td>
+                        <td class="text-center">' . $row['unodiez_diferente_de_cero'] . '</td>
                         <td class="text-center">' . number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',') . '% (' . $centroDatos[$row['centro']][1] . ')</td>
                       </tr>';
                         }
@@ -587,190 +586,190 @@ if ($_SESSION["instancia"] != 0) {
         </div>
       </div>
       <div class="row mt-4">
-      <div class="col-lg-6 mb-lg-0 mb-4">
-        <div class="card h-100 p-3">
-          <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
-            <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-              <h6 class="font-weight-bolder mb-4">Reportes por usuario</h6>
-              <div class="table-responsive" >
-                <table class="table" id="table2">
-                  <thead>
-                    <tr>
-                      <th class="p-0">Centro</th>
-                      <th class="text-center p-0">R</th>
-                      <th class="text-center p-0">Porcentaje</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                    $nombres = array();
-                    $stmt = mysqli_prepare($conexion_app, "SELECT cedula, nombre, centro, sexo FROM rep_24");
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    if ($result->num_rows > 0) {
-                      while ($row = $result->fetch_assoc()) {
-                        $nombres["$row[cedula]"] = [$row['nombre'], $row['centro']];
+        <div class="col-lg-6 mb-lg-0 mb-4">
+          <div class="card h-100 p-3">
+            <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+              <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                <h6 class="font-weight-bolder mb-4">Reportes por usuario</h6>
+                <div class="table-responsive">
+                  <table class="table" id="table2">
+                    <thead>
+                      <tr>
+                        <th class="p-0">Centro</th>
+                        <th class="text-center p-0">R</th>
+                        <th class="text-center p-0">Porcentaje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      $nombres = array();
+                      $stmt = mysqli_prepare($conexion_app, "SELECT cedula, nombre, centro, sexo FROM rep_24");
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                          $nombres["$row[cedula]"] = [$row['nombre'], $row['centro']];
+                        }
                       }
-                    }
-                    $stmt->close();
+                      $stmt->close();
 
-                    $stmt = mysqli_prepare($conexion_app, "SELECT responsable, centro, COUNT(*) AS Nrepeticiones
+                      $stmt = mysqli_prepare($conexion_app, "SELECT responsable, centro, COUNT(*) AS Nrepeticiones
                     FROM flujo_electoral $extraCondicionW
                     GROUP BY responsable
                     ORDER BY Nrepeticiones ASC");
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    if ($result->num_rows > 0) {
-                      while ($row = $result->fetch_assoc()) {
-                        if (@$nombres[$row['responsable']][0]) {
-                          echo '<tr>
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                          if (@$nombres[$row['responsable']][0]) {
+                            echo '<tr>
                         <td>' . $nombres[$row['responsable']][0] . '</td>
                         <td class="text-center">' . $row['Nrepeticiones'] . '</td>
                         <td class="text-center">' . number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',') . '% (' . $centroDatos[$row['centro']][1] . ')</td>
                       </tr>';
+                          }
                         }
                       }
-                    }
-                    $stmt->close();
-                    ?>
-                  </tbody>
-                </table>
+                      $stmt->close();
+                      ?>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-lg-6 mb-lg-0 mb-4">
-        <div class="card h-100 p-3">
-          <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
-            <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-              <h6 class="font-weight-bolder mb-4">Movilización de OP</h6>
-              <div class="table-responsive" >
-                <table class="table" id="table3">
-                  <thead>
-                    <tr>
-                      <th class="p-0">OP</th>
-                      <th class="text-center p-0">Movilizador</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-              
-                    $stmt = mysqli_prepare($conexion_app, "SELECT responsable, cedula FROM flujo_electoral
+        <div class="col-lg-6 mb-lg-0 mb-4">
+          <div class="card h-100 p-3">
+            <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+              <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                <h6 class="font-weight-bolder mb-4">Movilización de OP</h6>
+                <div class="table-responsive">
+                  <table class="table" id="table3">
+                    <thead>
+                      <tr>
+                        <th class="p-0">OP</th>
+                        <th class="text-center p-0">Movilizador</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+
+                      $stmt = mysqli_prepare($conexion_app, "SELECT responsable, cedula FROM flujo_electoral
                     WHERE voto='OP' $extraCondicion ORDER BY responsable");
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    if ($result->num_rows > 0) {
-                      while ($row = $result->fetch_assoc()) {
-                        if (@$nombres[$row['responsable']][0]) {
-                          echo '<tr>
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                          if (@$nombres[$row['responsable']][0]) {
+                            echo '<tr>
                         <td>' . $nombres[$row['cedula']][0] . '</td>
                         <td>' . $nombres[$row['responsable']][0] . '</td>
                       </tr>';
+                          }
                         }
                       }
-                    }
-                    $stmt->close();
-                    ?>
-                  </tbody>
-                </table>
+                      $stmt->close();
+                      ?>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="col-lg-12 mb-lg-0 mb-4 mt-4" >
-        <div class="card h-100">
-          <div class="card-body p-3">
-            <div class="row">
-              <div class="d-flex flex-column h-100">
-                <h6 class="font-weight-bolder mb-4 pt-2">Reportes por municipios</h6>
-                <div id="chartdivJefes" style="height: 50vh;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <?php 
-    $municipios = array(
-      '1' => ['MP. ATURES'],
-      '2' => ['MP. ATABAPO'],
-      '3' => ['MP. MAROA'],
-      '4' => ['MP. RIO NEGRO'],
-      '5' => ['MP. AUTANA'],
-      '6' => ['MP. MANAPIARE'],
-      '7' => ['MP. ALTO ORINOCO']
-    );
-
-    
-    foreach ($municipios as $key => $value) {
-      $cantidadFlujo = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key'");
-      $cantidadFlujoUnod = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key' AND unodiez!='0'");
-      $cantidadRep = contar("SELECT count(*) FROM rep_24 WHERE mcp='$key'");
-      
-      array_push($municipios[$key], $cantidadFlujo, $cantidadRep, $cantidadFlujoUnod);
-    }
-
-  
-    ?>
-
-
-    <div class="row my-4" style="display: none;">
-
-      <div class="row">
-        <div class="col-lg-8 mb-lg-0 mb-4">
+        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
           <div class="card h-100">
             <div class="card-body p-3">
               <div class="row">
                 <div class="d-flex flex-column h-100">
-                  <h6 class="font-weight-bolder mb-4 pt-2">Votos Blandos por Centro de Votaci&oacute;n</h6>
-                  <div id="chartdivDist" style="height: 60vh;"></div>
+                  <h6 class="font-weight-bolder mb-4 pt-2">Reportes por municipios</h6>
+                  <div id="chartdivJefes" style="height: 50vh;"></div>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="col-lg-4 mb-lg-0 mb-4">
-          <div class="card h-100">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="d-flex flex-column h-100">
-                  <h6 class="font-weight-bolder mb-4 pt-2">Votos duros por genero</h6>
-                  <div id="chartdivSexo" style="height: 60vh;"></div>
+      <?php
+      $municipios = array(
+        '1' => ['MP. ATURES'],
+        '2' => ['MP. ATABAPO'],
+        '3' => ['MP. MAROA'],
+        '4' => ['MP. RIO NEGRO'],
+        '5' => ['MP. AUTANA'],
+        '6' => ['MP. MANAPIARE'],
+        '7' => ['MP. ALTO ORINOCO']
+      );
+
+
+      foreach ($municipios as $key => $value) {
+        $cantidadFlujo = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key'");
+        $cantidadFlujoUnod = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key' AND unodiez!='0'");
+        $cantidadRep = contar("SELECT count(*) FROM rep_24 WHERE mcp='$key'");
+
+        array_push($municipios[$key], $cantidadFlujo, $cantidadRep, $cantidadFlujoUnod);
+      }
+
+
+      ?>
+
+
+      <div class="row my-4" style="display: none;">
+
+        <div class="row">
+          <div class="col-lg-8 mb-lg-0 mb-4">
+            <div class="card h-100">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="d-flex flex-column h-100">
+                    <h6 class="font-weight-bolder mb-4 pt-2">Votos Blandos por Centro de Votaci&oacute;n</h6>
+                    <div id="chartdivDist" style="height: 60vh;"></div>
+                  </div>
+
                 </div>
-
               </div>
             </div>
           </div>
-        </div>
 
+          <div class="col-lg-4 mb-lg-0 mb-4">
+            <div class="card h-100">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="d-flex flex-column h-100">
+                    <h6 class="font-weight-bolder mb-4 pt-2">Votos duros por genero</h6>
+                    <div id="chartdivSexo" style="height: 60vh;"></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
 
       </div>
 
-    </div>
+      <div class="row my-4" style="display: none;">
 
-    <div class="row my-4" style="display: none;">
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100">
+            <div class="card-header pb-0">
+              <h6>Ultimos inicios de session</h6>
 
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100">
-          <div class="card-header pb-0">
-            <h6>Ultimos inicios de session</h6>
+            </div>
+            <div class="card-body p-3">
+              <div class="timeline timeline-one-side">
+                <?php
+                $querry222 = "SELECT * FROM log_usuarios ORDER BY id DESC LIMIT 9";
+                $search22222 = $conexion->query($querry222);
+                if ($search22222->num_rows > 0) {
+                  while ($resultado2222222 = $search22222->fetch_assoc()) {
 
-          </div>
-          <div class="card-body p-3">
-            <div class="timeline timeline-one-side">
-              <?php
-              $querry222 = "SELECT * FROM log_usuarios ORDER BY id DESC LIMIT 9";
-              $search22222 = $conexion->query($querry222);
-              if ($search22222->num_rows > 0) {
-                while ($resultado2222222 = $search22222->fetch_assoc()) {
-
-                  echo '<div class="timeline-block">
+                    echo '<div class="timeline-block">
                               <span class="timeline-step">
                                 <i style="font-size: 12px; margin-left: -3px; color: #cd454e" class="line icon-login"></i>
                               </span>
@@ -779,70 +778,70 @@ if ($_SESSION["instancia"] != 0) {
                                 <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . date("d-m-y H:i a", $resultado2222222['fecha']) . '</p>
                               </div>
                             </div>';
+                  }
                 }
-              }
-              ?>
+                ?>
 
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
-        <div class="card h-100">
-          <div class="card-header pb-0">
-            <div class="row">
-              <div class="col-lg-6 col-7">
-                <h6>Ultimas10 acciones</h6>
+        <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
+          <div class="card h-100">
+            <div class="card-header pb-0">
+              <div class="row">
+                <div class="col-lg-6 col-7">
+                  <h6>Ultimas10 acciones</h6>
+
+                </div>
 
               </div>
-
             </div>
-          </div>
-          <div class="card-body px-0 pb-2">
-            <div class="table-responsive" style="padding-left: 15px;">
-              <table class="table align-items-center mb-0">
-                <thead>
-                  <tr>
-                    <th style="font-size: 12px !important; padding: 8px;" class="text-xxs font-weight-bolder opacity-7">Fecha</th>
-                    <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Usuario</th>
-                    <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Tipo</th>
-                    <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Accion</th>
-                    <th style="font-size: 12px !important;" class="text-secondary text-xxs font-weight-bolder opacity-7"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php
+            <div class="card-body px-0 pb-2">
+              <div class="table-responsive" style="padding-left: 15px;">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th style="font-size: 12px !important; padding: 8px;" class="text-xxs font-weight-bolder opacity-7">Fecha</th>
+                      <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Usuario</th>
+                      <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Tipo</th>
+                      <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Accion</th>
+                      <th style="font-size: 12px !important;" class="text-secondary text-xxs font-weight-bolder opacity-7"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
 
-                  function actividad()
-                  {
-                    $tabla = '';
-                    global $conexion;
-                    $query = "SELECT actividad_usuarios.accion, usuarios.nombre, actividad_usuarios.fecha, actividad_usuarios.tipo  FROM `actividad_usuarios`
+                    function actividad()
+                    {
+                      $tabla = '';
+                      global $conexion;
+                      $query = "SELECT actividad_usuarios.accion, usuarios.nombre, actividad_usuarios.fecha, actividad_usuarios.tipo  FROM `actividad_usuarios`
                           LEFT JOIN usuarios ON actividad_usuarios.id_usuario=usuarios.id
                           ORDER BY actividad_usuarios.id DESC LIMIT 10";
 
 
-                    $search = $conexion->query($query);
-                    if ($search->num_rows > 0) {
-                      while ($fila = $search->fetch_assoc()) {
+                      $search = $conexion->query($query);
+                      if ($search->num_rows > 0) {
+                        while ($fila = $search->fetch_assoc()) {
 
 
 
-                        switch ($fila['accion']) {
-                          case ('Dato Agregado'):
-                            $hecho = '
+                          switch ($fila['accion']) {
+                            case ('Dato Agregado'):
+                              $hecho = '
                               <span class="badge badge-sm bg-gradient-primary">Agregado</span>';
-                            break;
-                          case ('Dato Eliminado'):
-                            $hecho = ' 
+                              break;
+                            case ('Dato Eliminado'):
+                              $hecho = ' 
                               <span class="badge badge-sm bg-gradient-info">Eliminado</span>';
-                            break;
-                          case ('Dato Modificado'):
-                            $hecho = ' <span class="badge badge-sm bg-gradient-secondary">Modificado</span> ';
-                            break;
-                        }
+                              break;
+                            case ('Dato Modificado'):
+                              $hecho = ' <span class="badge badge-sm bg-gradient-secondary">Modificado</span> ';
+                              break;
+                          }
 
-                        $tabla .= '  <tr>
+                          $tabla .= '  <tr>
                             <td style="    font-size: 12px !important;">
                             <p class="text-xs text-secondary mb-0">' . $fila['fecha'] . '</p>
                             </td>
@@ -859,29 +858,29 @@ if ($_SESSION["instancia"] != 0) {
                             ' . $hecho . '
                             </td>
                           </tr>';
+                        }
                       }
+
+                      return  $tabla;
                     }
 
-                    return  $tabla;
-                  }
+                    echo  actividad();
 
-                  echo  actividad();
-
-                  ?>
-                </tbody>
-              </table>
+                    ?>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <!-- footer -->
     </div>
-    <!-- footer -->
-  </div>
-  </main>
+    </main>
 
 
-  <script>
-   var languageSettings = {
+    <script>
+      var languageSettings = {
         "decimal": "",
         "emptyTable": "No hay información",
         "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
@@ -895,281 +894,280 @@ if ($_SESSION["instancia"] != 0) {
         "search": "Buscar:",
         "zeroRecords": "Sin resultados encontrados",
         "paginate": {
-            "first": "Primero",
-            "last": "Ultimo",
-            "next": "Siguiente",
-            "previous": "Anterior"
+          "first": "Primero",
+          "last": "Ultimo",
+          "next": "Siguiente",
+          "previous": "Anterior"
         }
-    };
+      };
 
-    $('#table1').DataTable({
+      $('#table1').DataTable({
         language: languageSettings
-    });
-
-    $('#table2').DataTable({
-        language: languageSettings
-    });
-    $('#table3').DataTable({
-        language: languageSettings
-    });
-
-  </script>
-
-  <?php require_once('includes/settings.php');  ?>
-
-  <script src="../vendors/amcharts5/index.js"></script>
-  <script src="../vendors/amcharts5/percent.js"></script>
-  <script src="../vendors/amcharts5/xy.js"></script>
-  <script src="../vendors/amcharts5/flow.js"></script>
-  <script src="../vendors/amcharts5/radar.js"></script>
-  <script src="../vendors/amcharts5/themes/Animated.js"></script>
-  <script src="../vendors/amcharts5/themes/Material.js"></script>
-
-  <script src="../vendors/amcharts5/use/sliced-pictorial-stacked/index.js"></script>
-
-  <script>
-    series.data.setAll([{
-        value: <?php echo $femeninas ?>,
-        category: "F"
-      },
-      {
-        value: <?php echo $masculinos ?>,
-        category: "M"
-      }
-    ]);
-  </script>
-  <script src="../vendors/amcharts5/use/radar-line/index.js"></script>
-  <script src="../vendors/amcharts5/use/flow-chord-directed/index.js"></script>
-
-  <script>
-    // Set data
-    // https://www.amcharts.com/docs/v5/charts/flow-charts/#Setting_data
-    series5.data.setAll([{
-        "from": "Psuv",
-        "to": "18-30",
-        "value": <?php echo $edadPsuv_30 ?>
-      },
-      {
-        "from": "Psuv",
-        "to": "31-40",
-        "value": <?php echo $edadPsuv_40 ?>
-      },
-      {
-        "from": "Psuv",
-        "to": "41-50",
-        "value": <?php echo $edadPsuv_50 ?>
-      },
-      {
-        "from": "Psuv",
-        "to": "51-60",
-        "value": <?php echo $edadPsuv_60 ?>
-      },
-      {
-        "from": "Psuv",
-        "to": "61-70",
-        "value": <?php echo $edadPsuv_70 ?>
-      },
-      {
-        "from": "Psuv",
-        "to": "71-80",
-        "value": <?php echo $edadPsuv_80 ?>
-      },
-      {
-        "from": "Psuv",
-        "to": "81...",
-        "value": <?php echo $edadPsuv_90 ?>
-      },
-      {
-        "from": "Oposicion",
-        "to": "18-30",
-        "value": <?php echo $edadOp_30 ?>
-      },
-      {
-        "from": "Oposicion",
-        "to": "31-40",
-        "value": <?php echo $edadOp_40 ?>
-      },
-      {
-        "from": "Oposicion",
-        "to": "41-50",
-        "value": <?php echo $edadOp_50 ?>
-      },
-      {
-        "from": "Oposicion",
-        "to": "51-60",
-        "value": <?php echo $edadOp_60 ?>
-      },
-      {
-        "from": "Oposicion",
-        "to": "61-70",
-        "value": <?php echo $edadOp_70 ?>
-      },
-      {
-        "from": "Oposicion",
-        "to": "71-80",
-        "value": <?php echo $edadOp_80 ?>
-      },
-      {
-        "from": "Oposicion",
-        "to": "81...",
-        "value": <?php echo $edadOp_90 ?>
-      },
-    ]);
-  </script>
-  <script>
-    var data4 = [];
-
-    data4.push({
-      category: "Ubch",
-      value: <?php echo round($porcentajeUbchCritico, 0, PHP_ROUND_HALF_DOWN); ?>
-    });
-    data4.push({
-      category: "Raas",
-      value: <?php echo round($porcentajeRaasCritico, 0, PHP_ROUND_HALF_DOWN); ?>
-    });
-    data4.push({
-      category: "Patrullas",
-      value: <?php echo round($porcentajePatrullaCritico, 0, PHP_ROUND_HALF_DOWN); ?>
-    });
-
-
-    var data = data4;
-
-
-    series.data.setAll(data);
-    xAxis.data.setAll(data);
-  </script>
-  <script src="../vendors/amcharts5/use/pie-donut-chart/index.js"></script>
-  <script src="../vendors/amcharts5/use/xy-clustered-column/index.js"></script>
-
-  <script src="../assets/js/core/bootstrap.min.js"></script>
-  <script src="../assets/js/jquery.nanoscroller.min.js"></script>
-  <script src="../assets/js/menubar/sidebar.js"></script>
-  <script src="../assets/js/core/popper.min.js"></script>
-  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
-  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.3"></script>
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-  </script>
-
-
-
-  <script>
-    // jefes de ubch //
-
-    var data = [    ]
-
- 
-    <?php 
-      foreach ($municipios as $key => $value) {
-        echo 'data.push({
-          "Municipio": "'.$value[0].'",
-          "total": '.$value[2].',
-          "avance": '.$value[1].',
-          "unoxdiez": '.$value[3].'
-        });';
-      }
-    ?>
-
-
-    // Create axes
-    // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-    var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root2, {
-      categoryField: "Municipio",
-      renderer: am5xy.AxisRendererX.new(root2, {
-        cellStartLocation: 0.1,
-        cellEndLocation: 0.9
-      }),
-      tooltip: am5.Tooltip.new(root2, {})
-    }));
-
-    xAxis.data.setAll(data);
-
-    var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root2, {
-      renderer: am5xy.AxisRendererY.new(root2, {})
-    }));
-
-
-    // Add series
-    // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-    function makeSeries(name, fieldName) {
-      var series = chart.series.push(am5xy.ColumnSeries.new(root2, {
-        name: name,
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: fieldName,
-        categoryXField: "Municipio"
-      }));
-
-      series.columns.template.setAll({
-        tooltipText: "{categoryX}: {name} {valueY}",
-        width: am5.percent(90),
-        tooltipY: 0
       });
+
+      $('#table2').DataTable({
+        language: languageSettings
+      });
+      $('#table3').DataTable({
+        language: languageSettings
+      });
+    </script>
+
+    <?php require_once('includes/settings.php');  ?>
+
+    <script src="../vendors/amcharts5/index.js"></script>
+    <script src="../vendors/amcharts5/percent.js"></script>
+    <script src="../vendors/amcharts5/xy.js"></script>
+    <script src="../vendors/amcharts5/flow.js"></script>
+    <script src="../vendors/amcharts5/radar.js"></script>
+    <script src="../vendors/amcharts5/themes/Animated.js"></script>
+    <script src="../vendors/amcharts5/themes/Material.js"></script>
+
+    <script src="../vendors/amcharts5/use/sliced-pictorial-stacked/index.js"></script>
+
+    <script>
+      series.data.setAll([{
+          value: <?php echo $femeninas ?>,
+          category: "F"
+        },
+        {
+          value: <?php echo $masculinos ?>,
+          category: "M"
+        }
+      ]);
+    </script>
+    <script src="../vendors/amcharts5/use/radar-line/index.js"></script>
+    <script src="../vendors/amcharts5/use/flow-chord-directed/index.js"></script>
+
+    <script>
+      // Set data
+      // https://www.amcharts.com/docs/v5/charts/flow-charts/#Setting_data
+      series5.data.setAll([{
+          "from": "Psuv",
+          "to": "18-30",
+          "value": <?php echo $edadPsuv_30 ?>
+        },
+        {
+          "from": "Psuv",
+          "to": "31-40",
+          "value": <?php echo $edadPsuv_40 ?>
+        },
+        {
+          "from": "Psuv",
+          "to": "41-50",
+          "value": <?php echo $edadPsuv_50 ?>
+        },
+        {
+          "from": "Psuv",
+          "to": "51-60",
+          "value": <?php echo $edadPsuv_60 ?>
+        },
+        {
+          "from": "Psuv",
+          "to": "61-70",
+          "value": <?php echo $edadPsuv_70 ?>
+        },
+        {
+          "from": "Psuv",
+          "to": "71-80",
+          "value": <?php echo $edadPsuv_80 ?>
+        },
+        {
+          "from": "Psuv",
+          "to": "81...",
+          "value": <?php echo $edadPsuv_90 ?>
+        },
+        {
+          "from": "Oposicion",
+          "to": "18-30",
+          "value": <?php echo $edadOp_30 ?>
+        },
+        {
+          "from": "Oposicion",
+          "to": "31-40",
+          "value": <?php echo $edadOp_40 ?>
+        },
+        {
+          "from": "Oposicion",
+          "to": "41-50",
+          "value": <?php echo $edadOp_50 ?>
+        },
+        {
+          "from": "Oposicion",
+          "to": "51-60",
+          "value": <?php echo $edadOp_60 ?>
+        },
+        {
+          "from": "Oposicion",
+          "to": "61-70",
+          "value": <?php echo $edadOp_70 ?>
+        },
+        {
+          "from": "Oposicion",
+          "to": "71-80",
+          "value": <?php echo $edadOp_80 ?>
+        },
+        {
+          "from": "Oposicion",
+          "to": "81...",
+          "value": <?php echo $edadOp_90 ?>
+        },
+      ]);
+    </script>
+    <script>
+      var data4 = [];
+
+      data4.push({
+        category: "Ubch",
+        value: <?php echo round($porcentajeUbchCritico, 0, PHP_ROUND_HALF_DOWN); ?>
+      });
+      data4.push({
+        category: "Raas",
+        value: <?php echo round($porcentajeRaasCritico, 0, PHP_ROUND_HALF_DOWN); ?>
+      });
+      data4.push({
+        category: "Patrullas",
+        value: <?php echo round($porcentajePatrullaCritico, 0, PHP_ROUND_HALF_DOWN); ?>
+      });
+
+
+      var data = data4;
+
 
       series.data.setAll(data);
+      xAxis.data.setAll(data);
+    </script>
+    <script src="../vendors/amcharts5/use/pie-donut-chart/index.js"></script>
+    <script src="../vendors/amcharts5/use/xy-clustered-column/index.js"></script>
 
-      // Make stuff animate on load
-      // https://www.amcharts.com/docs/v5/concepts/animations/
-      series.appear();
+    <script src="../assets/js/core/bootstrap.min.js"></script>
+    <script src="../assets/js/jquery.nanoscroller.min.js"></script>
+    <script src="../assets/js/menubar/sidebar.js"></script>
+    <script src="../assets/js/core/popper.min.js"></script>
+    <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+    <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.3"></script>
+    <script>
+      var win = navigator.platform.indexOf('Win') > -1;
+      if (win && document.querySelector('#sidenav-scrollbar')) {
+        var options = {
+          damping: '0.5'
+        }
+        Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+      }
+    </script>
 
-      series.bullets.push(function() {
-        return am5.Bullet.new(root2, {
-          locationY: 0,
-          sprite: am5.Label.new(root2, {
-            text: "{valueY}",
-            fill: root2.interfaceColors.get("alternativeText"),
-            centerY: 0,
-            centerX: am5.p50,
-            populateText: true
-          })
+
+
+    <script>
+      // jefes de ubch //
+
+      var data = []
+
+
+      <?php
+      foreach ($municipios as $key => $value) {
+        echo 'data.push({
+          "Municipio": "' . $value[0] . '",
+          "total": ' . $value[2] . ',
+          "avance": ' . $value[1] . ',
+          "unoxdiez": ' . $value[3] . '
+        });';
+      }
+      ?>
+
+
+      // Create axes
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+      var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root2, {
+        categoryField: "Municipio",
+        renderer: am5xy.AxisRendererX.new(root2, {
+          cellStartLocation: 0.1,
+          cellEndLocation: 0.9
+        }),
+        tooltip: am5.Tooltip.new(root2, {})
+      }));
+
+      xAxis.data.setAll(data);
+
+      var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root2, {
+        renderer: am5xy.AxisRendererY.new(root2, {})
+      }));
+
+
+      // Add series
+      // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+      function makeSeries(name, fieldName) {
+        var series = chart.series.push(am5xy.ColumnSeries.new(root2, {
+          name: name,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: fieldName,
+          categoryXField: "Municipio"
+        }));
+
+        series.columns.template.setAll({
+          tooltipText: "{categoryX}: {name} {valueY}",
+          width: am5.percent(90),
+          tooltipY: 0
         });
-      });
 
-      legend.data.push(series);
-    }
+        series.data.setAll(data);
 
-    makeSeries("Total", "total");
-    makeSeries("Avance", "avance");
-    makeSeries("Uno x diez", "unoxdiez");
-    // jefes de ubch //
+        // Make stuff animate on load
+        // https://www.amcharts.com/docs/v5/concepts/animations/
+        series.appear();
+
+        series.bullets.push(function() {
+          return am5.Bullet.new(root2, {
+            locationY: 0,
+            sprite: am5.Label.new(root2, {
+              text: "{valueY}",
+              fill: root2.interfaceColors.get("alternativeText"),
+              centerY: 0,
+              centerX: am5.p50,
+              populateText: true
+            })
+          });
+        });
+
+        legend.data.push(series);
+      }
+
+      makeSeries("Total", "total");
+      makeSeries("Avance", "avance");
+      makeSeries("Uno x diez", "unoxdiez");
+      // jefes de ubch //
 
 
-    // hMapa del boto en donut chart //
-    series.data.setAll([{
-        value: <?php echo $vd ?>,
-        category: "Voto Duro"
-      },
-      {
-        value: <?php echo $vb ?>,
-        category: "Voto Blando"
-      },
-      {
-        value: <?php echo $vo ?>,
-        category: "Voto Opositor"
-      }, {
-        value: <?php echo $nc ?>,
-        category: "No caracterizado"
-      },
-    ]);
+      // hMapa del boto en donut chart //
+      series.data.setAll([{
+          value: <?php echo $vd ?>,
+          category: "Voto Duro"
+        },
+        {
+          value: <?php echo $vb ?>,
+          category: "Voto Blando"
+        },
+        {
+          value: <?php echo $vo ?>,
+          category: "Voto Opositor"
+        }, {
+          value: <?php echo $nc ?>,
+          category: "No caracterizado"
+        },
+      ]);
 
 
-    var legend2 = chart.children.push(am5.Legend2.new(root, {
-      centerX: am5.percent(50),
-      x: am5.percent(50),
-      marginTop: 15,
-      marginBottom: 15,
-    }));
-    legend2.data.setAll(series.dataItems);
-    // hMapa del boto en donut chart //
-  </script>
+      var legend2 = chart.children.push(am5.Legend2.new(root, {
+        centerX: am5.percent(50),
+        x: am5.percent(50),
+        marginTop: 15,
+        marginBottom: 15,
+      }));
+      legend2.data.setAll(series.dataItems);
+      // hMapa del boto en donut chart //
+    </script>
 
 </body>
 
