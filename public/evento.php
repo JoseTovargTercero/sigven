@@ -135,81 +135,7 @@ if ($_SESSION["instancia"] != 0) {
 
     ////////////////////////////// Contar el total de jefes de ubch registrados//////////////////////////
 
-    function FunctionName()
-    {
-      global $base;
-      $atures = 0;
-      $altoOrinoco = 0;
-      $autana = 0;
-      $manapiare = 0;
-      $maroa = 0;
-      $rNegro = 0;
-      $atabapo = 0;
-
-
-      try {
-        $sql = "SELECT id FROM estructuraubch WHERE cargo ='JEFE DE UBCH' AND municipio = ?";
-
-        $resultado = $base->prepare($sql);
-
-
-
-        $resultado->execute(array('1'));
-        while ($resultado->fetch(PDO::FETCH_ASSOC)) {
-          $atures += 1;
-        }
-
-        $resultado->execute(array('2'));
-        while ($resultado->fetch(PDO::FETCH_ASSOC)) {
-          $altoOrinoco += 1;
-        }
-
-        $resultado->execute(array('3'));
-        while ($resultado->fetch(PDO::FETCH_ASSOC)) {
-          $autana += 1;
-        }
-
-        $resultado->execute(array('4'));
-        while ($resultado->fetch(PDO::FETCH_ASSOC)) {
-          $manapiare += 1;
-        }
-        $resultado->execute(array('5'));
-        while ($resultado->fetch(PDO::FETCH_ASSOC)) {
-          $maroa += 1;
-        }
-
-        $resultado->execute(array('6'));
-        while ($resultado->fetch(PDO::FETCH_ASSOC)) {
-          $rNegro += 1;
-        }
-
-        $resultado->execute(array('7'));
-        while ($resultado->fetch(PDO::FETCH_ASSOC)) {
-          $atabapo += 1;
-        }
-
-
-
-
-        $resultado->closeCursor();
-      } catch (Exception $e) {
-        // die('Error: ' . $e->GetMessage());
-      }
-
-
-      return $atures . '/' .
-        $altoOrinoco . '/' .
-        $autana . '/' .
-        $manapiare . '/' .
-        $maroa . '/' .
-        $rNegro . '/' .
-        $atabapo;
-    }
-
-    $resultMcp = explode('/', FunctionName());
-
-
-
+   
 
     $edadPsuv_20 = 0;
     $edadPsuv_30 = 0;
@@ -755,12 +681,12 @@ if ($_SESSION["instancia"] != 0) {
         </div>
       </div>
 
-      <div class="col-lg-6 mb-lg-0 mb-4 mt-4" style="display: none;">
+      <div class="col-lg-12 mb-lg-0 mb-4 mt-4" >
         <div class="card h-100">
           <div class="card-body p-3">
             <div class="row">
               <div class="d-flex flex-column h-100">
-                <h6 class="font-weight-bolder mb-4 pt-2">Jefes de UBCH registrados</h6>
+                <h6 class="font-weight-bolder mb-4 pt-2">Reportes por municipios</h6>
                 <div id="chartdivJefes" style="height: 50vh;"></div>
               </div>
             </div>
@@ -770,6 +696,27 @@ if ($_SESSION["instancia"] != 0) {
 
     </div>
 
+
+    <?php 
+    $municipios = array(
+      '1' => ['MP. ATURES'],
+      '2' => ['MP. ATABAPO'],
+      '3' => ['MP. MAROA'],
+      '4' => ['MP. RIO NEGRO'],
+      '5' => ['MP. AUTANA'],
+      '6' => ['MP. MANAPIARE'],
+      '7' => ['MP. ALTO ORINOCO']
+    );
+
+    
+    foreach ($municipios as $key => $value) {
+      $cantidadFlujo = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key'");
+      $cantidadRep = contar("SELECT count(*) FROM rep_24 WHERE mcp='$key'");
+      array_push($municipios[$key], $cantidadFlujo, $cantidadRep);
+    }
+
+  
+    ?>
 
 
     <div class="row my-4" style="display: none;">
@@ -1118,45 +1065,18 @@ if ($_SESSION["instancia"] != 0) {
   <script>
     // jefes de ubch //
 
-    var data = [{
-        "Municipio": "Atures",
-        "total": 88,
-        "avance": <?php echo $resultMcp[0] ?>,
-      },
-      {
-        "Municipio": "A. Orinoco",
-        "total": 14,
-        "avance": <?php echo $resultMcp[1] ?>,
-      },
-      {
-        "Municipio": "Autana",
-        "total": 11,
-        "avance": <?php echo $resultMcp[2] ?>,
-      },
-      {
-        "Municipio": "Manapiare",
-        "total": 8,
-        "avance": <?php echo $resultMcp[3] ?>,
-      },
-      {
-        "Municipio": "Maroa",
-        "total": 4,
-        "avance": <?php echo $resultMcp[4] ?>,
-      },
-      {
-        "Municipio": "Rio Negro",
-        "total": 6,
-        "avance": <?php echo $resultMcp[5] ?>,
-      },
-      {
-        "Municipio": "Atabapo",
-        "total": 10,
-        "avance": <?php echo $resultMcp[6] ?>,
+    var data = [    ]
+
+ 
+    <?php 
+      foreach ($municipios as $key => $value) {
+        echo 'data.push({
+          "Municipio": "'.$value[0].'",
+          "total": '.$value[2].',
+          "avance": '.$value[1].',
+        });';
       }
-
-
-
-    ]
+    ?>
 
 
     // Create axes
