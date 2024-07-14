@@ -27,7 +27,7 @@ function abrev($nombre)
     $nombre = str_replace($original, $abreviado, $nombre);
   }
 
-  return $nombre;
+  return trim($nombre);
 }
 
 
