@@ -6,13 +6,9 @@ require('../configuracion/datos_cne.php');
 header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 
+$cedula = $data["responsable"];
 
-//$cedula = $data["responsable"];
-$cedula = '17165224';
-
-
-function abrev($nombre)
-{
+function abrev($nombre){
   // Lista de sustituciones
   $sustituciones = [
     'UNIDAD EDUCATIVA INTEGRAL BOLIVARIANA' => 'U.E.I.B',
