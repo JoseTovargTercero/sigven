@@ -22,8 +22,9 @@ function abrev($nombre)
     'CENTRO MOVIL' => 'CM',
     'ESCUELA TECNICA' => 'ET',
     'UNIDAD EDUCATIVA INTEGRAL BOLIVARIANA' => 'U.E.I.B.',
-    
   ];
+  // Sustituir
+  return str_replace(array_keys($sustituciones), array_values($sustituciones), $nombre);
 }
 
 
