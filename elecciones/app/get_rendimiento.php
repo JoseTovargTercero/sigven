@@ -2,7 +2,8 @@
 require('../configuracion/conexion.php');
 require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
-
+// header json
+header('Content-Type: application/json');
 
 
 //$cedula = $_POST["responsable"];
@@ -51,7 +52,13 @@ if ($result->num_rows > 0) {
 $stmt->close();
 
 
-echo json_encode(['cod_centro' => $centro, 'centro' => $centro_nombre, 'reportes_del_centro' => $cantidad_remportes, 'electores' => $cantidad_elecotores, 'total_1x10_centro'=> count($cedulas), 'total_asistencia_1x10' => $asistentes1x10]);
+echo json_encode([
+  'cod_centro' => $centro, 
+  'centro' => $centro_nombre, 
+  'reportes_del_centro' => $cantidad_remportes, 
+  'electores_centro' => $cantidad_elecotores, 
+  'total_1x10_centro'=> count($cedulas), 
+  'total_asistencia_1x10' => $asistentes1x10]);
 
 
 
