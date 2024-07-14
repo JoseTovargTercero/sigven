@@ -39,7 +39,16 @@ $centro = $row['centro'];
 $centro_nombre = $row['nombreCentro'];
 $cantidad_remportes = $row['cantidad'];
 //echo $centro;
-
+if ($centro_nombre=='') {
+  echo json_encode([
+    'cod_centro' => '0', 
+    'centro' => 'Sin reporte', 
+    'reportes_del_centro' => '0', 
+    'electores_centro' => '0', 
+    'total_1x10_centro'=> '0', 
+    'total_asistencia_1x10' => '0']);
+  
+}
 // usando $centro cuenta los electores de 'rep_24' por la columna 'centro'
 $sql = "SELECT COUNT(centro) AS cantidad FROM rep_24 WHERE centro = '$centro'";
 $result = $conexion_app->query($sql);
