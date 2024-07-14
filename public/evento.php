@@ -250,6 +250,7 @@ if ($_SESSION["instancia"] != 0) {
       // die('Error: ' . $e->GetMessage());
     }
 
+    $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0'");
 
     $vd = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VD' $extraCondicion");
     $vb = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VB' $extraCondicion");
@@ -416,7 +417,8 @@ if ($_SESSION["instancia"] != 0) {
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Electores Registrados</p>
                     <h5 class="font-weight-bolder mb-0">
-                      <?php echo number_format($totalVotos, '0', '.', '.'); ?>
+                      <?php echo number_format($totalVotos, '0', '.', '.'); ?>/
+                      <small><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?></small>
                     </h5>
                   </div>
                 </div>
