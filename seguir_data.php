@@ -26,39 +26,57 @@ $stmt->close();
 
 
 $avance = 0;
-                $pendiente = 0;
+$pendiente = 0;
 
-                $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados_instituciones.cedula, empleados_instituciones.nombre, empleados_instituciones.telefono, empleados_instituciones.ubicacion FROM `empleados_instituciones`
+$avanceUbicacion = [];
+
+$stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados_instituciones.cedula, empleados_instituciones.nombre, empleados_instituciones.telefono, empleados_instituciones.ubicacion FROM `empleados_instituciones`
                 LEFT JOIN flujo_electoral ON flujo_electoral.cedula = empleados_instituciones.cedula
                  WHERE institucion = ?");
-                $stmt->bind_param('s', $institucion);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($result->num_rows > 0) {
-                  while ($row = $result->fetch_assoc()) {
-                    $tabla[] = '<tr>
-                    <td>'.$row['cedula'].'</td>
-                    <td>'.$row['nombre'].'</td>
-                    <td>'.$row['ubicacion'].'</td>
-                    <td>'.$row['telefono'].'</td>
-                    <td>'.($row['id_flujo'] ? '<span class="badge bg-primary">VOTO</span>':'<span class="badge bg-info">PENDIENTE</span>').'</td>
+$stmt->bind_param('s', $institucion);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+  while ($row = $result->fetch_assoc()) {
+    $tabla[] = '<tr>
+                    <td>' . $row['cedula'] . '</td>
+                    <td>' . $row['nombre'] . '</td>
+                    <td>' . $row['ubicacion'] . '</td>
+                    <td>' . $row['telefono'] . '</td>
+                    <td>' . ($row['id_flujo'] ? '<span class="badge bg-primary">VOTO</span>' : '<span class="badge bg-info">PENDIENTE</span>') . '</td>
                   </tr>';
 
-                  if($row['id_flujo']){
-                    $avance++;
-                  } else {
-                    $pendiente++;
-                  }
+    if ($row['id_flujo']) {
+      $avance++;
 
-                }
-                }
-                $stmt->close();
+      if (@$avanceUbicacion[$row['ubicacion']]) {
+        @$avanceUbicacion[$row['ubicacion']][0] += 1; 
+      }else {
+        @$avanceUbicacion[$row['ubicacion']][0] = 1; 
+      }
 
-                $total = $avance + $pendiente;
+    } else {
+      $pendiente++;
 
-                $porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.', ''));
-                $porc_pendiente = ($pendiente==0?0:number_format($pendiente * 100 / $total, '2', '.', ''));
+      if (@$avanceUbicacion[$row['ubicacion']]) {
+        @$avanceUbicacion[$row['ubicacion']][1] += 1; 
+      }else {
+        @$avanceUbicacion[$row['ubicacion']][1] = 1; 
+      }
+
+    }
+  }
+}
+$stmt->close();
+
+$total = $avance + $pendiente;
+
+$porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.', ''));
+$porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total, '2', '.', ''));
                 
+
+
+
 
 ?>
 <!DOCTYPE html>
@@ -144,6 +162,28 @@ $avance = 0;
             <span class="badge bg-primary">Participacion</span> <?php echo $avance ?>
             <span class="badge bg-info">Pendientes</span> <?php echo $pendiente ?>
           </p>
+
+          <div>
+            <h3>Por Ubicación</h3>
+            <div class="row">
+              <?php 
+              foreach ($avanceUbicacion as $key => $value) {
+                echo '<div class="col-lg-6 mb-2">
+                        <div class="card">
+                          <div class="card-body">
+                            <h5 class="card-title
+                            ">' . $key . '</h5>
+                            <p class="card-text">
+                              <span class="badge bg-primary">Participacion</span> ' . (@$value[0] ? $value[0] : 0) . '
+                              <span class="badge bg-info">Pendientes</span> ' . (@$value[1] ? $value[1] : 0) . '
+                            </p>
+                            </div>
+                            </div>
+                            </div>';
+              }
+                            ?>
+
+          </div>
 
             <div id="chartdiv"></div>
           </div>
