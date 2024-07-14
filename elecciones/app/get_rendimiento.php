@@ -28,7 +28,6 @@ function abrev($nombre){
   return trim($nombre);
 }
 
-
 // consulta a la tabla 'flujo_electoral' en donde responsable = $cedula y agrupados por 'centro' me regresas el centro que tenga mayor cantidad, la cantidad y el nombre
 $sql = "SELECT flujo_electoral.centro, COUNT(flujo_electoral.centro) AS cantidad, t.centro AS nombreCentro FROM flujo_electoral
 LEFT JOIN tablamesa AS t ON t.CODIGO = flujo_electoral.centro
