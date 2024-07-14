@@ -6,8 +6,17 @@ require('../configuracion/datos_cne.php');
 header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 
-$cedula = $data["responsable"];
-
+$cedula = $_POST["responsable"];
+if ($cedula=='') {
+  echo json_encode([
+    'cod_centro' => '0', 
+    'centro' => 'La informacion no esta disponible CIERRE SESION E INGRESE SIN AUTENTICACION BIOMETRICA, UTILIZANDO SU USARIO Y CONTRASEÑA', 
+    'reportes_del_centro' => '0', 
+    'electores_centro' => '0', 
+    'total_1x10_centro'=> '0', 
+    'total_asistencia_1x10' => '0']);
+  
+}
 function abrev($nombre){
   // Lista de sustituciones
   $sustituciones = [

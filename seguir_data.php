@@ -1,4 +1,5 @@
 <?php
+ob_start();
 include('elecciones/configuracion/conexion.php');
 
 if (!isset($_POST["param_2"])) {
@@ -22,6 +23,42 @@ if ($stmt->execute()) {
 }
 $stmt->close();
 
+
+
+$avance = 0;
+                $pendiente = 0;
+
+                $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados_instituciones.cedula, empleados_instituciones.nombre, empleados_instituciones.telefono, empleados_instituciones.ubicacion FROM `empleados_instituciones`
+                LEFT JOIN flujo_electoral ON flujo_electoral.cedula = empleados_instituciones.cedula
+                 WHERE institucion = ?");
+                $stmt->bind_param('s', $institucion);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                    $tabla[] = '<tr>
+                    <td>'.$row['cedula'].'</td>
+                    <td>'.$row['nombre'].'</td>
+                    <td>'.$row['ubicacion'].'</td>
+                    <td>'.$row['telefono'].'</td>
+                    <td>'.($row['id_flujo'] ? '<span class="badge bg-primary">VOTO</span>':'<span class="badge bg-info">PENDIENTE</span>').'</td>
+                  </tr>';
+
+                  if($row['id_flujo']){
+                    $avance++;
+                  } else {
+                    $pendiente++;
+                  }
+
+                }
+                }
+                $stmt->close();
+
+                $total = $avance + $pendiente;
+
+                $porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.', ''));
+                $porc_pendiente = ($pendiente==0?0:number_format($pendiente * 100 / $total, '2', '.', ''));
+                
 
 ?>
 <!DOCTYPE html>
@@ -49,8 +86,6 @@ $stmt->close();
 </head>
 
 <body class="">
-
-
   <div class="loading spinner-wrapper show">
     <div class="spinner">
       <div class="bounce1"></div>
@@ -104,7 +139,11 @@ $stmt->close();
           <div class="row">
 
           <div class="col lg-12">
-          <h3>Participación</h3>
+          <h3 class="mb-0">Participación</h3>
+          <p>
+            <span class="badge bg-primary">Participacion</span> <?php echo $avance ?>
+            <span class="badge bg-info">Pendientes</span> <?php echo $pendiente ?>
+          </p>
 
             <div id="chartdiv"></div>
           </div>
@@ -117,44 +156,16 @@ $stmt->close();
                   <tr>
                     <th>Cédula</th>
                     <th>nombre</th>
+                    <th>Ubicación</th>
                     <th>Teléfono</th>
                     <th>Estatus</th>
                   </tr>
               </thead>
               <tbody>
                 <?php 
-                $avance = 0;
-                $pendiente = 0;
-
-                $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados_instituciones.cedula, empleados_instituciones.nombre, empleados_instituciones.telefono FROM `empleados_instituciones`
-                LEFT JOIN flujo_electoral ON flujo_electoral.cedula = empleados_instituciones.cedula
-                 WHERE institucion = ?");
-                $stmt->bind_param('s', $institucion);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($result->num_rows > 0) {
-                  while ($row = $result->fetch_assoc()) {
-                    echo '<tr>
-                    <td>'.$row['cedula'].'</td>
-                    <td>'.$row['nombre'].'</td>
-                    <td>'.$row['telefono'].'</td>
-                    <td>'.($row['id_flujo'] ? '<span class="badge bg-primary">VOTO</span>':'<span class="badge bg-info">PENDIENTE</span>').'</td>
-                  </tr>';
-
-                  if($row['id_flujo']){
-                    $avance++;
-                  } else {
-                    $pendiente++;
-                  }
-
+                foreach ($tabla as $key => $value) {
+                  echo $value;
                 }
-                }
-                $stmt->close();
-
-                $total = $avance + $pendiente;
-
-                $porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.', ''));
-                $porc_pendiente = ($pendiente==0?0:number_format($pendiente * 100 / $total, '2', '.', ''));
                 ?>
               </tbody>
             </table>
@@ -359,3 +370,6 @@ var table = $('#DataTables').DataTable({
 </body>
 
 </html>
+<?php 
+ob_end_flush();
+?>
