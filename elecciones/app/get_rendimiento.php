@@ -4,10 +4,28 @@ require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
 // header json
 header('Content-Type: application/json');
+$data = json_decode(file_get_contents('php://input'), true);
 
 
-//$cedula = $_POST["responsable"];
+//$cedula = $data["responsable"];
 $cedula = '17165224';
+
+
+function abrev($nombre)
+{
+  // Lista de sustituciones
+  $sustituciones = [
+    'UNIDAD EDUCATIVA' => 'UE',
+    'CENTRO EDUCATIVO INTEGRAL BOLIVARIANO' => 'CEIB',
+    'ESCUELA BASICA' => 'EB',
+    'LICEO BOLIVARIANO' => 'LB',
+    'CENTRO MOVIL' => 'CM',
+    'ESCUELA TECNICA' => 'ET',
+    'UNIDAD EDUCATIVA INTEGRAL BOLIVARIANA' => 'U.E.I.B.',
+    
+  ];
+}
+
 
 
 // consulta a la tabla 'flujo_electoral' en donde responsable = $cedula y agrupados por 'centro' me regresas el centro que tenga mayor cantidad, la cantidad y el nombre
@@ -54,7 +72,7 @@ $stmt->close();
 
 echo json_encode([
   'cod_centro' => $centro, 
-  'centro' => $centro_nombre, 
+  'centro' => abrev($centro_nombre), 
   'reportes_del_centro' => $cantidad_remportes, 
   'electores_centro' => $cantidad_elecotores, 
   'total_1x10_centro'=> count($cedulas), 
