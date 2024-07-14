@@ -15,11 +15,13 @@ function abrev($nombre)
 {
   // Lista de sustituciones
   $sustituciones = [
+    'UNIDAD EDUCATIVA INTEGRAL BOLIVARIANA' => 'U.E.I.B',
     'UNIDAD EDUCATIVA' => 'UE',
     'CENTRO EDUCATIVO INTEGRAL BOLIVARIANO' => 'CEIB',
     'ESCUELA BASICA' => 'EB',
     'LICEO BOLIVARIANO' => 'LB',
-    'CENTRO MOVIL' => 'CM'
+    'CENTRO MOVIL' => 'CM',
+    'ESCUELA TECNICA' => 'ET',
   ];
 
   // Reemplazar cada coincidencia en la lista de sustituciones
