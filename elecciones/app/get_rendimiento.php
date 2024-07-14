@@ -19,14 +19,16 @@ function abrev($nombre)
     'CENTRO EDUCATIVO INTEGRAL BOLIVARIANO' => 'CEIB',
     'ESCUELA BASICA' => 'EB',
     'LICEO BOLIVARIANO' => 'LB',
-    'CENTRO MOVIL' => 'CM',
-    'ESCUELA TECNICA' => 'ET',
-    'UNIDAD EDUCATIVA INTEGRAL BOLIVARIANA' => 'U.E.I.B.',
+    'CENTRO MOVIL' => 'CM'
   ];
-  // Sustituir
-  return str_replace(array_keys($sustituciones), array_values($sustituciones), $nombre);
-}
 
+  // Reemplazar cada coincidencia en la lista de sustituciones
+  foreach ($sustituciones as $original => $abreviado) {
+    $nombre = str_replace($original, $abreviado, $nombre);
+  }
+
+  return $nombre;
+}
 
 
 // consulta a la tabla 'flujo_electoral' en donde responsable = $cedula y agrupados por 'centro' me regresas el centro que tenga mayor cantidad, la cantidad y el nombre
