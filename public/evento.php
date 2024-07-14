@@ -129,9 +129,37 @@ if ($_SESSION["instancia"] != 0) {
   <?php require_once('includes/menu.php');  ?>
   <div class="main-content position-relative bg-gray-100 max-height-vh-100 h-100">
     <!-- Navbar -->
-    <?php echo $navbar; ?>
-    <!-- End Navbar -->
-    <?php
+    <?php echo $navbar;
+
+
+
+      $jefesUnoDiex = [];
+        $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcdula) FROM unox10");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+          while ($row = $result->fetch_assoc()) {
+            $jefesUnoDiex[$row['jfcdula']]=true;
+          }
+        }
+        $stmt->close();
+
+
+        $jefesParticiparon = 0;
+        $stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+          while ($row = $result->fetch_assoc()) {
+            if ($jefesUnoDiex[$row['cedula']]) {
+              $jefesParticiparon++;
+            }
+
+          }
+        }
+        $stmt->close();
+
+
 
     ////////////////////////////// Contar el total de jefes de ubch registrados//////////////////////////
 
@@ -418,7 +446,8 @@ if ($_SESSION["instancia"] != 0) {
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Electores Registrados</p>
                     <h5 class="font-weight-bolder mb-0">
                       <?php echo number_format($totalVotos, '0', '.', '.'); ?>/
-                      <small><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?></small>
+                      <small><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?>/</small>
+                      <small><?php echo number_format($jefesParticiparon, '0', '.', '.'); ?></small>
                     </h5>
                   </div>
                 </div>
