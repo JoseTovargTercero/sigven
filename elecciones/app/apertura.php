@@ -1,16 +1,15 @@
 <?php
 require('../configuracion/conexion.php');
 
-
-if (isset($_GET["cedula"]) && isset($_GET["cantidad"])) {
-    $c = $_GET['cedula'];
-    $cantidad = $_GET["cantidad"];
+if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
+    $c = $_POST['cedula'];
+    $cantidad = $_POST["cantidad"];
     $time = date('H-i a');
 
     $result = getOperador($c);
 
 
-    if ($result[1]) {
+    if ($result) {
       $id = $result[1];
       $tipo_user = $result[0];
       if ($tipo_user != 'inst') {
