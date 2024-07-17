@@ -57,6 +57,21 @@ if ($centro_nombre=='') {
     'total_asistencia_1x10' => '0']);
   
 }
+
+
+
+// usando $centro cuenta los electores de 'rep_24' por la columna 'centro'
+$sql = "SELECT DISTINCT cv, COUNT(*) AS cantidad
+FROM unox10
+GROUP BY cv
+WHERE cv = '$centro'";
+$result = $conexion_app->query($sql);
+$row = $result->fetch_assoc();
+$cantidad_110 = $row['cantidad'];
+
+
+
+
 // usando $centro cuenta los electores de 'rep_24' por la columna 'centro'
 $sql = "SELECT COUNT(centro) AS cantidad FROM rep_24 WHERE centro = '$centro'";
 $result = $conexion_app->query($sql);
@@ -94,7 +109,9 @@ echo json_encode([
   'reportes_del_centro' => $cantidad_remportes, 
   'electores_centro' => $cantidad_elecotores, 
   'total_1x10_centro'=> count($cedulas), 
-  'total_asistencia_1x10' => $asistentes1x10]);
+  'total_asistencia_1x10' => $asistentes1x10,
+  'total_110_centro' => $cantidad_110]
+);
 
 
 

@@ -14,15 +14,14 @@ $stmt = mysqli_prepare($conexion_app, "SELECT *
 $stmt->bind_param('s', $cedula);
 $stmt->execute();
 if ($stmt->execute()) {
-	$result = $stmt->get_result();
-	if (!$result->num_rows > 0) {
+  $result = $stmt->get_result();
+  if (!$result->num_rows > 0) {
     header("Location: seguir.php");
-	}
-}else {
+  }
+} else {
   header("Location: seguir.php");
 }
 $stmt->close();
-
 
 
 $avance = 0;
@@ -32,16 +31,25 @@ $avanceUbicacion = [];
 
 $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados_instituciones.cedula, empleados_instituciones.nombre, empleados_instituciones.telefono, empleados_instituciones.ubicacion FROM `empleados_instituciones`
                 LEFT JOIN flujo_electoral ON flujo_electoral.cedula = empleados_instituciones.cedula
-                 WHERE institucion = ?");
+                 WHERE institucion = ? LIMIT 130");
 $stmt->bind_param('s', $institucion);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
+
+    if ($row['ubicacion'] == '') {
+      $ubicacion = 'Sin ubicación definida<br>';
+    }else {
+      $ubicacion = $row['ubicacion'];
+      $ubicacion = ucfirst(strtolower($row['ubicacion']));
+
+    }
+
     $tabla[] = '<tr>
                     <td>' . $row['cedula'] . '</td>
                     <td>' . $row['nombre'] . '</td>
-                    <td>' . $row['ubicacion'] . '</td>
+                    <td>' . $ubicacion . '</td>
                     <td>' . $row['telefono'] . '</td>
                     <td>' . ($row['id_flujo'] ? '<span class="badge bg-primary">VOTO</span>' : '<span class="badge bg-info">PENDIENTE</span>') . '</td>
                   </tr>';
@@ -49,21 +57,18 @@ if ($result->num_rows > 0) {
     if ($row['id_flujo']) {
       $avance++;
 
-      if (@$avanceUbicacion[$row['ubicacion']]) {
-        @$avanceUbicacion[$row['ubicacion']][0] += 1; 
-      }else {
-        @$avanceUbicacion[$row['ubicacion']][0] = 1; 
+      if (@$avanceUbicacion[$ubicacion]) {
+        @$avanceUbicacion[$ubicacion][0] += 1;
+      } else {
+        @$avanceUbicacion[$ubicacion][0] = 1;
       }
-
     } else {
       $pendiente++;
-
-      if (@$avanceUbicacion[$row['ubicacion']]) {
-        @$avanceUbicacion[$row['ubicacion']][1] += 1; 
-      }else {
-        @$avanceUbicacion[$row['ubicacion']][1] = 1; 
+      if (@$avanceUbicacion[$ubicacion]) {
+        @$avanceUbicacion[$ubicacion][1] += 1;
+      } else {
+        @$avanceUbicacion[$ubicacion][1] = 1;
       }
-
     }
   }
 }
@@ -73,10 +78,6 @@ $total = $avance + $pendiente;
 
 $porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.', ''));
 $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total, '2', '.', ''));
-                
-
-
-
 
 ?>
 <!DOCTYPE html>
@@ -98,9 +99,30 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <link id="pagestyle" href="assets/css/soft-ui-dashboard.css?v=1.0.3" rel="stylesheet" />
-  <script src="vendors/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+  <script src="vendors/jquery-3.1.1.min.js" crossorigin="anonymous"></script><!--
+  <link rel="stylesheet" href="vendors/datatables/datatables.min.css" />
+  <script src="vendors/datatables/datatables.min.js"></script> -->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
   <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+  <style>
+    p{
+      font-size: 12px;
+    }
+    .lista-ubicaciones{
+      height: 110vh;
+      overflow-y: auto;
+    }
+    .lista-ubicaciones::-webkit-scrollbar{
+      width: 8px;
+      height: 8px;
+    }
+
+    .lista-ubicaciones::-webkit-scrollbar-thumb{
+      background-color: gray;
+      border-radius: 4px;
+    }
+
+  </style>
 </head>
 
 <body class="">
@@ -111,7 +133,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
       <div class="bounce3"></div>
     </div>
   </div>
-  <div class="container top-0">
+  <div class=" top-0">
     <div class="row">
       <div class="col-12">
         <!-- Navbar -->
@@ -153,77 +175,109 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
   <main class="main-content ">
     <section>
       <div class="page-header ">
-        <div class="container">
+        <div style="width: 100% !important;margin: 15px 33px;">
           <div class="row">
+            <div class="col lg-12">
+              
+              <div class="d-flex justify-content-between">
+                <div>
+                <h3 class="mb-0">Participación</h3>
+                <p>
+                  <span class="badge bg-primary">Participacion</span> <?php echo $avance ?>
+                  <span class="badge bg-info">Pendientes</span> <?php echo $pendiente ?>
+                </p>
+                </div>
+                <div>
+                  <button class="btn btn-info">Descargar</button>
+                </div>
 
-          <div class="col lg-12">
-          <h3 class="mb-0">Participación</h3>
-          <p>
-            <span class="badge bg-primary">Participacion</span> <?php echo $avance ?>
-            <span class="badge bg-info">Pendientes</span> <?php echo $pendiente ?>
-          </p>
+              </div>
+              <hr>
+              <div class="mt-3">
 
-          <div>
-            <h3>Por Ubicación</h3>
-            <div class="row">
-              <?php 
-              foreach ($avanceUbicacion as $key => $value) {
-                echo '<div class="col-lg-6 mb-2">
-                        <div class="card">
-                          <div class="card-body">
-                            <h5 class="card-title
-                            ">' . $key . '</h5>
-                            <p class="card-text">
-                              <span class="badge bg-primary">Participacion</span> ' . (@$value[0] ? $value[0] : 0) . '
-                              <span class="badge bg-info">Pendientes</span> ' . (@$value[1] ? $value[1] : 0) . '
-                            </p>
+                <div class="row">
+                  <div class="col-lg-3">
+                  <div class="card mb-3" style="background: #d5d5d5;">
+                    <div class="card-body">
+                      <h5 class="mb-0">Por ubicación</h5>
+                      <small class="text-muted">Listado de reportes por ubicaciones</small>
+                    </div>
+                  </div>
+                <div class="row lista-ubicaciones">
+                  <?php
+                    foreach ($avanceUbicacion as $key => $value) {
+                      echo '<div class="col-lg-12 col-sm-4 mb-2">
+                              <div class="card">
+                                <div class="card-body">
+                                <p class="card-title">' . $key . '</p>
+                                <p class="card-text">
+                                  VOTOS <span class="badge bg-primary">'.(@$value[0] ? $value[0] : 0).'</span>
+                                  FALTA <span class="badge bg-info">'.(@$value[1] ? $value[1] : 0).'</span>
+                                </p>
+                              </div>
                             </div>
-                            </div>
-                            </div>';
-              }
-                            ?>
+                          </div>';
+                    }
+                  ?>
+                </div>
+                </div>
+                <div class="col-lg-9">
+                  
+                <div class="card mb-3" style="height: 50vh;">
+                  <div class="card-header">
+                    <h5>Porcentaje de anvance</h5>
+                  </div>
+                    <div class="card-body"><div style="height: 35vh;" id="chartdiv"></div></div>
+                </div>
 
-          </div>
-
-            <div id="chartdiv"></div>
-          </div>
 
 
-          <div class="mt-3">
-            <h3>Empleados</h3>
-            <table id="DataTables">
-              <thead>
-                  <tr>
-                    <th>Cédula</th>
-                    <th>nombre</th>
-                    <th>Ubicación</th>
-                    <th>Teléfono</th>
-                    <th>Estatus</th>
-                  </tr>
-              </thead>
-              <tbody>
-                <?php 
-                foreach ($tabla as $key => $value) {
-                  echo $value;
-                }
-                ?>
-              </tbody>
-            </table>
-          </div>
+                <div class="card mt-3" style="height: 70vh; overflow-y: auto">
+                <div class="card-header">
+
+                  <h5>Empleados</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                    <table id="DataTables" class="table">
+                  <thead>
+                    <tr>
+                      <th>Cédula</th>
+                      <th>nombre</th>
+                      <th>Ubicación</th>
+                      <th>Teléfono</th>
+                      <th>Estatus</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                      foreach ($tabla as $key => $value) {
+                        echo $value;
+                      }
+                    ?>
+                  </tbody>
+                </table>
+                    </div>
+              </div>
+              </div>
+
+                </div>
+              </div>
+       
+             
+              </div>
+         
+            </div>
           </div>
         </div>
-      </div>
     </section>
   </main>
-
   <style>
-#chartdiv {
-  width: 100%;
-  height: 500px;
-}
-</style>
-
-
+    #chartdiv {
+      width: 100%;
+      height: 500px;
+    }
+  </style>
   <script src="assets/js/core/bootstrap.min.js"></script>
   <script src="vendors/sweetAlert2/sweetalert2.all.min.js"></script>
 
@@ -232,16 +286,15 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
   <script src="assets/js/plugins/smooth-scrollbar.min.js"></script>
 
 
-  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <script src="vendors/amcharts5/index.js"></script>
+  <script src="vendors/amcharts5/percent.js"></script>
+  <script src="vendors/amcharts5/themes/Animated.js"></script>
 
 
 
-<script>
-
-var table = $('#DataTables').DataTable({
-    language: {
+  <script>
+    var table = $('#DataTables').DataTable({
+      language: {
         "decimal": "",
         "emptyTable": "No hay información",
         "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
@@ -255,101 +308,100 @@ var table = $('#DataTables').DataTable({
         "search": "Buscar:",
         "zeroRecords": "Sin resultados encontrados",
         "paginate": {
-            "first": "Primero",
-            "last": "Ultimo",
-            "next": "Siguiente",
-            "previous": "Anterior"
+          "first": "Primero",
+          "last": "Ultimo",
+          "next": "Siguiente",
+          "previous": "Anterior"
         }
-    },
-});
-</script>
-<script>
-  am5.ready(function() {
-  // Create root and chart
-  var root = am5.Root.new("chartdiv");
+      },
+    });
+  </script>
+  <script>
+    am5.ready(function() {
+      // Create root and chart
+      var root = am5.Root.new("chartdiv");
 
-  root.setThemes([
-    am5themes_Animated.new(root)
-  ]);
+      root.setThemes([
+        am5themes_Animated.new(root)
+      ]);
 
-  var chart = root.container.children.push( 
-    am5percent.PieChart.new(root, {
-      layout: root.verticalLayout
-    }) 
-  );
+      var chart = root.container.children.push(
+        am5percent.PieChart.new(root, {
+          layout: root.verticalLayout
+        })
+      );
 
-  // Create series
-  var series = chart.series.push(
-    am5percent.PieSeries.new(root, {
-      valueField: "percent",
-      categoryField: "type",
-      fillField: "color",
-      alignLabels: false
-    })
-  );
+      // Create series
+      var series = chart.series.push(
+        am5percent.PieSeries.new(root, {
+          valueField: "percent",
+          categoryField: "type",
+          fillField: "color",
+          alignLabels: false
+        })
+      );
 
-  series.slices.template.set("templateField", "sliceSettings");
-  series.labels.template.set("radius", 30);
+      series.slices.template.set("templateField", "sliceSettings");
+      series.labels.template.set("radius", 30);
 
-  // Set up click events
-  series.slices.template.events.on("click", function(event) {
-    console.log(event.target.dataItem.dataContext)
-    if (event.target.dataItem.dataContext.id != undefined) {
-      selected = event.target.dataItem.dataContext.id;
-    } else {
-      selected = undefined;
-    }
-    series.data.setAll(generateChartData());
-  });
+      // Set up click events
+      series.slices.template.events.on("click", function(event) {
+        console.log(event.target.dataItem.dataContext)
+        if (event.target.dataItem.dataContext.id != undefined) {
+          selected = event.target.dataItem.dataContext.id;
+        } else {
+          selected = undefined;
+        }
+        series.data.setAll(generateChartData());
+      });
 
-  // Define data
-  var selected;
-  var types = [{
-    type: "Avance",
-    percent: <?php echo $porc_avance ?>,
-    color: am5.color("#FF6B6B"), // Color rojo
-  }, {
-    type: "Pendiente",
-    percent: <?php echo $porc_pendiente ?>,
-    color: am5.color("#FFD6D6"), // Color rosado
-  }];
-  series.data.setAll(generateChartData());
+      // Define data
+      var selected;
+      var types = [{
+        type: "Avance",
+        percent: <?php echo $porc_avance ?>,
+        color: am5.color("#FF6B6B"), // Color rojo
+      }, {
+        type: "Pendiente",
+        percent: <?php echo $porc_pendiente ?>,
+        color: am5.color("#FFD6D6"), // Color rosado
+      }];
+      series.data.setAll(generateChartData());
 
-  function generateChartData() {
-    var chartData = [];
-    for (var i = 0; i < types.length; i++) {
-      if (i == selected) {
-        for (var x = 0; x < types[i].subs.length; x++) {
-          chartData.push({
-            type: types[i].subs[x].type,
-            percent: types[i].subs[x].percent,
-            color: types[i].color,
-            pulled: true,
-            sliceSettings: {
-              active: true
+      function generateChartData() {
+        var chartData = [];
+        for (var i = 0; i < types.length; i++) {
+          if (i == selected) {
+            for (var x = 0; x < types[i].subs.length; x++) {
+              chartData.push({
+                type: types[i].subs[x].type,
+                percent: types[i].subs[x].percent,
+                color: types[i].color,
+                pulled: true,
+                sliceSettings: {
+                  active: true
+                }
+              });
             }
-          });
+          } else {
+            chartData.push({
+              type: types[i].type,
+              percent: types[i].percent,
+              color: types[i].color,
+              id: i
+            });
+          }
         }
-      } else {
-        chartData.push({
-          type: types[i].type,
-          percent: types[i].percent,
-          color: types[i].color,
-          id: i
-        });
+        return chartData;
       }
-    }
-    return chartData;
-  }
 
-}); // end am5.ready()
-
-</script>
+    }); // end am5.ready()
+  </script>
 
 
 
 
-<script>
+  <script>
     function alertaNoticia(title, text, tipo) {
       Swal.fire({
         type: tipo,
@@ -410,6 +462,6 @@ var table = $('#DataTables').DataTable({
 </body>
 
 </html>
-<?php 
+<?php
 ob_end_flush();
 ?>
