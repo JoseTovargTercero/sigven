@@ -75,7 +75,7 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     if ($result->num_rows > 0) {
       $row = $result->fetch_assoc();
       $voto = 'VD';
-      $idUnoX10 = $row['id'];
+      $idUnoX10 = $row['jfcdula'];
 
     }
     $stmt_unox10->close();

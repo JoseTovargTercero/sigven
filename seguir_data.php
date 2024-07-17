@@ -9,14 +9,17 @@ if (!isset($_POST["param_2"])) {
 $cedula = $_POST["param_2"];
 $institucion = $_POST["param_1"];
 
-$stmt = mysqli_prepare($conexion_app, "SELECT *
-	FROM jefes_instituciones WHERE cedula = ?");
+$stmt = mysqli_prepare($conexion_app, "SELECT institucion FROM jefes_instituciones WHERE cedula = ?");
 $stmt->bind_param('s', $cedula);
 $stmt->execute();
 if ($stmt->execute()) {
   $result = $stmt->get_result();
+
   if (!$result->num_rows > 0) {
     header("Location: seguir.php");
+  }else{
+    $row = $result->fetch_assoc();
+    $institucion = $row["institucion"];
   }
 } else {
   header("Location: seguir.php");
@@ -28,10 +31,10 @@ $avance = 0;
 $pendiente = 0;
 
 $avanceUbicacion = [];
-
+$tabla = [];
 $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados_instituciones.cedula, empleados_instituciones.nombre, empleados_instituciones.telefono, empleados_instituciones.ubicacion FROM `empleados_instituciones`
                 LEFT JOIN flujo_electoral ON flujo_electoral.cedula = empleados_instituciones.cedula
-                 WHERE institucion = ? LIMIT 130");
+                 WHERE institucion = ? ");
 $stmt->bind_param('s', $institucion);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -40,10 +43,9 @@ if ($result->num_rows > 0) {
 
     if ($row['ubicacion'] == '') {
       $ubicacion = 'Sin ubicación definida<br>';
-    }else {
+    } else {
       $ubicacion = $row['ubicacion'];
       $ubicacion = ucfirst(strtolower($row['ubicacion']));
-
     }
 
     $tabla[] = '<tr>
@@ -106,24 +108,37 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
   <script src="vendors/datatables/datatables.min.js"></script> -->
   <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
   <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
   <style>
-    p{
+    p {
       font-size: 12px;
     }
-    .lista-ubicaciones{
+
+    .lista-ubicaciones {
       height: 110vh;
       overflow-y: auto;
     }
-    .lista-ubicaciones::-webkit-scrollbar{
+
+    .lista-ubicaciones::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
 
-    .lista-ubicaciones::-webkit-scrollbar-thumb{
+    .lista-ubicaciones::-webkit-scrollbar-thumb {
       background-color: gray;
       border-radius: 4px;
     }
-
+    .sombra-bajo-lista{
+      box-shadow: 0px -14px 13px 18px #ddd;
+      height: 10px;
+      z-index: 99999;
+      position: relative;
+    }
+    .counter {
+        font-weight: bold;
+        font-size: 20px;
+    }
   </style>
 </head>
 
@@ -180,17 +195,30 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
         <div style="width: 100% !important;margin: 15px 33px;">
           <div class="row">
             <div class="col lg-12">
-              
+
               <div class="d-flex justify-content-between">
                 <div>
-                <h3 class="mb-0">Participación</h3>
-                <p>
-                  <span class="badge bg-primary">Participacion</span> <?php echo $avance ?>
-                  <span class="badge bg-info">Pendientes</span> <?php echo $pendiente ?>
-                </p>
+                  <h3 class="mb-0">Participación</h3>
+                  <span class="text-muted"><?php echo $institucion ?></span>
+                </div>
+
+                <div class="d-flex">
+                  <div class="card bg-primary p-2 text-center text-white me-2 " style="width: 126px;">
+                    <div class="counter">
+                      <?php echo $avance ?>
+                    </div>
+                    <span>
+                      Participacion
+                    </span>
+                  </div>
+                  <div class="card bg-info p-2 text-center text-white " style="width: 126px;">
+                    <div class="counter">
+                      <?php echo $pendiente ?>
+                    </div>
+                    <span>Pendientes</span>
+                  </div>
                 </div>
                 <div>
-                  <button class="btn btn-info">Descargar</button>
                 </div>
 
               </div>
@@ -199,76 +227,81 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
 
                 <div class="row">
                   <div class="col-lg-3">
-                  <div class="card mb-3" style="background: #d5d5d5;">
-                    <div class="card-body">
-                      <h5 class="mb-0">Por ubicación</h5>
-                      <small class="text-muted">Listado de reportes por ubicaciones</small>
+                    <div class="card mb-3" style="background: #d5d5d5;">
+                      <div class="card-body">
+                        <h5 class="mb-0">Por ubicación</h5>
+                        <small class="text-muted">Listado de reportes por ubicaciones</small>
+                      </div>
                     </div>
-                  </div>
-                <div class="row lista-ubicaciones">
-                  <?php
-                    foreach ($avanceUbicacion as $key => $value) {
-                      echo '<div class="col-lg-12 col-sm-4 mb-2">
+                    <div class="row lista-ubicaciones">
+                      <?php
+                      foreach ($avanceUbicacion as $key => $value) {
+                        echo '<div class="col-lg-12 col-sm-4" style="margin-bottom: 10px !important">
                               <div class="card">
                                 <div class="card-body">
                                 <p class="card-title">' . $key . '</p>
                                 <p class="card-text">
-                                  VOTOS <span class="badge bg-primary">'.(@$value[0] ? $value[0] : 0).'</span>
-                                  FALTA <span class="badge bg-info">'.(@$value[1] ? $value[1] : 0).'</span>
+                                  VOTOS <span class="badge bg-primary">' . (@$value[0] ? $value[0] : 0) . '</span>
+                                  FALTA <span class="badge bg-info">' . (@$value[1] ? $value[1] : 0) . '</span>
                                 </p>
                               </div>
                             </div>
                           </div>';
-                    }
-                  ?>
-                </div>
-                </div>
-                <div class="col-lg-9">
-                  
-                <div class="card mb-3" style="height: 50vh;">
-                  <div class="card-header">
-                    <h5>Porcentaje de anvance</h5>
-                  </div>
-                    <div class="card-body"><div style="height: 35vh;" id="chartdiv"></div></div>
-                </div>
-
-
-
-                <div class="card mt-3" style="height: 70vh; overflow-y: auto">
-                <div class="card-header">
-
-                  <h5>Empleados</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                    <table id="DataTables" class="table">
-                  <thead>
-                    <tr>
-                      <th>Cédula</th>
-                      <th>nombre</th>
-                      <th>Ubicación</th>
-                      <th>Teléfono</th>
-                      <th>Estatus</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-                      foreach ($tabla as $key => $value) {
-                        echo $value;
                       }
-                    ?>
-                  </tbody>
-                </table>
+                      ?>
                     </div>
-              </div>
+                    <div class="sombra-bajo-lista">
+                    </div>
+                  </div>
+                  <div class="col-lg-9">
+
+                    <div class="card mb-3">
+                      <div class="card-header">
+                        <h5>Porcentaje de anvance</h5>
+                      </div>
+                      <div class="card-body">
+                        <div style="height: 35vh;" id="chartdiv"></div>
+                      </div>
+                    </div>
+
+
+
+                    <div class="card mt-3" >
+                      
+                      <div class="card-header d-flex justify-content-between">
+                        <h5>Empleados</h5>
+                        <button id="exportButton" class="btn btn-success"> <i class="fa fa-file-excel"></i> Exportar a Excel</button>
+                      </div>
+                      <div class="card-body">
+                        <div class="table-responsive">
+                          <table id="DataTables">
+                            <thead>
+                              <tr>
+                                <th>Cédula</th>
+                                <th>nombre</th>
+                                <th>Ubicación</th>
+                                <th>Teléfono</th>
+                                <th>Estatus</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <?php
+                              foreach ($tabla as $key => $value) {
+                                echo $value;
+                              }
+                              ?>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+
               </div>
 
-                </div>
-              </div>
-       
-             
-              </div>
-         
             </div>
           </div>
         </div>
@@ -317,6 +350,47 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
         }
       },
     });
+
+
+    document.getElementById('exportButton').addEventListener('click', function() {
+
+      // Obtener la tabla DataTable
+      var table = $('#DataTables').DataTable();
+      
+      // Obtener los nombres de las columnas
+      var columnNames = [];
+      $('#DataTables thead th').each(function() {
+          columnNames.push($(this).text());
+      });
+      
+      // Obtener los datos filtrados
+      var filteredData = table.rows({ search: 'applied' }).nodes().toArray();
+      
+      // Procesar los datos para extraer solo el texto
+      var processedData = filteredData.map(function(row) {
+          var rowData = [];
+          $(row).find('td').each(function() {
+              rowData.push($(this).text());
+          });
+          return rowData;
+      });
+
+      // Insertar los nombres de las columnas como la primera fila
+      processedData.unshift(columnNames);
+      
+      // Crear una hoja de trabajo (worksheet) con los datos procesados
+      var ws = XLSX.utils.aoa_to_sheet(processedData);
+      
+      // Crear un libro de trabajo (workbook)
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Datos Filtrados');
+      
+      // Generar el archivo Excel y descargarlo
+      XLSX.writeFile(wb, $('#dt-search-0').val()+'.xlsx');
+  });
+
+
+
   </script>
   <script>
     am5.ready(function() {
