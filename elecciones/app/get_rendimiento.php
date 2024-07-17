@@ -6,8 +6,7 @@ require('../configuracion/datos_cne.php');
 header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 
-//$cedula = $_POST["responsable"];
-$cedula = '27640176';
+$cedula = $_POST["responsable"];
 if ($cedula=='') {
   echo json_encode([
     'cod_centro' => '0', 
