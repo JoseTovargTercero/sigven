@@ -79,6 +79,8 @@ $total = $avance + $pendiente;
 $porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.', ''));
 $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total, '2', '.', ''));
 
+
+// No estoy interesado, ya tengo uno de 1500va.
 ?>
 <!DOCTYPE html>
 <html lang="es">

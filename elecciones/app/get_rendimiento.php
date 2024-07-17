@@ -6,7 +6,8 @@ require('../configuracion/datos_cne.php');
 header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 
-$cedula = $_POST["responsable"];
+//$cedula = $_POST["responsable"];
+$cedula = '27640176';
 if ($cedula=='') {
   echo json_encode([
     'cod_centro' => '0', 
@@ -58,13 +59,11 @@ if ($centro_nombre=='') {
   
 }
 
-
-
 // usando $centro cuenta los electores de 'rep_24' por la columna 'centro'
 $sql = "SELECT DISTINCT cv, COUNT(*) AS cantidad
 FROM unox10
-GROUP BY cv
-WHERE cv = '$centro'";
+WHERE cv = '$centro'
+GROUP BY cv";
 $result = $conexion_app->query($sql);
 $row = $result->fetch_assoc();
 $cantidad_110 = $row['cantidad'];

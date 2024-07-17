@@ -27,4 +27,4 @@ $base->exec("SET CHARACTER SET utf8");
 
 date_default_timezone_set('America/Manaus');
 session_start();
-error_reporting(0);
+//error_reporting(0);
