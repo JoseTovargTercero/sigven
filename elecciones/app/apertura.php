@@ -1,10 +1,6 @@
 <?php
 require('../configuracion/conexion.php');
 
-echo "Reporte de apertura enviado correctamente.";
-
-exit();
-/*
 if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
     $c = $_POST['cedula'];
     $cantidad = $_POST["cantidad"];
@@ -44,9 +40,8 @@ if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
     }
 
 }else {
-    echo 'Rechazado : No ha iniciado sesi贸n';
+    echo 'Rechazado : No ha iniciado sesion';
     exit();
 }
-*/
 
 ?>
