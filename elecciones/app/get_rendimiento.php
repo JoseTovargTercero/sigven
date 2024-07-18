@@ -5,18 +5,17 @@ require('../configuracion/datos_cne.php');
 // header json
 header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
-
+$hora = date('H:s:i a');
 $cedula = $_POST["responsable"];
 if ($cedula=='') {
   echo json_encode([
-    'cod_centro' => '0', 
     'centro' => 'La informacion no esta disponible CIERRE SESION E INGRESE SIN AUTENTICACION BIOMETRICA, UTILIZANDO SU USARIO Y CONTRASEÑA', 
     'reportes_del_centro' => '0', 
     'electores_centro' => '0', 
     'total_1x10_centro'=> '0', 
     'total_asistencia_1x10' => '0',
     'meta_inicial' => '0',
-    'hora' => date('H:s:i a')]
+    'hora' => "$hora"]
   );
   
 }
@@ -52,14 +51,13 @@ $cantidad_remportes = $row['cantidad'];
 //echo $centro;
 if ($centro_nombre=='') {
   echo json_encode([
-    'cod_centro' => '0', 
     'centro' => 'Sin reporte', 
     'reportes_del_centro' => '0', 
     'electores_centro' => '0', 
     'total_1x10_centro'=> '0', 
     'total_asistencia_1x10' => '0',
     'meta_inicial' => '0',
-    'hora' => date('H:s:i a')
+    'hora' => "$hora"
   ]);
   
 }
@@ -108,14 +106,13 @@ $stmt->close();
 
 
 echo json_encode([
-  'cod_centro' => $centro, 
   'centro' => abrev($centro_nombre), 
   'reportes_del_centro' => $cantidad_remportes, 
   'electores_centro' => $cantidad_elecotores, 
   'total_1x10_centro'=> count($cedulas), 
   'total_asistencia_1x10' => $asistentes1x10,
   'meta_inicial' => ($cantidad_110 > $meta_inicial ? $cantidad_110 : $meta_inicial),
-  'hora' => date('H:s:i a')
+  'hora' => "$hora"
 ]);
 
 
