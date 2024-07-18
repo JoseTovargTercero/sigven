@@ -64,16 +64,6 @@ if ($centro_nombre=='') {
   
 }
 
-// usando $centro cuenta los electores de 'rep_24' por la columna 'centro'
-$sql = "SELECT DISTINCT cv, COUNT(*) AS cantidad
-FROM unox10
-WHERE cv = '$centro'
-GROUP BY cv";
-$result = $conexion_app->query($sql);
-$row = $result->fetch_assoc();
-$cantidad_110 = $row['cantidad'];
-
-
 
 
 // ubtener la meta inicial
@@ -124,7 +114,6 @@ echo json_encode([
   'electores_centro' => $cantidad_elecotores, 
   'total_1x10_centro'=> count($cedulas), 
   'total_asistencia_1x10' => $asistentes1x10,
-  'total_110_centro' => $cantidad_110,
   'meta_inicial' => ($cantidad_110 > $meta_inicial ? $cantidad_110 : $meta_inicial),
   'hora' => date('H:s:i a')
 ]);
