@@ -14,7 +14,10 @@ if ($cedula=='') {
     'reportes_del_centro' => '0', 
     'electores_centro' => '0', 
     'total_1x10_centro'=> '0', 
-    'total_asistencia_1x10' => '0']);
+    'total_asistencia_1x10' => '0',
+    'meta_inicial' => '0',
+    'hora' => date('H:s:i a')]
+  );
   
 }
 function abrev($nombre){
@@ -54,7 +57,10 @@ if ($centro_nombre=='') {
     'reportes_del_centro' => '0', 
     'electores_centro' => '0', 
     'total_1x10_centro'=> '0', 
-    'total_asistencia_1x10' => '0']);
+    'total_asistencia_1x10' => '0',
+    'meta_inicial' => '0',
+    'hora' => date('H:s:i a')
+  ]);
   
 }
 
@@ -66,6 +72,16 @@ GROUP BY cv";
 $result = $conexion_app->query($sql);
 $row = $result->fetch_assoc();
 $cantidad_110 = $row['cantidad'];
+
+
+
+
+// ubtener la meta inicial
+$sql = "SELECT META FROM metas_iniciales WHERE CODIGO = '$centro'";
+$result = $conexion_app->query($sql);
+$row = $result->fetch_assoc();
+$meta_inicial = $row['META'];
+
 
 
 
@@ -108,9 +124,10 @@ echo json_encode([
   'electores_centro' => $cantidad_elecotores, 
   'total_1x10_centro'=> count($cedulas), 
   'total_asistencia_1x10' => $asistentes1x10,
-  'total_110_centro' => $cantidad_110]
-);
-
+  'total_110_centro' => $cantidad_110,
+  'meta_inicial' => ($cantidad_110 > $meta_inicial ? $cantidad_110 : $meta_inicial),
+  'hora' => date('H:s:i a')
+]);
 
 
 ?>
