@@ -84,7 +84,7 @@ $cantidad_elecotores = $row['cantidad'];
 // consulta en 'unox10' los registros en donde cv=$centro y agregas a un array la columna cdula
 $sql = "SELECT cdula FROM unox10 WHERE cv = '$centro'";
 $result = $conexion_app->query($sql);
-$cedulas = [];
+$cedulas = [];  
 while($row = $result->fetch_assoc()){
   $cedulas[] = $row['cdula'];
 }
