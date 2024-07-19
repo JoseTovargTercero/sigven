@@ -30,7 +30,7 @@ if ($search->num_rows > 0) {
 require '../../elecciones/configuracion/conexion.php';
 
 // Declarar la consulta
-$stmt = $conexion_app->prepare("SELECT cdula FROM `unox10`");
+$stmt = $conexion_app->prepare("SELECT cdula, jefe FROM `unox10`");
 // Ejecutar la consulta
 $stmt->execute();
 // Obtener los resultados
@@ -38,16 +38,39 @@ $result = $stmt->get_result();
 $cdulas = array();
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $cdulas[] = $row['cdula'];
+        $cdulas[$row['cdula']] = [$row['jefe']];
     }
 }
 // Cerrar la conexión
 $stmt->close();
 
+// Declarar la consulta
+$stmt = $conexion_app->prepare("SELECT cedula, jefe FROM `unox107`");
+// Ejecutar la consulta
+$stmt->execute();
+// Obtener los resultados
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $cdulas[$row['cedula']] = [$row['jefe']];
+    }
+}
+// Cerrar la conexión
+$stmt->close();
+
+
+
+
 // Función para verificar si un valor existe en el array
 function verificarCdula($valor, $array){
+    if (@$array[$valor]) {
+        return $array[$valor][0];
+    }else {
+        return '';
+    }
     return in_array($valor, $array) ? 'X' : '';
 }
+
 
 
 
@@ -64,8 +87,6 @@ $objPHPExcel->getProperties()->setCreator("SIGVEN Amazonas")
     ->setCategory("Reportes");
 
 
-
-
     $contador = 1;
     $rowA = 9;
     $rowB = 9;
@@ -76,7 +97,6 @@ $objPHPExcel->getProperties()->setCreator("SIGVEN Amazonas")
     $rowG = 9;
     $rowH = 9;
     $rowI = 9;
-
 
 
 
@@ -92,8 +112,6 @@ $objPHPExcel->getProperties()->setCreator("SIGVEN Amazonas")
         $result = $stmt->get_result();
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
-              
-
                 $objPHPExcel->setActiveSheetIndex(0)
                 ->setCellValue('A' . $rowA++, $contador++)
                 ->setCellValue('B' . $rowB++, '')
