@@ -151,7 +151,7 @@ if ($_SESSION["instancia"] != 0) {
         $result = $stmt->get_result();
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
-            if ($jefesUnoDiex[$row['cedula']]) {
+            if (@$jefesUnoDiex[$row['cedula']]) {
               $jefesParticiparon++;
             }
 
@@ -545,18 +545,38 @@ if ($_SESSION["instancia"] != 0) {
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
                 <h6 class="font-weight-bolder mb-4">Reportes por Centro</h6>
                 <div class="table-responsive">
-                  <table class="table" id="table1">
+                  <table class="" id="table1">
                     <thead>
                       <tr>
                         <th class="p-0">Centro</th>
                         <th class="text-center p-0">R</th>
                         <th class="text-center p-0">1*10</th>
+                        <th class="text-center p-0">1*10*7</th>
                         <th class="text-center p-0">Porcentaje</th>
                       </tr>
                     </thead>
                     <tbody>
 
                       <?php
+
+
+
+
+
+                    $unoX107 = [];
+
+                    $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(centro), COUNT(*) AS Nrepeticiones FROM unox107 GROUP BY centro");
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($result->num_rows > 0) {
+                      while ($row = $result->fetch_assoc()) {
+                        $unoX107[$row['centro']] = $row['Nrepeticiones'];
+                      }
+                    }
+                    $stmt->close();
+
+
+
 
                       function abrev($nombre)
                       {
@@ -598,12 +618,17 @@ if ($_SESSION["instancia"] != 0) {
                       if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
                           $participacionCentro = [abrev($centroDatos[$row['centro']][0]), number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',')];
+                          if ( abrev($centroDatos[$row['centro']][0]) != '') {
                           echo '<tr>
                         <td>' . abrev($centroDatos[$row['centro']][0]) . '</td>
                         <td class="text-center">' . $row['Nrepeticiones'] . '</td>
+                        <td class="text-center">' . $unoX107[$row['centro']] . '</td>
                         <td class="text-center">' . $row['unodiez_diferente_de_cero'] . '</td>
                         <td class="text-center">' . number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',') . '% (' . $centroDatos[$row['centro']][1] . ')</td>
                       </tr>';
+
+                    }
+
                         }
                       }
                       $stmt->close();
@@ -623,7 +648,7 @@ if ($_SESSION["instancia"] != 0) {
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
                 <h6 class="font-weight-bolder mb-4">Reportes por usuario</h6>
                 <div class="table-responsive">
-                  <table class="table" id="table2">
+                  <table class="" id="table2">
                     <thead>
                       <tr>
                         <th class="p-0">Centro</th>
@@ -677,7 +702,7 @@ if ($_SESSION["instancia"] != 0) {
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
                 <h6 class="font-weight-bolder mb-4">Movilización de OP</h6>
                 <div class="table-responsive">
-                  <table class="table" id="table3">
+                  <table class="" id="table3">
                     <thead>
                       <tr>
                         <th class="p-0">OP</th>
@@ -830,7 +855,7 @@ if ($_SESSION["instancia"] != 0) {
             </div>
             <div class="card-body px-0 pb-2">
               <div class="table-responsive" style="padding-left: 15px;">
-                <table class="table align-items-center mb-0">
+                <table class=" align-items-center mb-0">
                   <thead>
                     <tr>
                       <th style="font-size: 12px !important; padding: 8px;" class="text-xxs font-weight-bolder opacity-7">Fecha</th>
