@@ -34,7 +34,7 @@ $avanceUbicacion = [];
 $tabla = [];
 $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados_instituciones.cedula, empleados_instituciones.nombre, empleados_instituciones.telefono, empleados_instituciones.ubicacion FROM `empleados_instituciones`
                 LEFT JOIN flujo_electoral ON flujo_electoral.cedula = empleados_instituciones.cedula
-                 WHERE institucion = ? LIMIT 150");
+                 WHERE institucion = ?");
 $stmt->bind_param('s', $institucion);
 $stmt->execute();
 $result = $stmt->get_result();
