@@ -13,7 +13,7 @@ $cedula = $_POST["responsable"];
 $result = getOperador($c);
 if (!$result) {
   echo json_encode([
-    'centro' => 'Datos no disponibles', 
+    'centro' => 'Datos no disponibles' + $result, 
     'reportes_del_centro' => '0', 
     'electores_centro' => '0', 
     'total_1x10_centro'=> '0', 

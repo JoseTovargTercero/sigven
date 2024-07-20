@@ -34,11 +34,11 @@ function getOperador($cedula){
 	  if ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
 		  if ($row['OPERADOR'] == $cedula) {
-			return array('Operador', $row['id']);
+			return array('Operador', $row['id'], $row['CODIGO']);
 		  }elseif ($row['OPERADOR_PUNTO'] == $cedula) {
-			return array('Punto', $row['id']);
+			return array('Punto', $row['id'], $row['CODIGO']);
 		  }elseif ($row['OPERADOR_UBCH'] == $cedula) {
-			return array('Ubch', $row['id']);
+			return array('Ubch', $row['id'], $row['CODIGO']);
 		  }
 		}
 	  }

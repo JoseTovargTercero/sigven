@@ -20,13 +20,27 @@ function getCentro($value, $accion){
   }
   return false;
 }*/
+
+
+
 header('Content-Type: application/json');
+/*
+$cedula = $_POST["responsable"];
+
+$result = getOperador($cedula);
+
+
+if ($result) {
+  $centro = $result[2];
+
+}else {
+  echo "Reporte de apertura enviado correctamente.";
+}*/
 
 // Suponiendo que tienes los datos almacenados en un array
 $data = [
     ['nombre' => 'Elemento 1', 'detalle' => 'Detalle 1'],
     ['nombre' => 'Elemento 2', 'detalle' => 'Detalle 2'],
-    // Agrega más elementos según sea necesario
 ];
 
 // Empaqueta los datos en un JSON
