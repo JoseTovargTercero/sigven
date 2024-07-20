@@ -39,6 +39,8 @@ function getOperador($cedula){
 			return array('Punto', $row['id'], $row['CODIGO']);
 		  }elseif ($row['OPERADOR_UBCH'] == $cedula) {
 			return array('Ubch', $row['id'], $row['CODIGO']);
+		}else {
+			  return array('Ubch', $row['id'], $row['CODIGO']);
 		  }
 		}
 	  }
