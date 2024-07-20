@@ -1,7 +1,7 @@
 <?php
 require('../configuracion/conexion.php');
+require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
-
 function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
@@ -44,10 +44,7 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     }
 
 
-    $conexion_sigven = mysqli_connect("localhost", "user_sigven", "+ij*tK&[JH$,", "sigven");
-    $conexion_sigven->set_charset('utf8');
-
-    $stmt_sig = mysqli_prepare($conexion_sigven, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
+    $stmt_sig = mysqli_prepare($conexion, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
     $stmt_sig->bind_param('s', $elector);
     $stmt_sig->execute();
     $result = $stmt_sig->get_result();
@@ -56,7 +53,7 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
       $voto = $row['voto'];
     }
     $stmt_sig->close();
-    $conexion_sigven->close();
+    $conexion->close();
 
     $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
     $stmt->bind_param('s', $elector);
@@ -66,9 +63,8 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
 
 
 
-    
     $idUnoX10 = '0';
-    $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id FROM `unox10` WHERE cdula = ?");
+    $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id, jfcedula FROM `unox10` WHERE cdula = ?");
     $stmt_unox10->bind_param('s', $elector);
     $stmt_unox10->execute();
     $result = $stmt_unox10->get_result();
@@ -76,8 +72,8 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
       $row = $result->fetch_assoc();
       $voto = 'VD';
       $idUnoX10 = $row['jfcedula'];
-
     }
+
     $stmt_unox10->close();
 
 
