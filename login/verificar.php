@@ -38,6 +38,7 @@
 				$_SESSION['consulta']=$registro['consulta'];
 				$_SESSION['respaldos']=$registro['respaldos'];
 				$_SESSION['instancia']=$registro['instancia'];
+				$_SESSION['id_instancia']=$registro['id_instancia'];
 
 				$id = $_SESSION['id'];
 				$nombre = $_SESSION['nombre'];

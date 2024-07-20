@@ -10,15 +10,18 @@ if ($_SESSION['nivel'] != 1) {
   header('Location: ' . PAGINA_INICIO);
 }
 
-if ($_SESSION["instancia"] != 0) {
-  $extraCondicion = 'AND mcp=' . $_SESSION["instancia"];
-  $extraCondicionW = 'WHERE mcp=' . $_SESSION["instancia"];
-} else {
+if ($_SESSION["instancia"] == 0) {
   $extraCondicion = '';
   $extraCondicionW = '';
+} elseif ($_SESSION['instancia'] == '1') {
+  $extraCondicion = 'AND mcp=' . $_SESSION["id_instancia"];
+  $extraCondicionW = 'WHERE mcp=' . $_SESSION["id_instancia"];
+}else {
+  $extraCondicion = 'AND pq=' . $_SESSION["id_instancia"];
+  $extraCondicionW = 'WHERE pq=' . $_SESSION["id_instancia"];
 }
 
-//instancia
+//instancia - $_SESSION['id_instancia']
 ?>
 
 
@@ -148,7 +151,7 @@ if ($_SESSION["instancia"] != 0) {
 
 
         $jefesParticiparon = 0;
-        $stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral");
+        $stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral $extraCondicionW");
         $stmt->execute();
         $result = $stmt->get_result();
         if ($result->num_rows > 0) {
@@ -280,7 +283,7 @@ if ($_SESSION["instancia"] != 0) {
       // die('Error: ' . $e->GetMessage());
     }
 
-    $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0'");
+    $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0' $extraCondicion");
 
     $vd = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VD' $extraCondicion");
     $vb = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VB' $extraCondicion");
@@ -619,6 +622,10 @@ if ($_SESSION["instancia"] != 0) {
                       $result = $stmt->get_result();
                       if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
+
+
+
+                          
                           $participacionCentro = [abrev($centroDatos[$row['centro']][0]), number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',')];
                           if ( abrev($centroDatos[$row['centro']][0]) != '') {
                           echo '<tr>
@@ -737,6 +744,8 @@ if ($_SESSION["instancia"] != 0) {
             </div>
           </div>
         </div>
+                <?php if ($_SESSION["instancia"] == 0) { ?>
+  
         <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
           <div class="card h-100">
             <div class="card-body p-3">
@@ -749,6 +758,9 @@ if ($_SESSION["instancia"] != 0) {
             </div>
           </div>
         </div>
+          <?php } ?>
+
+
       </div>
 
       <?php
@@ -775,169 +787,44 @@ if ($_SESSION["instancia"] != 0) {
       ?>
 
 
-      <div class="row my-4" style="display: none;">
 
-        <div class="row">
-          <div class="col-lg-8 mb-lg-0 mb-4">
-            <div class="card h-100">
-              <div class="card-body p-3">
-                <div class="row">
-                  <div class="d-flex flex-column h-100">
-                    <h6 class="font-weight-bolder mb-4 pt-2">Votos Blandos por Centro de Votaci&oacute;n</h6>
-                    <div id="chartdivDist" style="height: 60vh;"></div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 mb-lg-0 mb-4">
-            <div class="card h-100">
-              <div class="card-body p-3">
-                <div class="row">
-                  <div class="d-flex flex-column h-100">
-                    <h6 class="font-weight-bolder mb-4 pt-2">Votos duros por genero</h6>
-                    <div id="chartdivSexo" style="height: 60vh;"></div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-        </div>
-
-      </div>
-
-      <div class="row my-4" style="display: none;">
-
-        <div class="col-lg-4 col-md-6">
-          <div class="card h-100">
-            <div class="card-header pb-0">
-              <h6>Ultimos inicios de session</h6>
-
-            </div>
-            <div class="card-body p-3">
-              <div class="timeline timeline-one-side">
-                <?php
-                $querry222 = "SELECT * FROM log_usuarios ORDER BY id DESC LIMIT 9";
-                $search22222 = $conexion->query($querry222);
-                if ($search22222->num_rows > 0) {
-                  while ($resultado2222222 = $search22222->fetch_assoc()) {
-
-                    echo '<div class="timeline-block">
-                              <span class="timeline-step">
-                                <i style="font-size: 12px; margin-left: -3px; color: #cd454e" class="line icon-login"></i>
-                              </span>
-                              <div class="timeline-content">
-                                <h6 style="margin-bottom: -3px">' . $resultado2222222['usuario'] . '</h6>
-                                <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">' . date("d-m-y H:i a", $resultado2222222['fecha']) . '</p>
-                              </div>
-                            </div>';
-                  }
-                }
-                ?>
-
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
-          <div class="card h-100">
-            <div class="card-header pb-0">
-              <div class="row">
-                <div class="col-lg-6 col-7">
-                  <h6>Ultimas10 acciones</h6>
-
-                </div>
-
-              </div>
-            </div>
-            <div class="card-body px-0 pb-2">
-              <div class="table-responsive" style="padding-left: 15px;">
-                <table class=" align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th style="font-size: 12px !important; padding: 8px;" class="text-xxs font-weight-bolder opacity-7">Fecha</th>
-                      <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Usuario</th>
-                      <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Tipo</th>
-                      <th style="font-size: 12px !important;" class="text-xxs font-weight-bolder opacity-7 ps-2">Accion</th>
-                      <th style="font-size: 12px !important;" class="text-secondary text-xxs font-weight-bolder opacity-7"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php
-
-                    function actividad()
-                    {
-                      $tabla = '';
-                      global $conexion;
-                      $query = "SELECT actividad_usuarios.accion, usuarios.nombre, actividad_usuarios.fecha, actividad_usuarios.tipo  FROM `actividad_usuarios`
-                          LEFT JOIN usuarios ON actividad_usuarios.id_usuario=usuarios.id
-                          ORDER BY actividad_usuarios.id DESC LIMIT 10";
-
-
-                      $search = $conexion->query($query);
-                      if ($search->num_rows > 0) {
-                        while ($fila = $search->fetch_assoc()) {
-
-
-
-                          switch ($fila['accion']) {
-                            case ('Dato Agregado'):
-                              $hecho = '
-                              <span class="badge badge-sm bg-gradient-primary">Agregado</span>';
-                              break;
-                            case ('Dato Eliminado'):
-                              $hecho = ' 
-                              <span class="badge badge-sm bg-gradient-info">Eliminado</span>';
-                              break;
-                            case ('Dato Modificado'):
-                              $hecho = ' <span class="badge badge-sm bg-gradient-secondary">Modificado</span> ';
-                              break;
-                          }
-
-                          $tabla .= '  <tr>
-                            <td style="    font-size: 12px !important;">
-                            <p class="text-xs text-secondary mb-0">' . $fila['fecha'] . '</p>
-                            </td>
-                            <td style="    font-size: 12px !important;">
-                            <p class="text-xs text-secondary mb-0">' . $fila['nombre'] . '</p>
-                            </td>
-                            <td style="    font-size: 12px !important;">
-                              <p class="text-xs font-weight-bold mb-0">' . $fila['tipo'] . '</p>
-                            </td>
-                            <td style="    font-size: 12px !important;">
-                              <p class="text-xs font-weight-bold mb-0">' . $fila['accion'] . '</p>
-                            </td style="    font-size: 12px !important;">
-                            <td class="align-middle text-center text-sm">
-                            ' . $hecho . '
-                            </td>
-                          </tr>';
-                        }
-                      }
-
-                      return  $tabla;
-                    }
-
-                    echo  actividad();
-
-                    ?>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <!-- footer -->
     </div>
     </main>
 
 
+
+
+
+    <script src="../vendors/amcharts5/index.js"></script>
+    <script src="../vendors/amcharts5/percent.js"></script>
+    <script src="../vendors/amcharts5/xy.js"></script>
+    <script src="../vendors/amcharts5/flow.js"></script>
+    <script src="../vendors/amcharts5/radar.js"></script>
+    <script src="../vendors/amcharts5/themes/Animated.js"></script>
+    <script src="../vendors/amcharts5/themes/Material.js"></script>
+
+  
+    <script src="../vendors/amcharts5/use/pie-donut-chart/index.js"></script>
+    <?php if ($_SESSION["instancia"] == 0) { ?>
+      <script src="../vendors/amcharts5/use/xy-clustered-column/index.js"></script>
+      <?php } ?>
+    <script src="../assets/js/core/bootstrap.min.js"></script>
+    <script src="../assets/js/jquery.nanoscroller.min.js"></script>
+    <script src="../assets/js/menubar/sidebar.js"></script>
+    <script src="../assets/js/core/popper.min.js"></script>
+    <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+    <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.3"></script>
     <script>
+      var win = navigator.platform.indexOf('Win') > -1;
+      if (win && document.querySelector('#sidenav-scrollbar')) {
+        var options = {
+          damping: '0.5'
+        }
+        Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+      }
+
       var languageSettings = {
         "decimal": "",
         "emptyTable": "No hay información",
@@ -971,154 +858,10 @@ if ($_SESSION["instancia"] != 0) {
       });
     </script>
 
-    <?php require_once('includes/settings.php');  ?>
-
-    <script src="../vendors/amcharts5/index.js"></script>
-    <script src="../vendors/amcharts5/percent.js"></script>
-    <script src="../vendors/amcharts5/xy.js"></script>
-    <script src="../vendors/amcharts5/flow.js"></script>
-    <script src="../vendors/amcharts5/radar.js"></script>
-    <script src="../vendors/amcharts5/themes/Animated.js"></script>
-    <script src="../vendors/amcharts5/themes/Material.js"></script>
-
-    <script src="../vendors/amcharts5/use/sliced-pictorial-stacked/index.js"></script>
 
     <script>
-      series.data.setAll([{
-          value: <?php echo $femeninas ?>,
-          category: "F"
-        },
-        {
-          value: <?php echo $masculinos ?>,
-          category: "M"
-        }
-      ]);
-    </script>
-    <script src="../vendors/amcharts5/use/radar-line/index.js"></script>
-    <script src="../vendors/amcharts5/use/flow-chord-directed/index.js"></script>
-
-    <script>
-      // Set data
-      // https://www.amcharts.com/docs/v5/charts/flow-charts/#Setting_data
-      series5.data.setAll([{
-          "from": "Psuv",
-          "to": "18-30",
-          "value": <?php echo $edadPsuv_30 ?>
-        },
-        {
-          "from": "Psuv",
-          "to": "31-40",
-          "value": <?php echo $edadPsuv_40 ?>
-        },
-        {
-          "from": "Psuv",
-          "to": "41-50",
-          "value": <?php echo $edadPsuv_50 ?>
-        },
-        {
-          "from": "Psuv",
-          "to": "51-60",
-          "value": <?php echo $edadPsuv_60 ?>
-        },
-        {
-          "from": "Psuv",
-          "to": "61-70",
-          "value": <?php echo $edadPsuv_70 ?>
-        },
-        {
-          "from": "Psuv",
-          "to": "71-80",
-          "value": <?php echo $edadPsuv_80 ?>
-        },
-        {
-          "from": "Psuv",
-          "to": "81...",
-          "value": <?php echo $edadPsuv_90 ?>
-        },
-        {
-          "from": "Oposicion",
-          "to": "18-30",
-          "value": <?php echo $edadOp_30 ?>
-        },
-        {
-          "from": "Oposicion",
-          "to": "31-40",
-          "value": <?php echo $edadOp_40 ?>
-        },
-        {
-          "from": "Oposicion",
-          "to": "41-50",
-          "value": <?php echo $edadOp_50 ?>
-        },
-        {
-          "from": "Oposicion",
-          "to": "51-60",
-          "value": <?php echo $edadOp_60 ?>
-        },
-        {
-          "from": "Oposicion",
-          "to": "61-70",
-          "value": <?php echo $edadOp_70 ?>
-        },
-        {
-          "from": "Oposicion",
-          "to": "71-80",
-          "value": <?php echo $edadOp_80 ?>
-        },
-        {
-          "from": "Oposicion",
-          "to": "81...",
-          "value": <?php echo $edadOp_90 ?>
-        },
-      ]);
-    </script>
-    <script>
-      var data4 = [];
-
-      data4.push({
-        category: "Ubch",
-        value: <?php echo round($porcentajeUbchCritico, 0, PHP_ROUND_HALF_DOWN); ?>
-      });
-      data4.push({
-        category: "Raas",
-        value: <?php echo round($porcentajeRaasCritico, 0, PHP_ROUND_HALF_DOWN); ?>
-      });
-      data4.push({
-        category: "Patrullas",
-        value: <?php echo round($porcentajePatrullaCritico, 0, PHP_ROUND_HALF_DOWN); ?>
-      });
-
-
-      var data = data4;
-
-
-      series.data.setAll(data);
-      xAxis.data.setAll(data);
-    </script>
-    <script src="../vendors/amcharts5/use/pie-donut-chart/index.js"></script>
-    <script src="../vendors/amcharts5/use/xy-clustered-column/index.js"></script>
-
-    <script src="../assets/js/core/bootstrap.min.js"></script>
-    <script src="../assets/js/jquery.nanoscroller.min.js"></script>
-    <script src="../assets/js/menubar/sidebar.js"></script>
-    <script src="../assets/js/core/popper.min.js"></script>
-    <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
-    <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
-    <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.3"></script>
-    <script>
-      var win = navigator.platform.indexOf('Win') > -1;
-      if (win && document.querySelector('#sidenav-scrollbar')) {
-        var options = {
-          damping: '0.5'
-        }
-        Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-      }
-    </script>
-
-
-
-    <script>
-      // jefes de ubch //
+              <?php if ($_SESSION["instancia"] == 0) { ?>
+  // jefes de ubch //
 
       var data = []
 
@@ -1196,34 +939,26 @@ if ($_SESSION["instancia"] != 0) {
       makeSeries("Avance", "avance");
       makeSeries("Uno x diez", "unoxdiez");
       // jefes de ubch //
-
+      <?php } ?>
 
       // hMapa del boto en donut chart //
       series.data.setAll([{
           value: <?php echo $vd ?>,
-          category: "Voto Duro"
+          category: "Duro"
         },
         {
           value: <?php echo $vb ?>,
-          category: "Voto Blando"
+          category: "Blando"
         },
         {
           value: <?php echo $vo ?>,
-          category: "Voto Opositor"
+          category: "Opositor"
         }, {
           value: <?php echo $nc ?>,
-          category: "No caracterizado"
+          category: "NC"
         },
       ]);
 
-
-      var legend2 = chart.children.push(am5.Legend2.new(root, {
-        centerX: am5.percent(50),
-        x: am5.percent(50),
-        marginTop: 15,
-        marginBottom: 15,
-      }));
-      legend2.data.setAll(series.dataItems);
       // hMapa del boto en donut chart //
     </script>
 
