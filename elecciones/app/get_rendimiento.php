@@ -141,7 +141,7 @@ $stmt->close();
 echo json_encode([
   'centro' => abrev($centro_nombre), 
   'reportes_del_centro' => $cantidad_remportes, 
-  'electores_centro' => $cantidad_elecotores, 
+  'electores_centro' => "$cantidad_elecotores", 
   'total_1x10_centro'=> count($cedulas), 
   'total_asistencia_1x10' => $asistentes1x10,
   'meta_inicial' => ($cantidad_110 > $meta_inicial ? $cantidad_110 : $meta_inicial),
