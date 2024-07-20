@@ -323,7 +323,7 @@ $datosSigven .= '</ul>';
 
                         echo '<li>Encontrado</li>';
                         echo '<li>Jefe: '.explode(';', $row['jefe'])[0].'</li>';
-                        echo '<li>Cedula Jefe: '.(explode(';', $row['jefe'])[1] == '' ? $row['jfcdula'] : explode(';', $row['jefe'])[1]).'</li>';
+                        echo '<li>Cedula Jefe: '.(explode(';', $row['jefe'])[1] == '' ? $row['jfcedula'] : explode(';', $row['jefe'])[1]).'</li>';
                         
                     }
                     }

@@ -9,27 +9,6 @@ if($_SESSION['nivel'] == 1){
 }
 
 
-function queryCerrar(){
-  global $conexion; 
-  global $id;
-  $var1 = ''; 
-  $query = "SELECT * FROM log_usuarios WHERE id_user='$id' ORDER BY id DESC LIMIT 1";
-  $search = $conexion->query($query);
-  if ($search->num_rows > 0) {
-      while ($fila = $search->fetch_assoc()) {
-        $var1 = $fila["last_act"];
-      }
-  }
-  return $var1;
-}
-
-
-if(queryCerrar() - 900 > time()){
-  define( 'PAGINA_INICIO', '../login/salir.php' );
-  header( 'Location: '.PAGINA_INICIO );
-}
-
-
 
 function query(){
   $time = time();
@@ -41,7 +20,7 @@ function query(){
   $search = $conexion->query($query);
   if ($search->num_rows > 0) {
       while ($fila = $search->fetch_assoc()) {
-        $var1 = $fila["fecha"]." - ".$fila["hora"];
+        @$var1 = $fila["fecha"]." - ".$fila["hora"];
         $last_id = $fila["id"];
       }
   }

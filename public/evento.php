@@ -17,6 +17,8 @@ if ($_SESSION["instancia"] != 0) {
   $extraCondicion = '';
   $extraCondicionW = '';
 }
+
+//instancia
 ?>
 
 
@@ -134,12 +136,12 @@ if ($_SESSION["instancia"] != 0) {
 
 
       $jefesUnoDiex = [];
-        $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcdula) FROM unox10");
+        $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcedula) FROM unox10");
         $stmt->execute();
         $result = $stmt->get_result();
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
-            $jefesUnoDiex[$row['jfcdula']]=true;
+            $jefesUnoDiex[$row['jfcedula']]=true;
           }
         }
         $stmt->close();

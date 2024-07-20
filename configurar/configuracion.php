@@ -12,8 +12,6 @@ if ($_SERVER['SERVER_NAME'] == 'localhost') {
 
 
 
-
-
 $conexion = mysqli_connect("localhost", "$user", "$pass", "sigven");
 $conexion->set_charset('utf8');
 // CONEXION EN MYSQLI //////
@@ -27,4 +25,4 @@ $base->exec("SET CHARACTER SET utf8");
 
 date_default_timezone_set('America/Manaus');
 session_start();
-error_reporting(0);
+//error_reporting(0);
