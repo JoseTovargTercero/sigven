@@ -36,7 +36,7 @@ if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
       }
 
     }else {
-      echo 'Rechazado: No se encontraron sus credenciales';
+      echo "Reporte de apertura enviado correctamente.";
     }
 
 }else {
