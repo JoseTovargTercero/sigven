@@ -108,8 +108,6 @@ if ($total_1107 > 0) {
       }
     }
 
-
-
 if (count($cedulas) > $meta_inicial) {
   $meta_inicial = count($cedulas);
 }

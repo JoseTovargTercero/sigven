@@ -13,6 +13,13 @@ if ($result) {
   $centro = $result[2];
 
 
+
+
+
+
+
+  
+
 // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
 $sql = "SELECT DISTINCT cedula, nombre, jefe, telefono
 FROM (
