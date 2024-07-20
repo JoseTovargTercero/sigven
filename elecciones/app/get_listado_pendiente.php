@@ -59,9 +59,6 @@ while($row = $result->fetch_assoc()) {
 $conexion_app->close();
 
 // Imprimir los resultados en formato JSON
-echo json_encode($data);
-
-
 
 }else {
   $data = array(
