@@ -7,9 +7,13 @@ header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 $hora = date('H:s:i a');
 $cedula = $_POST["responsable"];
-if ($cedula=='') {
+
+
+
+$result = getOperador($c);
+if (!$result) {
   echo json_encode([
-    'centro' => 'La informacion no esta disponible CIERRE SESION E INGRESE SIN AUTENTICACION BIOMETRICA, UTILIZANDO SU USARIO Y CONTRASEÑA', 
+    'centro' => 'Datos no disponibles', 
     'reportes_del_centro' => '0', 
     'electores_centro' => '0', 
     'total_1x10_centro'=> '0', 
@@ -17,7 +21,18 @@ if ($cedula=='') {
     'meta_inicial' => '0',
     'hora' => "$hora"]
   );
-  
+}
+
+if ($cedula=='') {
+  echo json_encode([
+    'centro' => 'La información no esta disponible CIERRE SESION E INGRESE SIN AUTENTICACION BIOMETRICA, UTILIZANDO SU USARIO Y CONTRASEÑA', 
+    'reportes_del_centro' => '0', 
+    'electores_centro' => '0', 
+    'total_1x10_centro'=> '0', 
+    'total_asistencia_1x10' => '0',
+    'meta_inicial' => '0',
+    'hora' => "$hora"]
+  );
 }
 function abrev($nombre){
   // Lista de sustituciones

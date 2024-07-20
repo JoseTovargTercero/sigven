@@ -259,7 +259,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
 
                     <div class="card mb-3">
                       <div class="card-header">
-                        <h5>Porcentaje de anvance por ubicacioón</h5>
+                        <h5>Porcentaje de anvance por ubicación</h5>
                       </div>
                       <div class="card-body">
                         <div id="chartdiv"></div>

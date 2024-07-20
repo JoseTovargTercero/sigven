@@ -25,25 +25,20 @@ function clear($campo){
 function getOperador($cedula){
 	global $conexion_app;
 
-	$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `operadores_institucional` WHERE cedula = ?");
-	$stmt->bind_param('s', $cedula);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	  if ($result->num_rows > 0) {
-		return array('Inst', 0);
-	  }
-	$stmt->close();
 
-	$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa` WHERE OPERADOR = ? OR OPERADOR_PUNTO = ?");
-	$stmt->bind_param('ss', $cedula, $cedula);
+
+	$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa` WHERE OPERADOR = ? OR OPERADOR_PUNTO = ? OR OPERADOR_UBCH = ?");
+	$stmt->bind_param('sss', $cedula, $cedula, $cedula);
 	$stmt->execute();
 	$result = $stmt->get_result();
 	  if ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
 		  if ($row['OPERADOR'] == $cedula) {
 			return array('Operador', $row['id']);
-		  }else {
+		  }elseif ($row['OPERADOR_PUNTO'] == $cedula) {
 			return array('Punto', $row['id']);
+		  }elseif ($row['OPERADOR_UBCH'] == $cedula) {
+			return array('Ubch', $row['id']);
 		  }
 		}
 	  }
