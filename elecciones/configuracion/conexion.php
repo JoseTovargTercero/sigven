@@ -21,37 +21,38 @@ function clear($campo){
 }
 
 
-// Obtener operador
+
 function getOperador($cedula){
-	global $conexion_app;
+    global $conexion_app;
 
+    // Preparar la consulta
+    $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa` WHERE OPERADOR = ? OR OPERADOR_PUNTO = ? OR OPERADOR_UBCH = ?");
+    
+    // Verificar si la preparación de la consulta falló
+    if (!$stmt) {
+        die('Error en mysqli_prepare: ' . mysqli_error($conexion_app));
+    }
 
+    $stmt->bind_param('sss', $cedula, $cedula, $cedula);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-	$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa` WHERE OPERADOR = ? OR OPERADOR_PUNTO = ? OR OPERADOR_UBCH = ?");
-	$stmt->bind_param('sss', $cedula, $cedula, $cedula);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	  if ($result->num_rows > 0) {
-		while ($row = $result->fetch_assoc()) {
-			return array('Ubch', $row['id'], $row['CODIGO']);
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            if ($row['OPERADOR'] == $cedula) {
+                return array('Operador', $row['id'], $row['CODIGO']);
+            } elseif ($row['OPERADOR_PUNTO'] == $cedula) {
+                return array('Punto', $row['id'], $row['CODIGO']);
+            } elseif ($row['OPERADOR_UBCH'] == $cedula) {
+                return array('Ubch', $row['id'], $row['CODIGO']);
+            }
+        }
+    }
 
-		  if ($row['OPERADOR'] == $cedula) {
-			return array('Operador', $row['id'], $row['CODIGO']);
-		  }elseif ($row['OPERADOR_PUNTO'] == $cedula) {
-			return array('Punto', $row['id'], $row['CODIGO']);
-		  }elseif ($row['OPERADOR_UBCH'] == $cedula) {
-			return array('Ubch', $row['id'], $row['CODIGO']);
-		  }
-		}
-	  }
-	$stmt->close();
-	return false;
-  }
+    $stmt->close();
+    return false;
+}
 
-
-
-
-  
 
 
 function contar($condicion)
