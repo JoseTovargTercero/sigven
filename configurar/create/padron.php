@@ -46,7 +46,7 @@ switch ($origenDatos) {
 
     case (0):
 
-        $update = "UPDATE padronelectoral SET municipio='$municipio', parroquia='$parroquia', ubch='$ubch', comunidad='$comunidad', voto='$voto', registradopor='$ap', telefono='$telefono', cv='$cv', act='1' WHERE cedula='$ci'";
+        $update = "UPDATE padronelectoral SET calle='$calle', municipio='$municipio', parroquia='$parroquia', ubch='$ubch', comunidad='$comunidad', voto='$voto', registradopor='$ap', telefono='$telefono', cv='$cv', act='1' WHERE cedula='$ci'";
         $result = mysqli_query($conexion, $update);
         if ($result) {
             $_SESSION['noticia'] = "¡Actualizado!/Fue actualizado correctamente/success/3000";
@@ -62,7 +62,7 @@ switch ($origenDatos) {
         break;
 
     case (1):
-        $update = "UPDATE padronelectoral SET municipio='$municipio', parroquia='$parroquia', ubch='$ubch', comunidad='$comunidad', voto='$voto', registradopor='$ap', origenDatos='0', act='1' WHERE cedula='$ci'";
+        $update = "UPDATE padronelectoral SET calle='$calle', municipio='$municipio', parroquia='$parroquia', ubch='$ubch', comunidad='$comunidad', voto='$voto', registradopor='$ap', origenDatos='0', act='1' WHERE cedula='$ci'";
         $result = mysqli_query($conexion, $update);
         if ($result) {
             $_SESSION['noticia'] = "¡Perfecto!/Fue agregado correctamente/success/3000";
