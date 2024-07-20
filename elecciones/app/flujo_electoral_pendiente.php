@@ -55,14 +55,14 @@ function verificarElector($elector, $responsable, $tipo_user) {
 
 
     $idUnoX10 = '0';
-    $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id FROM `unox10` WHERE cdula = ?");
+    $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id, jfcedula FROM `unox10` WHERE cdula = ?");
     $stmt_unox10->bind_param('s', $elector);
     $stmt_unox10->execute();
     $result = $stmt_unox10->get_result();
     if ($result->num_rows > 0) {
       $row = $result->fetch_assoc();
       $voto = 'VD';
-      $idUnoX10 = $row['id'];
+      $idUnoX10 = $row['jfcedula'];
 
     }
     $stmt_unox10->close();
