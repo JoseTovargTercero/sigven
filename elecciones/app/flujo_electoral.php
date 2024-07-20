@@ -27,7 +27,7 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
   $resp_verificado = getOperador($responsable);
 
 
-  if ($resp_verificado) {
+  //if ($resp_verificado) {
 
     $tipo_user = $resp_verificado[0];
     
@@ -104,5 +104,5 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
       // Ya existia el reporte
     }
     $stmt->close();
-  }
+//  }
 }
