@@ -6,7 +6,7 @@ function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT mcp, centro, nombre FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT mcp, centro, nombre, pq FROM `rep_24` WHERE cedula = ?");
   } else {
     $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
   }
@@ -16,14 +16,20 @@ function getCentro($value, $accion){
   $stmt->close();
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['mcp']) : $row['CODIGO'];
+    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['mcp'], $row['pq']) : $row['CODIGO'];
   }
   return false;
 }
 
 if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
+//if (true) {
   $elector = $_POST["elector"];
   $responsable = $_POST["responsable"];
+
+ // $elector = '27640176';
+  //$responsable = '27640176';
+
+
   $resp_verificado = getOperador($responsable);
 
 
@@ -35,6 +41,9 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
     $centro = trim($datosCne[0]);
     $nombre = trim($datosCne[1]);
     $mcp = trim($datosCne[2]);
+    $pq = trim($datosCne[3]);
+
+
     $voto = 'NC';
 
 
@@ -78,8 +87,8 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
 
 
 
-      $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp) VALUES (?, ?, ?, ?, ?, ?, ?)");
-      $stmt_o->bind_param("sssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp);
+      $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+      $stmt_o->bind_param("ssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq);
       $stmt_o->execute();
 
 

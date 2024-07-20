@@ -16,7 +16,7 @@ function getCentro($value, $accion){
   $stmt->close();
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['mcp']) : $row['CODIGO'];
+    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['mcp'], $row['pq']) : $row['CODIGO'];
   }else {
     return ($accion == 1) ? array(false, false) : false;
 
@@ -32,6 +32,7 @@ function verificarElector($elector, $responsable, $tipo_user) {
     $centro = trim($datosCne[0]);
     $nombre = trim($datosCne[1]);
     $mcp = trim($datosCne[2]);
+    $pq = trim($datosCne[3]);
     $voto = 'NC';
 
     if ($nombre == '' || $centro == false) {
@@ -74,8 +75,8 @@ function verificarElector($elector, $responsable, $tipo_user) {
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows == 0) {
-        $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt_o->bind_param("sssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp);
+        $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt_o->bind_param("ssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq);
         $stmt_o->execute();
         $stmt_o->close();
 
