@@ -33,14 +33,14 @@ function getOperador($cedula){
 	$result = $stmt->get_result();
 	  if ($result->num_rows > 0) {
 		while ($row = $result->fetch_assoc()) {
+			return array('Ubch', $row['id'], $row['CODIGO']);
+
 		  if ($row['OPERADOR'] == $cedula) {
 			return array('Operador', $row['id'], $row['CODIGO']);
 		  }elseif ($row['OPERADOR_PUNTO'] == $cedula) {
 			return array('Punto', $row['id'], $row['CODIGO']);
 		  }elseif ($row['OPERADOR_UBCH'] == $cedula) {
 			return array('Ubch', $row['id'], $row['CODIGO']);
-		}else {
-			  return array('Ubch', $row['id'], $row['CODIGO']);
 		  }
 		}
 	  }
