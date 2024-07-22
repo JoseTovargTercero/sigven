@@ -283,7 +283,36 @@ if ($_SESSION["instancia"] == 0) {
       // die('Error: ' . $e->GetMessage());
     }
 
+
+    /*
+
+    $sql = "SELECT cedula, jefe, telefono
+    FROM unox107
+    UNION
+    SELECT cdula AS cedula, jefe, telefono
+    FROM unox10";
+
+    $stmt = $conexion_app->prepare($sql);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+    $data110 = array();
+    $votos_uno_dies = $result->num_rows;
+    if ($votos_uno_dies > 0) {
+    // Obtener los datos y convertirlos en un arreglo asociativo
+    while($row = $result->fetch_assoc()) {
+        $data110[$row['cedula']] = [$row['jefe'], $row['telefono']];
+    }
+    }
+
+
+
+
+    */
+
     $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0' $extraCondicion");
+
 
     $vd = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VD' $extraCondicion");
     $vb = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VB' $extraCondicion");
@@ -442,7 +471,7 @@ if ($_SESSION["instancia"] == 0) {
     <div class="container-fluid">
 
       <div class="row">
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
@@ -450,9 +479,9 @@ if ($_SESSION["instancia"] == 0) {
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Electores Registrados</p>
                     <h5 class="font-weight-bolder mb-0">
-                      <?php echo number_format($totalVotos, '0', '.', '.'); ?>/
-                      <small><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?>/</small>
-                      <small><?php echo number_format($jefesParticiparon, '0', '.', '.'); ?></small>
+                       <span title="Votos duros"><?php echo number_format($totalVotos, '0', '.', '.'); ?></span> /
+                      <small title="1*10/7"><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?>/</small>
+                      <small title="Jefes de 1*10/7"><?php echo number_format($jefesParticiparon, '0', '.', '.'); ?></small>
                     </h5>
                   </div>
                 </div>
@@ -465,24 +494,18 @@ if ($_SESSION["instancia"] == 0) {
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+        <div class="col-xl-2 col-sm-6 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
-                <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Votos Duros</p>
+                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Duros</p>
                     <h5 class="font-weight-bolder mb-0">
                       <?php echo number_format($vd, '0', '.', '.');  ?>
                       <span class="text-danger text-sm font-weight-bolder"><?php echo number_format($porcetanjeVotosD, '2', '.', '.'); ?>%</span>
                     </h5>
                   </div>
-                </div>
-                <div class="col-4 text-end">
-                  <div class="icon icon-shape bg-primary-Plano shadow text-center border-radius-md">
-                    <i class="line icon-user-following text-lg opacity-10" aria-hidden="true"></i>
-                  </div>
-                </div>
+             
               </div>
             </div>
           </div>
@@ -530,8 +553,28 @@ if ($_SESSION["instancia"] == 0) {
 
 
 
+      
       <div class="row mt-4">
-        <div class="col-lg-6 mb-lg-0 mb-4">
+
+      <?php if ($_SESSION["instancia"] == 0) { ?>
+  
+  <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+    <div class="card h-100">
+      <div class="card-body p-3">
+        <div class="row">
+          <div class="d-flex flex-column h-100">
+            <h6 class="font-weight-bolder mb-4 pt-2">Reportes por municipios</h6>
+            <div id="chartdivJefes" style="height: 30vh;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <?php } ?>
+
+
+
+        <div class="col-lg-6 mb-4 mt-4">
           <div class="card h-100 ">
             <div class="card-body p-3">
               <div class="row">
@@ -544,7 +587,7 @@ if ($_SESSION["instancia"] == 0) {
             </div>
           </div>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-6 mb-4 mt-4">
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
@@ -744,21 +787,7 @@ if ($_SESSION["instancia"] == 0) {
             </div>
           </div>
         </div>
-                <?php if ($_SESSION["instancia"] == 0) { ?>
-  
-        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
-          <div class="card h-100">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="d-flex flex-column h-100">
-                  <h6 class="font-weight-bolder mb-4 pt-2">Reportes por municipios</h6>
-                  <div id="chartdivJefes" style="height: 50vh;"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-          <?php } ?>
+       
 
 
       </div>

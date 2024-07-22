@@ -81,6 +81,20 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
       $row = $result->fetch_assoc();
       $voto = 'VD';
       $idUnoX10 = $row['jfcedula'];
+    }else {
+      
+      $stmt = mysqli_prepare($conexion, "SELECT cdula_jf FROM `unox107` WHERE cedula = ?");
+      $stmt->bind_param('s', $elector);
+      $stmt->execute();
+      $result = $stmt->get_result();
+      if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+          $voto = 'VD';
+          $idUnoX10 = $row['jfcedula'];
+      }
+      }
+      $stmt->close();
+
     }
 
     $stmt_unox10->close();
