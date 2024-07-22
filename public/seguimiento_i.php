@@ -122,17 +122,17 @@ while($row = $result->fetch_assoc()) {
       if ($row['id_flujo']) {
         $avance++;
 
-        if (@$avanceUbicacion[$ubicacion]) {
-          @$avanceUbicacion[$ubicacion][0] += 1;
+        if (@$avanceUbicacion[$row['institucion']]) {
+          @$avanceUbicacion[$row['institucion']][0] += 1;
         } else {
-          @$avanceUbicacion[$ubicacion][0] = 1;
+          @$avanceUbicacion[$row['institucion']][0] = 1;
         }
       } else {
         $pendiente++;
-        if (@$avanceUbicacion[$ubicacion]) {
-          @$avanceUbicacion[$ubicacion][1] += 1;
+        if (@$avanceUbicacion[$row['institucion']]) {
+          @$avanceUbicacion[$row['institucion']][1] += 1;
         } else {
-          @$avanceUbicacion[$ubicacion][1] = 1;
+          @$avanceUbicacion[$row['institucion']][1] = 1;
         }
       }
     }
@@ -405,7 +405,21 @@ while($row = $result->fetch_assoc()) {
       </div>
 
 
-      <div class="row">
+      <div class="row mt-3">
+
+      <div class="col-lg-12">
+
+      <div class="card mb-3">
+                      <div class="card-header">
+                        <h5>Porcentaje de participación por ente</h5>
+                      </div>
+                      <div class="card-body">
+                        <div id="chartdiv" style="height: 40vh;"></div>
+                      </div>
+                    </div>
+                    </div>
+
+
 
         <div class="col-lg-12">
 
@@ -462,15 +476,18 @@ while($row = $result->fetch_assoc()) {
 
 
 
+  <style>
+    #chartdiv {
+      width: 100%;
+      height: 500px;
+    }
 
+    #chartdiv2 {
+      width: 100%;
+      height: 60vh;
+    }
+    </style>
 
-  <script src="../vendors/amcharts5/index.js"></script>
-  <script src="../vendors/amcharts5/percent.js"></script>
-  <script src="../vendors/amcharts5/xy.js"></script>
-  <script src="../vendors/amcharts5/flow.js"></script>
-  <script src="../vendors/amcharts5/radar.js"></script>
-  <script src="../vendors/amcharts5/themes/Animated.js"></script>
-  <script src="../vendors/amcharts5/themes/Material.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/jquery.nanoscroller.min.js"></script>
   <script src="../assets/js/menubar/sidebar.js"></script>
@@ -478,6 +495,19 @@ while($row = $result->fetch_assoc()) {
   <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.3"></script>
+
+
+
+  <script src="../vendors/sweetAlert2/sweetalert2.all.min.js"></script>
+
+  <script src="assets/js/core/popper.min.js"></script>
+  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
   <script>
     var table = $('#DataTables').DataTable({
       language: {
@@ -541,6 +571,169 @@ while($row = $result->fetch_assoc()) {
       // Generar el archivo Excel y descargarlo
       XLSX.writeFile(wb, $('#dt-search-0').val() + '.xlsx');
     });
+
+
+<?php if(isset($_POST["instituciones"])){ ?>
+
+
+    // GRAFICO ENTES
+
+    am5.ready(function() {
+
+// Create root element
+// https://www.amcharts.com/docs/v5/getting-started/#Root_element
+var root = am5.Root.new("chartdiv");
+
+// Set themes
+// https://www.amcharts.com/docs/v5/concepts/themes/
+root.setThemes([
+  am5themes_Animated.new(root)
+]);
+
+// Create chart
+// https://www.amcharts.com/docs/v5/charts/xy-chart/
+var chart = root.container.children.push(am5xy.XYChart.new(root, {
+  panX: true,
+  panY: false,
+  wheelX: "panX",
+  wheelY: "zoomX",
+  paddingLeft: 0,
+  layout: root.verticalLayout
+}));
+
+// Add scrollbar
+// https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
+chart.set("scrollbarX", am5.Scrollbar.new(root, {
+  orientation: "horizontal"
+}));
+
+var data = [];
+
+
+<?php
+function abreviarIns($nombre)
+{
+  $abr = [
+    'Secretaria ejecutiva' => 'SE',
+    'Unidad educativa nacional' => 'UEN',
+    '<br>' => '',
+  ];
+  // Reemplazar cada coincidencia en la lista de sustituciones
+  foreach ($abr as $original => $abreviado) {
+    $nombre = str_replace($original, $abreviado, $nombre);
+  }
+
+  if (strlen($nombre) > 35) {
+    // nombre sera igual a los primeros 20 caracteres, seguido de 3 puntos mas los ultimos 15 carcateres
+    $nombre = substr($nombre, 0, 15) . '...' . substr($nombre, -10);
+  }
+  return trim($nombre);
+}
+foreach ($avanceUbicacion as $key => $value) {
+  $faltantes = (@$value[1] ? $value[1] : 0) + (@$value[0] ? $value[0] : 0);
+  echo '
+    data.push({
+    "country": "' . abreviarIns($key) . '",
+    "year2004": ' . $faltantes . ',
+    "year2005": ' . (@$value[0] ? $value[0] : 0) . '
+  })';
+}
+?>
+
+// Create axes
+// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+var xRenderer = am5xy.AxisRendererX.new(root, {
+  minGridDistance: 70,
+  minorGridEnabled: true
+});
+
+xRenderer.labels.template.setAll({
+  rotation: -90,
+  centerY: am5.p50,
+});
+
+var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+  categoryField: "country",
+  renderer: xRenderer,
+
+  tooltip: am5.Tooltip.new(root, {
+    themeTags: ["axis"],
+
+    animationDuration: 200
+  })
+}));
+
+xRenderer.grid.template.setAll({
+  location: 1
+})
+
+xAxis.data.setAll(data);
+
+var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+  min: 0,
+  renderer: am5xy.AxisRendererY.new(root, {
+    strokeOpacity: 0.1
+  })
+}));
+
+// Add series
+// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+
+var series0 = chart.series.push(am5xy.ColumnSeries.new(root, {
+  name: "Income",
+  xAxis: xAxis,
+  yAxis: yAxis,
+  valueYField: "year2004",
+  categoryXField: "country",
+  clustered: false,
+  tooltip: am5.Tooltip.new(root, {
+    labelText: "Total: {valueY}"
+  })
+}));
+
+series0.columns.template.setAll({
+  width: am5.percent(80),
+  tooltipY: 0,
+  strokeOpacity: 0
+});
+
+
+series0.data.setAll(data);
+
+
+var series1 = chart.series.push(am5xy.ColumnSeries.new(root, {
+  name: "Income",
+  xAxis: xAxis,
+  yAxis: yAxis,
+  valueYField: "year2005",
+  categoryXField: "country",
+  clustered: false,
+  tooltip: am5.Tooltip.new(root, {
+    labelText: "Participación: {valueY}"
+  })
+}));
+
+series1.columns.template.setAll({
+  width: am5.percent(50),
+  tooltipY: 0,
+  strokeOpacity: 0
+});
+
+series1.data.setAll(data);
+
+var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+
+
+// Make stuff animate on load
+// https://www.amcharts.com/docs/v5/concepts/animations/
+chart.appear(1000, 100);
+series0.appear();
+series1.appear();
+
+}); // end am5.ready()
+
+console.clear();
+<?php } ?>
   </script>
 </body>
 
