@@ -1,0 +1,547 @@
+<?php
+include('../configurar/configuracion.php');
+include('../elecciones/configuracion/conexion.php'); // CONEXION A LA BASE DE DATOS DE LAS ELECCIONES
+
+include('includes/navbar.php');
+
+
+if ($_SESSION['nivel'] != 1) {
+  define('PAGINA_INICIO', '../index.php');
+  header('Location: ' . PAGINA_INICIO);
+}
+
+if ($_SESSION["instancia"] != 0) {
+  header("Location:" . $_SERVER['HTTP_REFERER']);
+}
+
+/* EN CASO DE QUE SE RECIBA LA INFO */
+
+if (isset($_POST['instituciones'])) {
+
+  
+// OBTENER TODOS LOS 1*10
+
+
+// Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
+$sql = "SELECT cedula, jefe, telefono
+FROM unox107
+UNION
+SELECT cdula AS cedula, jefe, telefono
+FROM unox10";
+
+$stmt = $conexion_app->prepare($sql);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$data110 = array();
+if ($result->num_rows > 0) {
+// Obtener los datos y convertirlos en un arreglo asociativo
+while($row = $result->fetch_assoc()) {
+    $data110[$row['cedula']] = [$row['jefe'], $row['telefono']];
+}
+}
+
+// OBTENER TODOS LOS 1*10
+
+
+  $instituciones_string = $_POST['instituciones'];
+
+  // Convertir el string en un array
+  $instituciones_list = explode(",", $instituciones_string);
+
+  // Escapar cada valor para evitar inyecciones SQL
+  $instituciones_list = array_map(function ($value) use ($conexion_app) {
+    return "'" . $conexion_app->real_escape_string(trim($value)) . "'";
+  }, $instituciones_list);
+
+  // Convertir el array en una cadena para usar en la cláusula IN
+  $instituciones_list = implode(", ", $instituciones_list);
+
+  $instituciones_nombre = [];
+
+  $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(Institucion) FROM `jefes_instituciones` WHERE id IN ($instituciones_list)");
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+      array_push($instituciones_nombre, "'" . $row['Institucion'] . "'");
+    }
+  }
+
+  $stmt->close();
+
+  $instituciones_list = implode(", ", $instituciones_nombre);
+
+  $sql = "CREATE TEMPORARY TABLE empleados AS
+          SELECT *
+          FROM empleados_instituciones
+          WHERE institucion IN ($instituciones_list)";
+
+  if ($conexion_app->query($sql) !== TRUE) {
+    echo json_encode(['status' => false, 'mensaje' => "Error creating temporary table: " . $conexion_app->error]);
+    exit();
+  }
+
+
+
+
+
+  $avance = 0;
+  $pendiente = 0;
+
+  $avanceUbicacion = [];
+  $tabla = [];
+  $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.id AS id_flujo, empleados.cedula, empleados.institucion, empleados.nombre, empleados.telefono, empleados.ubicacion FROM `empleados`
+                LEFT JOIN flujo_electoral ON flujo_electoral.cedula = empleados.cedula");
+  $stmt->execute();
+  $result = $stmt->get_result();
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+
+      if ($row['ubicacion'] == '') {
+        $ubicacion = 'Sin ubicación definida<br>';
+      } else {
+        $ubicacion = $row['ubicacion'];
+        $ubicacion = ucfirst(strtolower($row['ubicacion']));
+      }
+
+      $info110 = @$data110[$row['cedula']];
+
+      $tabla[] = '<tr>
+                    <td>' . $row['cedula'] . '</td>
+                    <td>' . $row['nombre'] . '</td>
+                    <td>' . $row['institucion'] . '</td>
+                    <td>' . $ubicacion . '</td>
+                    <td>' . $row['telefono'] . '</td>
+                    <td>' . ($row['id_flujo'] ? '<span class="badge bg-primary">VOTO</span>' : '<span class="badge bg-info">PENDIENTE</span>') . '</td>
+                    <td>' . ($info110 ? $info110[0] : '')  . '</td>
+                    <td>' . ($info110 ? $info110[1] : '')  . '</td>
+                  </tr>';
+
+      if ($row['id_flujo']) {
+        $avance++;
+
+        if (@$avanceUbicacion[$ubicacion]) {
+          @$avanceUbicacion[$ubicacion][0] += 1;
+        } else {
+          @$avanceUbicacion[$ubicacion][0] = 1;
+        }
+      } else {
+        $pendiente++;
+        if (@$avanceUbicacion[$ubicacion]) {
+          @$avanceUbicacion[$ubicacion][1] += 1;
+        } else {
+          @$avanceUbicacion[$ubicacion][1] = 1;
+        }
+      }
+    }
+  }
+  $stmt->close();
+
+  $total = $avance + $pendiente;
+
+  $porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.', ''));
+  $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total, '2', '.', ''));
+
+
+  /* EN CASO DE QUE SE RECIBA LA INFO */
+
+
+
+  
+
+  $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0'");
+
+
+
+}
+
+?>
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/apple-icon.png">
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+  <title>Evento</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <link rel="stylesheet" href="../vendors/animatedLines/css/animate.css">
+  <link rel="stylesheet" href="../vendors/animatedLines/css/simple-line-icons.css">
+  <script src="../vendors/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../vendors/validator/fv.css" type="text/css" />
+  <link href="../assets/css/sidebar.css" rel="stylesheet" />
+  <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.0.3" rel="stylesheet" />
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
+  <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+  <style>
+    .text-center {
+      text-align: center !important;
+    }
+  </style>
+
+  <?php include('darkMode.php') ?>
+  <script>
+    $(function() {
+      var h6 = $('.namePagina');
+      var li = $('.index');
+      li.text('Inicio');
+      h6.text('Administración');
+
+      var active = document.getElementById('inicio');
+      active.classList.add('active');
+    })
+
+
+
+    // Loading
+    var Loading = (loadingDelayHidden = 0) => {
+      let loading = null;
+      const myLoadingDelayHidden = loadingDelayHidden;
+      let imgs = [];
+      let lenImgs = 0;
+      let counterImgsLoading = 0;
+
+      function incrementCounterImgs() {
+        counterImgsLoading += 1;
+        if (counterImgsLoading === lenImgs) {
+          hideLoading()
+        }
+      }
+
+      function hideLoading() {
+        if (loading !== null) {
+          loading.classList.remove('show');
+          setTimeout(function() {
+            loading.remove()
+          }, myLoadingDelayHidden)
+        }
+      }
+
+      function init() {
+        document.addEventListener('DOMContentLoaded', function() {
+          loading = document.querySelector('.loading');
+          imgs = Array.from(document.images);
+          lenImgs = imgs.length;
+          if (imgs.length === 2) {
+            hideLoading()
+          } else {
+            imgs.forEach(function(img) {
+              img.addEventListener('load', incrementCounterImgs, false)
+            })
+          }
+
+
+        })
+
+      }
+      return {
+        'init': init
+      }
+    }
+
+    Loading(1000).init();
+  </script>
+
+</head>
+
+
+<body class="g-sidenav-show bg-gray-100">
+  <div class="loader loading show">
+    <div class="cssload-thecube">
+      <div class="cssload-cube cssload-c1"></div>
+      <div class="cssload-cube cssload-c2"></div>
+      <div class="cssload-cube cssload-c4"></div>
+      <div class="cssload-cube cssload-c3"></div>
+      <img src="../assets/img/logo_extended_white.png" alt="Img" style="width: 84px;z-index: 1;transform: rotate(-45deg);    margin-top: -76px;margin-left: -18px;">
+    </div>
+  </div>
+
+  <?php require_once('includes/menu.php');  ?>
+  <div class="main-content position-relative bg-gray-100 max-height-vh-100 h-100">
+    <!-- Navbar -->
+    <?php echo $navbar ?>
+    <div class="container-fluid">
+
+
+
+
+
+      <div class="row mt-4">
+
+        <?php if (!isset($_POST["instituciones"])) { ?>
+          <div class="col-lg-8 mb-4 mt-4" style="margin: auto;">
+            <div class="card h-100 p-3">
+              <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+                <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                  <h6 class="font-weight-bolder mb-4">Seleccione las instituciones</h6>
+                  <div class="table-responsive">
+                    <form id="senData" method="POST">
+                      <ul class="list">
+                        <?php
+                        $stmt = mysqli_prepare($conexion_app, "SELECT * FROM jefes_instituciones");
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        if ($result->num_rows > 0) {
+                          while ($row = $result->fetch_assoc()) {
+                            //echo '<li><span>'.$row['institucion'].'</span> <span>HOla</span></li>';
+                            // imprime con un li, el nombre la institucion y a la derecha un checbox con una clase que se pueda recorrer des jquery y que tenga como valor el nombre de la institucion
+                            $instit = $row['Institucion'];
+                            echo '<li><label><input type="checkbox" class="instituciones form-check-input" value="' . $row['id'] . '">
+                                <span>' . $instit . '</span> </label></li>';
+                          }
+                        }
+                        $stmt->close();
+                        ?>
+                      </ul>
+                      <button class="btn btn-primary mt-3" onclick="consultar_instituciones()">Seleccionar</button>
+
+                    </form>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+
+    <script>
+      function consultar_instituciones() {
+        // prevenir el envio del formulairo
+
+        let inst = ''
+        event.preventDefault();
+        $('.instituciones').each(function() {
+          if ($(this).is(':checked')) {
+            inst += $(this).val() + ',';
+          }
+        });
+        if (inst == '') {
+          alert('Debe seleccionar al menos una institución');
+          return;
+        }
+        $('#senData').append('<input type="hidden" name="instituciones" value="' + inst + '">');
+        $('#senData').submit();
+
+
+      }
+    </script>
+  <?php } ?>
+
+
+
+
+
+
+
+
+  <?php if (isset($_POST['instituciones'])) { ?>
+
+
+
+
+    <section>
+
+
+      <div class="row">
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
+          <div class="card">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="col-8">
+                  <div class="numbers">
+                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total de servidores públicos</p>
+                    <h5 class="font-weight-bolder mb-0">
+                      <span title="Votos duros"><?php echo number_format($total, '0', '.', '.'); ?></span>
+                    </h5>
+                  </div>
+                </div>
+                <div class="col-4 text-end">
+                  <div class="icon icon-shape bg-primary-Plano shadow text-center border-radius-md">
+                    <i class="line icon-user text-lg opacity-10" aria-hidden="true"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
+          <div class="card">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="numbers">
+                  <p class="text-sm mb-0 text-capitalize font-weight-bold">Votos</p>
+                  <h5 class="font-weight-bolder mb-0">
+                    <?php echo number_format($avance, '0', '.', '.');  ?>
+                    <span class="text-danger text-sm font-weight-bolder"><?php echo number_format($porc_avance, '2', '.', '.'); ?>%</span>
+                  </h5>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
+          <div class="card">
+            <div class="card-body p-3">
+              <div class="numbers">
+                <p class="text-sm mb-0 text-capitalize font-weight-bold">Pendientes</p>
+                <h5 class="font-weight-bolder mb-0">
+                  <?php echo number_format($pendiente, '0', '.', '.'); ?>
+                  <span class="text-sm font-weight-bolder" style="color: #ffb2b6 !important;"><?php echo number_format($porc_pendiente, '2', '.', '.'); ?>%</span>
+                </h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row">
+
+        <div class="col-lg-12">
+
+
+          <div class="card mt-3">
+
+            <div class="card-header d-flex justify-content-between">
+              <h5>Servidores públicos</h5>
+              <a href="" class="btn btn-danger">Salir</a>
+              <button id="exportButton" class="btn btn-success"> <i class="fa fa-file-excel"></i> Exportar a Excel</button>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table id="DataTables">
+                  <thead>
+                    <tr>
+                      <th>Cédula</th>
+                      <th>nombre</th>
+                      <th>Ente</th>
+                      <th>Ubicación</th>
+                      <th>Teléfono</th>
+                      <th>Estatus</th>
+                      <th>1*10/7</th>
+                      <th>Teléfono</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    foreach ($tabla as $key => $value) {
+                      echo $value;
+                    }
+                    ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+
+
+    </section>
+
+  <?php
+  }
+  ?>
+
+  <!-- footer -->
+  </div>
+  </main>
+
+
+
+
+
+  <script src="../vendors/amcharts5/index.js"></script>
+  <script src="../vendors/amcharts5/percent.js"></script>
+  <script src="../vendors/amcharts5/xy.js"></script>
+  <script src="../vendors/amcharts5/flow.js"></script>
+  <script src="../vendors/amcharts5/radar.js"></script>
+  <script src="../vendors/amcharts5/themes/Animated.js"></script>
+  <script src="../vendors/amcharts5/themes/Material.js"></script>
+  <script src="../assets/js/core/bootstrap.min.js"></script>
+  <script src="../assets/js/jquery.nanoscroller.min.js"></script>
+  <script src="../assets/js/menubar/sidebar.js"></script>
+  <script src="../assets/js/core/popper.min.js"></script>
+  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+  <script src="../assets/js/soft-ui-dashboard.min.js?v=1.0.3"></script>
+  <script>
+    var table = $('#DataTables').DataTable({
+      language: {
+        "decimal": "",
+        "emptyTable": "No hay información",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ Entradas",
+        "infoEmpty": "Mostrando 0 to 0 of 0 Entradas",
+        "infoFiltered": "(Filtrado de _MAX_ total entradas)",
+        "infoPostFix": "",
+        "thousands": ",",
+        "lengthMenu": "Mostrar _MENU_ Entradas",
+        "loadingRecords": "Cargando...",
+        "processing": "Procesando...",
+        "search": "Buscar:",
+        "zeroRecords": "Sin resultados encontrados",
+        "paginate": {
+          "first": "Primero",
+          "last": "Ultimo",
+          "next": "Siguiente",
+          "previous": "Anterior"
+        }
+      },
+    });
+
+
+    document.getElementById('exportButton').addEventListener('click', function() {
+
+      // Obtener la tabla DataTable
+      var table = $('#DataTables').DataTable();
+
+      // Obtener los nombres de las columnas
+      var columnNames = [];
+      $('#DataTables thead th').each(function() {
+        columnNames.push($(this).text());
+      });
+
+      // Obtener los datos filtrados
+      var filteredData = table.rows({
+        search: 'applied'
+      }).nodes().toArray();
+
+      // Procesar los datos para extraer solo el texto
+      var processedData = filteredData.map(function(row) {
+        var rowData = [];
+        $(row).find('td').each(function() {
+          rowData.push($(this).text());
+        });
+        return rowData;
+      });
+
+      // Insertar los nombres de las columnas como la primera fila
+      processedData.unshift(columnNames);
+
+      // Crear una hoja de trabajo (worksheet) con los datos procesados
+      var ws = XLSX.utils.aoa_to_sheet(processedData);
+
+      // Crear un libro de trabajo (workbook)
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Datos Filtrados');
+
+      // Generar el archivo Excel y descargarlo
+      XLSX.writeFile(wb, $('#dt-search-0').val() + '.xlsx');
+    });
+  </script>
+</body>
+
+</html>

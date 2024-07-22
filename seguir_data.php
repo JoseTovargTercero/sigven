@@ -115,7 +115,7 @@ $porc_avance = ($avance == 0 ? 0 : number_format($avance * 100 / $total, '2', '.
 $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total, '2', '.', ''));
 
 
-// No estoy interesado, ya tengo uno de 1500va.
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -252,18 +252,23 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                 <div class="d-flex">
                   <div class="card bg-primary p-2 text-center text-white me-2 " style="width: 226px;">
                     <div class="counter">
-                      <?php echo $avance ?> / <?php
-                                              echo $avance + $pendiente ?>
+                      <?php echo $avance ?>
                     </div>
                     <span>
                       Participacion
                     </span>
                   </div>
-                  <div class="card bg-info p-2 text-center text-white " style="width: 126px;">
+                  <div class="card bg-info p-2 me-2 text-center text-white " style="width: 126px;">
                     <div class="counter">
                       <?php echo $pendiente ?>
                     </div>
                     <span>Pendientes</span>
+                  </div>
+                  <div class="card bg-success p-2 text-center text-white " style="width: 126px;">
+                    <div class="counter">
+                    <?php echo $avance + $pendiente ?>
+                    </div>
+                    <span>Total</span>
                   </div>
                 </div>
                 <div>
@@ -282,12 +287,14 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                         <small class="text-muted">Listado de reportes por ubicaciones</small>
                       </div>
                     </div>
+                    <div  style="max-height: 100vh; overflow-y: auto;">
+
 
                     <?php
                     foreach ($avanceUbicacion as $key => $value) {
                       echo '
                           <div class="d-flex justify-content-between mb-2 bg-white p-2 corner">
-                          ' . $key . '
+                          ' . substr($key, 0, 45) . '
                               <div class="d-flex ms-2">
                                 <span class="badge bg-primary counter-p p-0 me-1">' . (@$value[0] ? $value[0] : 0) . '</span>
                                 <span class="badge bg-info counter-p p-0">' . (@$value[1] ? $value[1] : 0) . '</span=>
@@ -295,6 +302,8 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                           </div>';
                     }
                     ?>
+                    </div>
+
                   </div>
                   <div class="col-lg-9">
 
@@ -303,7 +312,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                         <h5>Porcentaje de avance por ubicación</h5>
                       </div>
                       <div class="card-body">
-                        <div id="chartdiv"></div>
+                        <div id="chartdiv" style="height: 40vh;"></div>
                       </div>
                     </div>
 
@@ -313,7 +322,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                         <h5>Porcentaje de avance</h5>
                       </div>
                       <div class="card-body">
-                        <div id="chartdiv2"></div>
+                        <div id="chartdiv2" style="height: 45vh;"></div>
                       </div>
                     </div>
 

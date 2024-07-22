@@ -591,8 +591,13 @@ if ($_SESSION["instancia"] == 0) {
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-                <h6 class="font-weight-bolder mb-4">Reportes por Centro</h6>
-                <div class="table-responsive">
+        
+              <div class="   d-flex justify-content-between">
+              <h6 class="font-weight-bolder mb-4">Reportes por Centro</h6>
+              <a href="seguimiento_i.php" class="btn btn-sm btn-danger">Instituciones</a>
+
+              </div>
+              <div class="table-responsive">
                   <table class="" id="table1">
                     <thead>
                       <tr>
