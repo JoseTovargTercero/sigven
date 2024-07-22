@@ -6,8 +6,37 @@ if (!isset($_POST["param_2"])) {
   header("Location: seguir.php");
 }
 
+
 $cedula = $_POST["param_2"];
 $institucion = $_POST["param_1"];
+
+
+// OBTENER TODOS LOS 1*10
+
+
+// Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
+$sql = "SELECT cedula, jefe, telefono
+FROM unox107
+UNION
+SELECT cdula AS cedula, jefe, telefono
+FROM unox10";
+
+$stmt = $conexion_app->prepare($sql);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$data110 = array();
+if ($result->num_rows > 0) {
+// Obtener los datos y convertirlos en un arreglo asociativo
+while($row = $result->fetch_assoc()) {
+    $data110[$row['cedula']] = [$row['jefe'], $row['telefono']];
+}
+}
+
+// OBTENER TODOS LOS 1*10
+
+
 
 $stmt = mysqli_prepare($conexion_app, "SELECT institucion FROM jefes_instituciones WHERE cedula = ?");
 $stmt->bind_param('s', $cedula);
@@ -48,12 +77,16 @@ if ($result->num_rows > 0) {
       $ubicacion = ucfirst(strtolower($row['ubicacion']));
     }
 
+    $info110 = @$data110[$row['cedula']];
+
     $tabla[] = '<tr>
                     <td>' . $row['cedula'] . '</td>
                     <td>' . $row['nombre'] . '</td>
                     <td>' . $ubicacion . '</td>
                     <td>' . $row['telefono'] . '</td>
                     <td>' . ($row['id_flujo'] ? '<span class="badge bg-primary">VOTO</span>' : '<span class="badge bg-info">PENDIENTE</span>') . '</td>
+                    <td>' . ($info110 ? $info110[0] : '')  . '</td>
+                    <td>' . ($info110 ? $info110[1] : '')  . '</td>
                   </tr>';
 
     if ($row['id_flujo']) {
@@ -141,6 +174,18 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
       font-weight: bold;
       font-size: 20px;
     }
+
+    .corner {
+      border-radius: 8px !important;
+    }
+
+    .counter-p {
+      width: 60px;
+      height: 40px;
+      place-content: center;
+      font-size: 18px !important;
+      font-weight: bold
+    }
   </style>
 </head>
 
@@ -205,9 +250,10 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                 </div>
 
                 <div class="d-flex">
-                  <div class="card bg-primary p-2 text-center text-white me-2 " style="width: 126px;">
+                  <div class="card bg-primary p-2 text-center text-white me-2 " style="width: 226px;">
                     <div class="counter">
-                      <?php echo $avance ?>
+                      <?php echo $avance ?> / <?php
+                                              echo $avance + $pendiente ?>
                     </div>
                     <span>
                       Participacion
@@ -225,6 +271,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
 
               </div>
               <hr>
+
               <div class="mt-3">
 
                 <div class="row">
@@ -235,77 +282,77 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                         <small class="text-muted">Listado de reportes por ubicaciones</small>
                       </div>
                     </div>
-                    <div class="row lista-ubicaciones">
-                      <?php
-                      foreach ($avanceUbicacion as $key => $value) {
-                        echo '<div class="col-lg-12 col-sm-4" style="margin-bottom: 10px !important">
-                              <div class="card">
-                                <div class="card-body">
-                                <p class="card-title">' . $key . '</p>
-                                <p class="card-text">
-                                  VOTOS <span class="badge bg-primary">' . (@$value[0] ? $value[0] : 0) . '</span>
-                                  FALTA <span class="badge bg-info">' . (@$value[1] ? $value[1] : 0) . '</span>
-                                </p>
+
+                    <?php
+                    foreach ($avanceUbicacion as $key => $value) {
+                      echo '
+                          <div class="d-flex justify-content-between mb-2 bg-white p-2 corner">
+                          ' . $key . '
+                              <div class="d-flex ms-2">
+                                <span class="badge bg-primary counter-p p-0 me-1">' . (@$value[0] ? $value[0] : 0) . '</span>
+                                <span class="badge bg-info counter-p p-0">' . (@$value[1] ? $value[1] : 0) . '</span=>
                               </div>
-                            </div>
                           </div>';
-                      }
-                      ?>
-                    </div>
-                    <div class="sombra-bajo-lista">
-                    </div>
+                    }
+                    ?>
                   </div>
                   <div class="col-lg-9">
 
                     <div class="card mb-3">
                       <div class="card-header">
-                        <h5>Porcentaje de anvance por ubicación</h5>
+                        <h5>Porcentaje de avance por ubicación</h5>
                       </div>
                       <div class="card-body">
                         <div id="chartdiv"></div>
                       </div>
                     </div>
 
-                    <div class="card mt-3">
 
-                      <div class="card-header d-flex justify-content-between">
-                        <h5>Empleados</h5>
-                        <button id="exportButton" class="btn btn-success"> <i class="fa fa-file-excel"></i> Exportar a Excel</button>
-                      </div>
-                      <div class="card-body">
-                        <div class="table-responsive">
-                          <table id="DataTables">
-                            <thead>
-                              <tr>
-                                <th>Cédula</th>
-                                <th>nombre</th>
-                                <th>Ubicación</th>
-                                <th>Teléfono</th>
-                                <th>Estatus</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php
-                              foreach ($tabla as $key => $value) {
-                                echo $value;
-                              }
-                              ?>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-12">
-                <div class="card mt-3">
+                    <div class="card mt-3">
                       <div class="card-header">
-                        <h5>Porcentaje de anvance</h5>
+                        <h5>Porcentaje de avance</h5>
                       </div>
                       <div class="card-body">
                         <div id="chartdiv2"></div>
                       </div>
                     </div>
+
+                  </div>
+                </div>
+                <div class="col-lg-12">
+
+
+                  <div class="card mt-3">
+
+                    <div class="card-header d-flex justify-content-between">
+                      <h5>Empleados</h5>
+                      <button id="exportButton" class="btn btn-success"> <i class="fa fa-file-excel"></i> Exportar a Excel</button>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table id="DataTables">
+                          <thead>
+                            <tr>
+                              <th>Cédula</th>
+                              <th>nombre</th>
+                              <th>Ubicación</th>
+                              <th>Teléfono</th>
+                              <th>Estatus</th>
+                              <th>1*10/7</th>
+                              <th>Teléfono</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            foreach ($tabla as $key => $value) {
+                              echo $value;
+                            }
+                            ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
 
@@ -321,6 +368,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
       width: 100%;
       height: 500px;
     }
+
     #chartdiv2 {
       width: 100%;
       height: 60vh;
@@ -435,25 +483,26 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
         }));
 
         var data = [];
-        
+
 
         <?php
-        function abreviarIns($nombre){
+        function abreviarIns($nombre)
+        {
           $abr = [
-            'Secretaria ejecutiva'=> 'SE',
-            'Unidad educativa nacional'=> 'UEN',
-            '<br>'=> '',
+            'Secretaria ejecutiva' => 'SE',
+            'Unidad educativa nacional' => 'UEN',
+            '<br>' => '',
           ];
-            // Reemplazar cada coincidencia en la lista de sustituciones
-            foreach ($abr as $original => $abreviado) {
-              $nombre = str_replace($original, $abreviado, $nombre);
-            }
+          // Reemplazar cada coincidencia en la lista de sustituciones
+          foreach ($abr as $original => $abreviado) {
+            $nombre = str_replace($original, $abreviado, $nombre);
+          }
 
-            if (strlen($nombre) > 35) {
-              // nombre sera igual a los primeros 20 caracteres, seguido de 3 puntos mas los ultimos 15 carcateres
-              $nombre = substr($nombre, 0, 15) . '...' . substr($nombre, -10);
-            }
-            return trim($nombre);
+          if (strlen($nombre) > 35) {
+            // nombre sera igual a los primeros 20 caracteres, seguido de 3 puntos mas los ultimos 15 carcateres
+            $nombre = substr($nombre, 0, 15) . '...' . substr($nombre, -10);
+          }
+          return trim($nombre);
         }
         foreach ($avanceUbicacion as $key => $value) {
           $faltantes = (@$value[1] ? $value[1] : 0) + (@$value[0] ? $value[0] : 0);
@@ -474,17 +523,17 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
         });
 
         xRenderer.labels.template.setAll({
-        rotation: -90,
-        centerY: am5.p50,
-      });
+          rotation: -90,
+          centerY: am5.p50,
+        });
 
         var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
           categoryField: "country",
           renderer: xRenderer,
-          
+
           tooltip: am5.Tooltip.new(root, {
             themeTags: ["axis"],
-            
+
             animationDuration: 200
           })
         }));
