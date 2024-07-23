@@ -568,8 +568,9 @@ while($row = $result->fetch_assoc()) {
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Datos Filtrados');
 
+      let nombre = ($('#dt-search-0').val() == '' ? 'Reporte de flujo electoral' :  $('#dt-search-0').val())
       // Generar el archivo Excel y descargarlo
-      XLSX.writeFile(wb, $('#dt-search-0').val() + '.xlsx');
+      XLSX.writeFile(wb, nombre + '.xlsx');
     });
 
 
