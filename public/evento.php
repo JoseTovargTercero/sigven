@@ -16,12 +16,40 @@ if ($_SESSION["instancia"] == 0) {
 } elseif ($_SESSION['instancia'] == '1') {
   $extraCondicion = 'AND mcp=' . $_SESSION["id_instancia"];
   $extraCondicionW = 'WHERE mcp=' . $_SESSION["id_instancia"];
-}else {
+} else {
   $extraCondicion = 'AND pq=' . $_SESSION["id_instancia"];
   $extraCondicionW = 'WHERE pq=' . $_SESSION["id_instancia"];
 }
 
 //instancia - $_SESSION['id_instancia']
+
+
+
+// sacar las metas por centro
+
+
+
+
+// Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
+$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( 
+  SELECT centro, cedula FROM unox107 
+  UNION ALL SELECT 
+  cv as centro, cdula AS cedula FROM unox10 ) AS combined GROUP BY centro ORDER BY centro;";
+
+$stmt = $conexion_app->prepare($sql);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$metas_1107 = array();
+if ($result->num_rows > 0) {
+  // Obtener los datos y convertirlos en un arreglo asociativo
+  while ($row = $result->fetch_assoc()) {
+    $metas_1107[$row['centro']] = $row['repeticiones'];
+  }
+}
+
+
 ?>
 
 
@@ -138,31 +166,30 @@ if ($_SESSION["instancia"] == 0) {
 
 
 
-      $jefesUnoDiex = [];
-        $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcedula) FROM unox10");
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-          while ($row = $result->fetch_assoc()) {
-            $jefesUnoDiex[$row['jfcedula']]=true;
-          }
+    $jefesUnoDiex = [];
+    $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcedula) FROM unox10");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+      while ($row = $result->fetch_assoc()) {
+        $jefesUnoDiex[$row['jfcedula']] = true;
+      }
+    }
+    $stmt->close();
+
+
+    $jefesParticiparon = 0;
+    $stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral $extraCondicionW");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+      while ($row = $result->fetch_assoc()) {
+        if (@$jefesUnoDiex[$row['cedula']]) {
+          $jefesParticiparon++;
         }
-        $stmt->close();
-
-
-        $jefesParticiparon = 0;
-        $stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral $extraCondicionW");
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-          while ($row = $result->fetch_assoc()) {
-            if (@$jefesUnoDiex[$row['cedula']]) {
-              $jefesParticiparon++;
-            }
-
-          }
-        }
-        $stmt->close();
+      }
+    }
+    $stmt->close();
 
 
 
@@ -389,83 +416,6 @@ if ($_SESSION["instancia"] == 0) {
 
 
 
-    ///////////////////////////////////// ESTADO DE LAS ESTRUCTURAS ///////////////////////////////////////////////
-
-    $count1 = mysqli_query($conexion, "SELECT * FROM estructuraraas WHERE tipocargo='1'");
-    $contarJefesCalle = mysqli_num_rows($count1);
-
-    $totalPatrulla = $contarJefesCalle * $cantidadestrpatrulla;
-    //total de patrullas que deberia haber
-    $totalUbch = $cantidadestrubch;
-    //total de ubch que deberia haber
-    $totalRaas = $cantidadestrraas;
-    //total de raas que deberia haber
-
-    $divisorOptimo = $totalPatrulla + $totalUbch + $totalRaas;
-
-
-    $count2 = mysqli_query($conexion, "SELECT * FROM estructuraraas WHERE tipocargo='0'");
-    $cantidadRaas = mysqli_num_rows($count2);
-    //cantidad raas cargada
-    $count3 = mysqli_query($conexion, "SELECT * FROM estructuraubch");
-    $cantidadUbch = mysqli_num_rows($count3);
-    //cantidad ubch cargada
-    $count4 = mysqli_query($conexion, "SELECT * FROM estructurapatrulla");
-    $patrullasCargadas = mysqli_num_rows($count4);
-    $cantidadPatrulla  = $patrullasCargadas + $contarJefesCalle;
-    //cantidad patrulla cargada
-
-    $cargadoOptimo = $cantidadRaas + $cantidadUbch + $cantidadPatrulla;
-    //cantidad total de las estructuras cargadas 
-    $porcentaje = $cargadoOptimo * 100 / $divisorOptimo;
-    //porcentaje total de las estructuras cargadas 
-
-    $porcentaRaasRepresenta = $totalRaas * 100 / $divisorOptimo;
-    //porcentaje total de las estructuras  raas
-    $porcentaUbchRepresenta = $totalUbch * 100 / $divisorOptimo;
-    //porcentaje total de la estructura ubch 
-    $porcentaPatrullaRepresenta = $totalPatrulla * 100 / $divisorOptimo;
-    //porcentaje total de las estructuras patrullas
-
-    $porcentajeRaasCritico = $cantidadRaas * 100 / $totalRaas;
-    //porcentaje total de las estructuras en relacion a si misma
-    $porcentajeUbchCritico = $cantidadUbch * 100 / $totalUbch;
-    //porcentaje total de la estructura  en relacion a si misma
-    $porcentajePatrullaCritico = $cantidadPatrulla * 100 / $totalPatrulla;
-    //porcentaje total de las estructuras en relacion a si misma
-
-
-
-
-    if ($porcentaje < 40) {
-      $color = "color: #63B3ED;";
-    } elseif ($porcentaje < 75) {
-      $color = "color: #fd7e14;";
-    } else {
-      $color = "color: #ea0606;";
-    }
-    if ($porcentajeUbchCritico < 40) {
-      $colorUbch = "color: #63B3ED;";
-    } elseif ($porcentajeUbchCritico < 75) {
-      $colorUbch = "color: #fd7e14;";
-    } else {
-      $colorUbch = "color: #ea0606;";
-    }
-    if ($porcentajeRaasCritico < 40) {
-      $colorRaas = "color: #63B3ED;";
-    } elseif ($porcentajeRaasCritico < 75) {
-      $colorRaas = "color: #fd7e14;";
-    } else {
-      $colorRaas = "color: #ea0606;";
-    }
-    if ($porcentajePatrullaCritico < 40) {
-      $colorPatrulla  = "color: #63B3ED;";
-    } elseif ($porcentajePatrullaCritico < 75) {
-      $colorPatrulla = "color: #fd7e14;";
-    } else {
-      $colorPatrulla  = "color: #ea0606;";
-    }
-
 
     ?>
     <div class="container-fluid">
@@ -479,7 +429,7 @@ if ($_SESSION["instancia"] == 0) {
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Electores Registrados</p>
                     <h5 class="font-weight-bolder mb-0">
-                       <span title="Votos duros"><?php echo number_format($totalVotos, '0', '.', '.'); ?></span> /
+                      <span title="Votos duros"><?php echo number_format($totalVotos, '0', '.', '.'); ?></span> /
                       <small title="1*10/7"><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?>/</small>
                       <small title="Jefes de 1*10/7"><?php echo number_format($jefesParticiparon, '0', '.', '.'); ?></small>
                     </h5>
@@ -498,14 +448,14 @@ if ($_SESSION["instancia"] == 0) {
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Duros</p>
-                    <h5 class="font-weight-bolder mb-0">
-                      <?php echo number_format($vd, '0', '.', '.');  ?>
-                      <span class="text-danger text-sm font-weight-bolder"><?php echo number_format($porcetanjeVotosD, '2', '.', '.'); ?>%</span>
-                    </h5>
-                  </div>
-             
+                <div class="numbers">
+                  <p class="text-sm mb-0 text-capitalize font-weight-bold">Duros</p>
+                  <h5 class="font-weight-bolder mb-0">
+                    <?php echo number_format($vd, '0', '.', '.');  ?>
+                    <span class="text-danger text-sm font-weight-bolder"><?php echo number_format($porcetanjeVotosD, '2', '.', '.'); ?>%</span>
+                  </h5>
+                </div>
+
               </div>
             </div>
           </div>
@@ -553,59 +503,47 @@ if ($_SESSION["instancia"] == 0) {
 
 
 
-      
+
       <div class="row mt-4">
 
-      <?php if ($_SESSION["instancia"] == 0) { ?>
-  
-  <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
-    <div class="card h-100">
-      <div class="card-body p-3">
-        <div class="row">
-          <div class="d-flex flex-column h-100">
-            <h6 class="font-weight-bolder mb-4 pt-2">Reportes por municipios</h6>
-            <div id="chartdivJefes" style="height: 30vh;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-    <?php } ?>
+        <?php if ($_SESSION["instancia"] == 0) { ?>
 
-
-
-        <div class="col-lg-6 mb-4 mt-4">
-          <div class="card h-100 ">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="d-flex flex-column h-100">
-                  <h6 class="font-weight-bolder mb-4 pt-2">Intencion de voto</h6>
-                  <div id="chartdiv" style="height: 53vh;"></div>
+          <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+            <div class="card h-100">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="d-flex flex-column h-100">
+                    <h6 class="font-weight-bolder mb-4 pt-2">Reportes por municipios</h6>
+                    <div id="chartdivJefes" style="height: 30vh;"></div>
+                  </div>
                 </div>
-
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-lg-6 mb-4 mt-4">
+        <?php } ?>
+
+
+
+        <div class="col-lg-12 mb-4 mt-4">
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-        
-              <div class="   d-flex justify-content-between">
-              <h6 class="font-weight-bolder mb-4">Reportes por Centro</h6>
-              <a href="seguimiento_i.php" class="btn btn-sm btn-danger">Instituciones</a>
 
-              </div>
-              <div class="table-responsive">
-                  <table class="" id="table1">
+                <div class="   d-flex justify-content-between">
+                  <h6 class="font-weight-bolder mb-4">Reportes por Centro</h6>
+                  <a href="seguimiento_i.php" class="btn btn-sm btn-danger">Instituciones</a>
+
+                </div>
+                <div class="table-responsive">
+                  <table id="table1">
                     <thead>
                       <tr>
                         <th class="p-0">Centro</th>
-                        <th class="text-center p-0">R</th>
-                        <th class="text-center p-0">1*10</th>
-                        <th class="text-center p-0">1*10*7</th>
-                        <th class="text-center p-0">Porcentaje</th>
+                        <th class="text-center p-0" style="background-color: #626262;">Asistencia <br> deseada</th>
+                        <th class="text-center p-0" style="background-color: #626262;">Porcentaje</th>
+                        <th class="text-center p-0">Tendencia 110/7</th>
+                        <th class="text-center p-0">Total</th>
+                        <th class="text-center p-0"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -615,7 +553,7 @@ if ($_SESSION["instancia"] == 0) {
 
 
 
-
+                      /*
                     $unoX107 = [];
 
                     $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(centro), COUNT(*) AS Nrepeticiones FROM unox107 GROUP BY centro");
@@ -627,7 +565,7 @@ if ($_SESSION["instancia"] == 0) {
                       }
                     }
                     $stmt->close();
-
+*/
 
 
 
@@ -660,9 +598,21 @@ if ($_SESSION["instancia"] == 0) {
                         }
                       }
                       $stmt->close();
-                
+
 
                       $participacionCentro = array();
+
+                      function getTendencia($favor, $total)
+                      {
+                        $result = $favor - ($total - $favor);
+                        if ($result > 0) {
+                          return '<span class="text-success"> + ' . $result . '</span>';
+                        } elseif ($result < 0) {
+                          return '<span class="text-danger"> - ' . abs($result) . '</span>';
+                        } else {
+                          return '<span class="text-warning">0</span>';
+                        }
+                      }
                       //SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral GROUP BY centro ORDER BY `unodiez_diferente_de_cero` DESC
 
                       $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral  $extraCondicionW GROUP BY centro ORDER BY `Nrepeticiones` ASC");
@@ -671,21 +621,29 @@ if ($_SESSION["instancia"] == 0) {
                       if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
 
-
-
-                          
                           $participacionCentro = [abrev($centroDatos[$row['centro']][0]), number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',')];
-                          if ( abrev($centroDatos[$row['centro']][0]) != '') {
-                          echo '<tr>
-                        <td>' . abrev($centroDatos[$row['centro']][0]) . '</td>
-                        <td class="text-center">' . $row['Nrepeticiones'] . '</td>
-                        <td class="text-center">' . $unoX107[$row['centro']] . '</td>
-                        <td class="text-center">' . $row['unodiez_diferente_de_cero'] . '</td>
-                        <td class="text-center">' . number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',') . '% (' . $centroDatos[$row['centro']][1] . ')</td>
-                      </tr>';
 
-                    }
+                          if (abrev($centroDatos[$row['centro']][0]) != '') {
+                            $meta = $metas_1107[$row['centro']];
+                            $asistencia_1107 = $row['unodiez_diferente_de_cero'];
 
+
+                            $tendencia1107 = getTendencia($asistencia_1107, $row['Nrepeticiones']);
+
+                            $favor_total += $asistencia_1107;
+                            $contra_total += $row['Nrepeticiones'] - $asistencia_1107;
+
+                            echo '<tr>
+                              <td>' . abrev($centroDatos[$row['centro']][0]) . '</td>
+                              <td class="text-center" style="background-color: #626262;">' . $asistencia_1107 . ' / ' . $meta . ' </td>
+                              <td class="text-center" style="background-color: #626262;">' . number_format($asistencia_1107 * 100 / $meta, '1', '.', ',') . '%</td>
+                              <td class="text-center">' . $tendencia1107 . '</td>
+                              <td class="text-center">' . $row['Nrepeticiones'] . '</td>
+                              <td class="text-center"><button class="btn btn-sm btn-info" style="padding: 8px;">
+                              <i class="line icon-share-alt" style="    font-size: 18px;"></i>
+                              </button></td>
+                            </tr>';
+                          }
                         }
                       }
                       $stmt->close();
@@ -693,6 +651,37 @@ if ($_SESSION["instancia"] == 0) {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="col-lg-6 mb-4 mt-4">
+          <div class="card h-100 ">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="d-flex flex-column h-100">
+                  <h6 class="font-weight-bolder mb-4 pt-2">Tendencia 110/7</h6>
+                  <div id="chartdiv3" style="height: 53vh;"></div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-lg-6 mb-4 mt-4">
+          <div class="card h-100 ">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="d-flex flex-column h-100">
+                  <h6 class="font-weight-bolder mb-4 pt-2">Intencion de voto</h6>
+                  <div id="chartdiv" style="height: 53vh;"></div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -792,7 +781,7 @@ if ($_SESSION["instancia"] == 0) {
             </div>
           </div>
         </div>
-       
+
 
 
       </div>
@@ -826,7 +815,12 @@ if ($_SESSION["instancia"] == 0) {
     </div>
     </main>
 
-
+    <style>
+      #chartdiv3 {
+        width: 100%;
+        height: 500px;
+      }
+    </style>
 
 
 
@@ -838,11 +832,11 @@ if ($_SESSION["instancia"] == 0) {
     <script src="../vendors/amcharts5/themes/Animated.js"></script>
     <script src="../vendors/amcharts5/themes/Material.js"></script>
 
-  
+
     <script src="../vendors/amcharts5/use/pie-donut-chart/index.js"></script>
     <?php if ($_SESSION["instancia"] == 0) { ?>
       <script src="../vendors/amcharts5/use/xy-clustered-column/index.js"></script>
-      <?php } ?>
+    <?php } ?>
     <script src="../assets/js/core/bootstrap.min.js"></script>
     <script src="../assets/js/jquery.nanoscroller.min.js"></script>
     <script src="../assets/js/menubar/sidebar.js"></script>
@@ -894,85 +888,184 @@ if ($_SESSION["instancia"] == 0) {
 
 
     <script>
-              <?php if ($_SESSION["instancia"] == 0) { ?>
-  // jefes de ubch //
+      function grafico_tendencias() {
+        am5.ready(function() {
 
-      var data = []
+          // Create root element
+          // https://www.amcharts.com/docs/v5/getting-started/#Root_element
+          var root = am5.Root.new("chartdiv3");
 
 
-      <?php
-      foreach ($municipios as $key => $value) {
-        echo 'data.push({
+          // Set themes
+          // https://www.amcharts.com/docs/v5/concepts/themes/
+          root.setThemes([
+            am5themes_Animated.new(root),
+            am5themes_Material.new(root)
+          ]);
+
+
+          // Create chart
+          // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/
+          var chart = root.container.children.push(am5percent.PieChart.new(root, {
+            layout: root.verticalLayout
+          }));
+
+
+          // Create series
+          // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Series
+          var series = chart.series.push(am5percent.PieSeries.new(root, {
+            alignLabels: true,
+            calculateAggregates: true,
+            valueField: "value",
+            categoryField: "category"
+          }));
+
+          series.slices.template.setAll({
+            strokeWidth: 3,
+            stroke: am5.color(0xffffff)
+          });
+
+          series.labelsContainer.set("paddingTop", 30)
+
+
+          // Set up adapters for variable slice radius
+          // https://www.amcharts.com/docs/v5/concepts/settings/adapters/
+          series.slices.template.adapters.add("radius", function(radius, target) {
+            var dataItem = target.dataItem;
+            var high = series.getPrivate("valueHigh");
+
+            if (dataItem) {
+              var value = target.dataItem.get("valueWorking", 0);
+              return radius * value / high
+            }
+            return radius;
+          });
+
+
+          // Set data
+          // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Setting_data
+          series.data.setAll([{
+            value: <?php echo $favor_total ?>,
+            category: "Favor"
+          }, {
+            value: <?php echo $contra_total ?>,
+            category: "Contra"
+          }]);
+
+
+          // Create legend
+          // https://www.amcharts.com/docs/v5/charts/percent-charts/legend-percent-series/
+          var legend = chart.children.push(am5.Legend.new(root, {
+            centerX: am5.p50,
+            x: am5.p50,
+            marginTop: 15,
+            marginBottom: 15
+          }));
+
+          legend.data.setAll(series.dataItems);
+
+
+          // Play initial series animation
+          // https://www.amcharts.com/docs/v5/concepts/animations/#Animation_of_series
+          series.appear(1000, 100);
+
+        }); // end am5.ready()
+      }
+      grafico_tendencias();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <?php if ($_SESSION["instancia"] == 0) { ?>
+        // jefes de ubch //
+
+        var data = []
+
+
+        <?php
+        foreach ($municipios as $key => $value) {
+          echo 'data.push({
           "Municipio": "' . $value[0] . '",
           "total": ' . $value[2] . ',
           "avance": ' . $value[1] . ',
           "unoxdiez": ' . $value[3] . '
         });';
-      }
-      ?>
+        }
+        ?>
 
 
-      // Create axes
-      // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-      var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root2, {
-        categoryField: "Municipio",
-        renderer: am5xy.AxisRendererX.new(root2, {
-          cellStartLocation: 0.1,
-          cellEndLocation: 0.9
-        }),
-        tooltip: am5.Tooltip.new(root2, {})
-      }));
-
-      xAxis.data.setAll(data);
-
-      var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root2, {
-        renderer: am5xy.AxisRendererY.new(root2, {})
-      }));
-
-
-      // Add series
-      // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-      function makeSeries(name, fieldName) {
-        var series = chart.series.push(am5xy.ColumnSeries.new(root2, {
-          name: name,
-          xAxis: xAxis,
-          yAxis: yAxis,
-          valueYField: fieldName,
-          categoryXField: "Municipio"
+        // Create axes
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+        var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root2, {
+          categoryField: "Municipio",
+          renderer: am5xy.AxisRendererX.new(root2, {
+            cellStartLocation: 0.1,
+            cellEndLocation: 0.9
+          }),
+          tooltip: am5.Tooltip.new(root2, {})
         }));
 
-        series.columns.template.setAll({
-          tooltipText: "{categoryX}: {name} {valueY}",
-          width: am5.percent(90),
-          tooltipY: 0
-        });
+        xAxis.data.setAll(data);
 
-        series.data.setAll(data);
+        var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root2, {
+          renderer: am5xy.AxisRendererY.new(root2, {})
+        }));
 
-        // Make stuff animate on load
-        // https://www.amcharts.com/docs/v5/concepts/animations/
-        series.appear();
 
-        series.bullets.push(function() {
-          return am5.Bullet.new(root2, {
-            locationY: 0,
-            sprite: am5.Label.new(root2, {
-              text: "{valueY}",
-              fill: root2.interfaceColors.get("alternativeText"),
-              centerY: 0,
-              centerX: am5.p50,
-              populateText: true
-            })
+        // Add series
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+        function makeSeries(name, fieldName) {
+          var series = chart.series.push(am5xy.ColumnSeries.new(root2, {
+            name: name,
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueYField: fieldName,
+            categoryXField: "Municipio"
+          }));
+
+          series.columns.template.setAll({
+            tooltipText: "{categoryX}: {name} {valueY}",
+            width: am5.percent(90),
+            tooltipY: 0
           });
-        });
 
-        legend.data.push(series);
-      }
+          series.data.setAll(data);
 
-      makeSeries("Total", "total");
-      makeSeries("Avance", "avance");
-      makeSeries("Uno x diez", "unoxdiez");
-      // jefes de ubch //
+          // Make stuff animate on load
+          // https://www.amcharts.com/docs/v5/concepts/animations/
+          series.appear();
+
+          series.bullets.push(function() {
+            return am5.Bullet.new(root2, {
+              locationY: 0,
+              sprite: am5.Label.new(root2, {
+                text: "{valueY}",
+                fill: root2.interfaceColors.get("alternativeText"),
+                centerY: 0,
+                centerX: am5.p50,
+                populateText: true
+              })
+            });
+          });
+
+          legend.data.push(series);
+        }
+
+        makeSeries("Total", "total");
+        makeSeries("Avance", "avance");
+        makeSeries("Uno x diez", "unoxdiez");
+        // jefes de ubch //
       <?php } ?>
 
       // hMapa del boto en donut chart //
