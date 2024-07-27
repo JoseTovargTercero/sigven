@@ -6,7 +6,7 @@ function getCentro($value, $accion){
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT mcp, centro, nombre FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT mcp, centro, nombre, pq FROM `rep_24` WHERE cedula = ?");
   } else {
     $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
   }
@@ -27,6 +27,8 @@ function getCentro($value, $accion){
 
 function verificarElector($elector, $responsable, $tipo_user) {
     global $conexion_app;
+    require('../../configurar/configuracion.php');
+
 
     $datosCne = getCentro($elector, 1);
     $centro = trim($datosCne[0]);
@@ -34,24 +36,26 @@ function verificarElector($elector, $responsable, $tipo_user) {
     $mcp = trim($datosCne[2]);
     $pq = trim($datosCne[3]);
     $voto = 'NC';
+    
 
     if ($nombre == '' || $centro == false) {
         return array("elector" => $elector, "status" => "NE");
     }
 
-    $conexion_sigven = mysqli_connect("localhost", "user_sigven", "+ij*tK&[JH$,", "sigven");
-    $conexion_sigven->set_charset('utf8');
 
-    $stmt_sig = mysqli_prepare($conexion_sigven, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
-    $stmt_sig->bind_param('s', $elector);
+    $query = "SELECT voto FROM `padronelectoral` WHERE cedula = ?";
+    $stmt_sig = $conexion->prepare($query);
+    $stmt_sig->bind_param("s", $elector);
     $stmt_sig->execute();
-    $result = $stmt_sig->get_result();
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $voto = $row['voto'];
-    }
+  $result = $stmt_sig->get_result();
+  if ($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $voto = $row['voto'];
+  }
+
+
     $stmt_sig->close();
-    $conexion_sigven->close();
+    $conexion->close();
 
 
 
@@ -94,9 +98,11 @@ function verificarElector($elector, $responsable, $tipo_user) {
     }
 }
 
-if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
-    $electores = json_decode($_POST["electores"], true);
-    $responsable = $_POST["responsable"];
+//if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
+if (true) {
+    //$electores = json_decode($_POST["electores"], true);
+    $electores = array('14565280', '27640176');
+    $responsable = '27640176';
     
     $resp_verificado = getOperador($responsable);
 
@@ -106,11 +112,17 @@ if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
         $tipo_user = $resp_verificado[0];
 
         foreach ($electores as $elector) {
+            $elector = trim($elector);
+            $elector = str_replace("-", "", $elector);
+            $elector = str_replace(".", "", $elector);
+            $elector = str_replace(" ", "", $elector);
+            $elector = str_replace("V", "", $elector);
+            $elector = str_replace("E", "", $elector);
             $response["results"][] = verificarElector($elector, $responsable, $tipo_user);
         }
     }
 
-    header('Content-Type: application/json');
+    //header('Content-Type: application/json');
     echo json_encode($response);
 }
 ?>
