@@ -18,7 +18,7 @@ if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
           $stmt->bind_param('s', $id);
           $stmt->execute();
           $result = $stmt->get_result();
-            if (!$result->num_rows > 0) {
+            if ($result->num_rows > 0) {
               echo "Reporte de apertura enviado correctamente.";
             }else {
               $stmt2 = $conexion_app->prepare("UPDATE `tablamesa` SET `HORA_APERTURA` = ?, `ELECTORES_APERTURA` = ?, `USER_REPORTE` = ? WHERE id = ?");
