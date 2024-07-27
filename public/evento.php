@@ -522,6 +522,64 @@ if ($result->num_rows > 0) {
           </div>
         <?php } ?>
 
+        <?php 
+        $votos_por_hora = array(
+          '05' => 0,
+          '06' => 0,
+          '07' => 0,
+          '08' => 0,
+          '09' => 0,
+          '10' => 0,
+          '11' => 0,
+          '12' => 0,
+          '13' => 0,
+          '14' => 0,
+          '15' => 0,
+          '16' => 0,
+          '17' => 0,
+          '18' => 0,
+          '19' => 0,
+          '20' => 0,
+          '21' => 0,
+          '22' => 0,
+          '23' => 0
+        );
+
+
+
+        $stmt = mysqli_prepare($conexion_app, "SELECT cedula, hora_reporte FROM `flujo_electoral` ORDER BY id ASC");
+        $stmt->execute();
+        $result = $stmt->get_result();
+          if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+              $datetime = $row['hora_reporte'];
+              $timestamp = strtotime($datetime);
+              $time = date("H", $timestamp);
+              if ($time == 9) {
+                echo $row['cedula'];
+              }
+                $votos_por_hora[$time] += 1;
+             
+          }
+        }
+        $stmt->close();
+        
+        ?>
+
+
+        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+            <div class="card h-100">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="d-flex flex-column h-100">
+                    <h6 class="font-weight-bolder mb-4 pt-2">Flujo de electores por hora</h6>
+                    <div id="chartdivHora" style="height: 30vh;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
 
 
         <div class="col-lg-12 mb-4 mt-4">
@@ -634,7 +692,14 @@ if ($result->num_rows > 0) {
                             $contra_total += $row['Nrepeticiones'] - $asistencia_1107;
 
                             echo '<tr>
-                              <td>' . abrev($centroDatos[$row['centro']][0]) . '</td>
+                              <td>
+  
+                              <a href="reportes/estado_ubch.php?c='.$row['centro'].'">
+                              <i style="margin-right: 15px;font-size: 17px;" class="line icon-cloud-download"></i>
+                              
+                              </a>
+                              
+                              ' . abrev($centroDatos[$row['centro']][0]) . '</td>
                               <td class="text-center" style="background-color: #626262;">' . $asistencia_1107 . ' / ' . $meta . ' </td>
                               <td class="text-center" style="background-color: #626262;">' . number_format($asistencia_1107 * 100 / $meta, '1', '.', ',') . '%</td>
                               <td class="text-center">' . $tendencia1107 . '</td>
@@ -820,6 +885,10 @@ if ($result->num_rows > 0) {
         width: 100%;
         height: 500px;
       }
+      #chartdivHora {
+        width: 100%;
+        height: 600px;
+      }
     </style>
 
 
@@ -974,8 +1043,200 @@ if ($result->num_rows > 0) {
       grafico_tendencias();
 
 
+function graficoHora(){
+  am5.ready(function() {
+
+// Create root element
+// https://www.amcharts.com/docs/v5/getting-started/#Root_element
+var root = am5.Root.new("chartdivHora");
+
+// Set themes
+// https://www.amcharts.com/docs/v5/concepts/themes/
+root.setThemes([
+  am5themes_Animated.new(root)
+]);
+/*
+
+var data = [
+  { x: 5, value: 11 },
+  { x: 6, value: 11 },
+  { x: 7, value: 12 },
+  { x: 8, value: 12 },
+  { x: 9, value: 13 },
+  { x: 10, value: 15 },
+  { x: 11, value: 19 },
+  { x: 12, value: 21 },
+  { x: 13, value: 22 },
+  { x: 14, value: 20 },
+  { x: 15, value: 18 },
+  { x: 16, value: 14 },
+  { x: 17, value: 16 },
+  { x: 18, value: 18 },
+  { x: 19, value: 17 },
+  { x: 20, value: 15 },
+  { x: 21, value: 12 },
+  { x: 22, value: 8 },
+  { x: 23, value: 11 }
+];
+*/
 
 
+var data = [
+  { x: 5, value: <?php echo $votos_por_hora['05'] ?> },
+  { x: 6, value: <?php echo $votos_por_hora['06'] ?> },
+  { x: 7, value: <?php echo $votos_por_hora['07'] ?> },
+  { x: 8, value: <?php echo $votos_por_hora['08'] ?> },
+  { x: 9, value: <?php echo $votos_por_hora['09'] ?> },
+  { x: 10, value: <?php echo $votos_por_hora['10'] ?> },
+  { x: 11, value: <?php echo $votos_por_hora['11'] ?> },
+  { x: 12, value: <?php echo $votos_por_hora['12'] ?> },
+  { x: 13, value: <?php echo $votos_por_hora['13'] ?> },
+  { x: 14, value: <?php echo $votos_por_hora['14'] ?> },
+  { x: 15, value: <?php echo $votos_por_hora['15'] ?> },
+  { x: 16, value: <?php echo $votos_por_hora['16'] ?> },
+  { x: 17, value: <?php echo $votos_por_hora['17'] ?> },
+  { x: 18, value: <?php echo $votos_por_hora['18'] ?> },
+  { x: 19, value: <?php echo $votos_por_hora['19'] ?> },
+  { x: 20, value: <?php echo $votos_por_hora['20'] ?> },
+  { x: 21, value: <?php echo $votos_por_hora['21'] ?> },
+  { x: 22, value: <?php echo $votos_por_hora['22'] ?> },
+  { x: 23, value: <?php echo $votos_por_hora['23'] ?> }
+];
+
+
+// Create chart
+// https://www.amcharts.com/docs/v5/charts/xy-chart/
+var chart = root.container.children.push(
+  am5xy.XYChart.new(root, {
+    panX: true,
+    panY: true,
+    wheelX: "panX",
+    wheelY: "zoomX"
+  })
+);
+
+// Create axes
+// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+var xAxis = chart.xAxes.push(
+  am5xy.ValueAxis.new(root, {
+    renderer: am5xy.AxisRendererX.new(root, {
+      minGridDistance: 50
+    }),
+    tooltip: am5.Tooltip.new(root, {})
+  })
+);
+
+var yAxis = chart.yAxes.push(
+  am5xy.ValueAxis.new(root, {
+    renderer: am5xy.AxisRendererY.new(root, {})
+  })
+);
+
+// Add series
+// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+var series = chart.series.push(
+  am5xy.LineSeries.new(root, {
+    minBulletDistance: 10,
+    xAxis: xAxis,
+    yAxis: yAxis,
+    valueYField: "value",
+    valueXField: "x",
+    tooltip: am5.Tooltip.new(root, {
+      pointerOrientation: "horizontal",
+      labelText: "{valueY}"
+    })
+  })
+);
+
+series.strokes.template.setAll({
+  strokeWidth: 3
+});
+
+series.data.setAll(data);
+
+series.bullets.push(function () {
+  return am5.Bullet.new(root, {
+    sprite: am5.Circle.new(root, {
+      radius: 6,
+      fill: series.get("fill"),
+      stroke: root.interfaceColors.get("background"),
+      strokeWidth: 2
+    })
+  });
+});
+
+// Add cursor
+// https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
+var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+  xAxis: xAxis
+}));
+cursor.lineY.set("visible", false);
+
+
+
+// Make stuff animate on load
+// https://www.amcharts.com/docs/v5/concepts/animations/
+series.appear(1000, 100);
+chart.appear(1000, 100);
+
+// Function to add process control ranges
+function addLimits(lower, upper) {
+  // Add range fill
+  createRange(lower, upper, undefined, am5.color(0xff8484));
+  
+  // Add upper/average/lower lines
+  createRange(lower, undefined, "Baja participación", am5.color(0xc71f1f));
+  createRange(upper, undefined, "Participación optima", am5.color(0xc71f1f));
+  createRange(lower + (upper - lower) / 2, undefined, "Participación aceptable", am5.color(0xc71f1f), true);
+  
+}
+
+//addLimits(10, 20)
+
+function createRange(value, endValue, label, color, dashed) {
+  var rangeDataItem = yAxis.makeDataItem({
+    value: value,
+    endValue: endValue
+  });
+  
+  var range = yAxis.createAxisRange(rangeDataItem);
+  
+  if (endValue) {
+    range.get("axisFill").setAll({
+      fill: color,
+      fillOpacity: 0.2,
+      visible: true
+    });
+  }
+  else {
+    range.get("grid").setAll({
+      stroke: color,
+      strokeOpacity: 1,
+      strokeWidth: 2,
+      location: 1
+    });
+    
+    if (dashed) {
+      range.get("grid").set("strokeDasharray", [5, 3]);
+    }
+  }
+
+  if (label) {
+    range.get("label").setAll({
+      text: label,
+      location: 1,
+      fontSize: 19,
+      inside: true,
+      centerX: am5.p0,
+      centerY: am5.p100
+    });
+  }
+}
+
+}); // end am5.ready()
+}
+
+graficoHora()
 
 
 
