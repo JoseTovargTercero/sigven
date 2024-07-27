@@ -21,13 +21,13 @@ function getCentro($value, $accion){
   return false;
 }
 
-//if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
-if (true) {
-//  $elector = $_POST["elector"];
-//  $responsable = $_POST["responsable"];
+if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
+//if (true) {
+ $elector = $_POST["elector"];
+ $responsable = $_POST["responsable"];
 
-  $elector = '14995015';
-  $responsable = '27640176';
+  //$elector = '31113897';
+  //$responsable = '27640176';
 
 
   $resp_verificado = getOperador($responsable);
@@ -82,7 +82,6 @@ if (true) {
       $voto = 'VD';
       $idUnoX10 = $row['jfcedula'];
     }else {
-      
       $stmt = mysqli_prepare($conexion_app, "SELECT cdula_jf FROM `unox107` WHERE cedula = ?");
       $stmt->bind_param('s', $elector);
       $stmt->execute();
@@ -90,14 +89,13 @@ if (true) {
       if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
           $voto = 'VD';
-          $idUnoX10 = $row['jfcedula'];
+          $idUnoX10 = $row['cdula_jf'];
         }
         }else {
           $voto = 'NC';
           $idUnoX10 = '';
       }
       $stmt->close();
-
     }
 
     $stmt_unox10->close();

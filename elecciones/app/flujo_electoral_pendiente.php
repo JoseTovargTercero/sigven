@@ -76,7 +76,7 @@ function verificarElector($elector, $responsable, $tipo_user) {
       if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
           $voto = 'VD';
-          $idUnoX10 = $row['jfcedula'];
+          $idUnoX10 = $row['cdula_jf'];
         }
         }else {
           $voto = 'NC';
