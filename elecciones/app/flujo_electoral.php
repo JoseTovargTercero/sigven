@@ -1,8 +1,5 @@
 <?php
 
-echo 'Los reportes se deben realizar cuando abra el centro';
-exit();
-
 require('../configuracion/conexion.php');
 require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
