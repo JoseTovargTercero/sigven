@@ -1,6 +1,6 @@
 <?php
 
-echo 'Tu cédula sera bloqueada, comunícate con los administradores';
+echo 'Tu cédula sera bloqueada, los reportes se deben realizar cuando abra el centro';
 exit();
 
 require('../configuracion/conexion.php');
