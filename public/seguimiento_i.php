@@ -269,23 +269,57 @@ while($row = $result->fetch_assoc()) {
     <!-- Navbar -->
     <?php echo $navbar ?>
     <div class="container-fluid">
-
-
-
-
-
       <div class="row mt-4">
 
         <?php if (!isset($_POST["instituciones"])) { ?>
-          <div class="col-lg-8 mb-4 mt-4" style="margin: auto;">
+          <div class="col-lg-12 mb-4 mt-4" style="margin: auto;">
             <div class="card h-100 p-3">
               <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
                 <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
                   <h6 class="font-weight-bolder mb-4">Seleccione las instituciones</h6>
                   <div class="table-responsive">
                     <form id="senData" method="POST">
-                      <ul class="list">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Ente</th>
+                            <th class="text-center">Empleados</th>
+                            <th class="text-center">Participación general</th>
+                            <th class="text-center">1*10/7</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          
+
                         <?php
+
+                          function getRendimientoInst($ins) {
+                            global $conexion_app;
+                            $votantes = 0;
+                            $unod = 0;
+                            $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, flujo_electoral.unodiez, empleados_instituciones.cedula FROM `empleados_instituciones` 
+                            LEFT JOIN flujo_electoral ON flujo_electoral.cedula=empleados_instituciones.cedula
+                            WHERE institucion = ?");
+                            $stmt->bind_param('s', $ins);
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+                            $total = $result->num_rows;
+                            if ($total > 0) {
+                              while ($row = $result->fetch_assoc()) {
+                              if ($row['centro'] != '') {
+                                $votantes++;
+                              }
+                              if ($row['unodiez'] != '' || $row['unodiez'] != 0) {
+                                $unod++;
+                              }
+                            }
+                            }
+                            $stmt->close();
+
+                            return [$total, $votantes, $unod];
+                          }
+
+
                         $stmt = mysqli_prepare($conexion_app, "SELECT * FROM jefes_instituciones");
                         $stmt->execute();
                         $result = $stmt->get_result();
@@ -293,14 +327,25 @@ while($row = $result->fetch_assoc()) {
                           while ($row = $result->fetch_assoc()) {
                             //echo '<li><span>'.$row['institucion'].'</span> <span>HOla</span></li>';
                             // imprime con un li, el nombre la institucion y a la derecha un checbox con una clase que se pueda recorrer des jquery y que tenga como valor el nombre de la institucion
+
                             $instit = $row['Institucion'];
-                            echo '<li><label><input type="checkbox" class="instituciones form-check-input" value="' . $row['id'] . '">
-                                <span>' . $instit . '</span> </label></li>';
+                            $datos = getRendimientoInst($instit);
+                            echo '
+                            <tr>
+                            <td><label><input type="checkbox" class="instituciones form-check-input" value="' . $row['id'] . '">
+                            <span>' . $instit . '</span> </label></td>
+                            <td class="text-center">'.$datos[0].'</td>
+                            <td class="text-center">'.$datos[1].'</td>
+                            <td class="text-center">'.$datos[2].'</td>
+                          </tr>
+';
                           }
                         }
                         $stmt->close();
                         ?>
-                      </ul>
+                      
+                      </tbody>
+                      </table>
                       <button class="btn btn-primary mt-3" onclick="consultar_instituciones()">Seleccionar</button>
 
                     </form>
