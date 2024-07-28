@@ -565,8 +565,8 @@ function abrev($nombre)
                         <th class="">Centro</th>
                         <th class="">Status</th>
                         <th class="">Hora apertura</th>
-                        <th class="text-center" style="background-color: #626262;">Cantidad de electores</th>
-                        <th class="" style="background-color: #626262;">Reporte</th>
+                        <th class="text-center" >Cantidad de electores</th>
+                        <th class="" >Reporte</th>
                       </tr>
                     </thead>
                     <tbody>
