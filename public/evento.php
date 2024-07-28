@@ -75,6 +75,67 @@ function abrev($nombre)
 
 
 
+
+
+
+$reportes_unodiex = [];
+$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(unodiez), COUNT(*) as reportes FROM `flujo_electoral` WHERE unodiez!='' GROUP BY unodiez");
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+while ($row = $result->fetch_assoc()) {
+$reportes_unodiex[$row['unodiez']] = $row['reportes'];
+}
+}
+
+
+$jefesUnoDiex = [];
+
+$tabla_reportes_110 = [];
+$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM ( 
+SELECT cdula_jf, telefono, jefe  FROM unox107
+UNION ALL SELECT 
+jfcedula, telefono, jefe FROM unox10) AS combined
+GROUP BY cdula_jf");
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+while ($row = $result->fetch_assoc()) {
+if(@$reportes_unodiex[$row['cdula_jf']]){
+$reportes = $reportes_unodiex[$row['cdula_jf']];
+$porcentaje = $reportes * 100 / $row['cantidad'];
+}else {
+$reportes = 0;
+$porcentaje = 0;
+}
+$jefesUnoDiex[$row['cdula_jf']] = true;
+
+$tabla_reportes_110[] = '<tr>
+<td>' . $row['cdula_jf'] . '</td>
+<td>' . $row['jefe'] . '</td>
+<td class="text-center">' . $row['telefono'] . '</td>
+<td class="text-center">' . $reportes.' / '.$row['cantidad'] . '</td>
+<td class="text-center">' . number_format($porcentaje, '2', '.', ',') . '%</td>
+</tr>';
+
+}
+}
+$stmt->close();
+
+
+
+$jefesParticiparon = 0;
+$stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral $extraCondicionW");
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+  while ($row = $result->fetch_assoc()) {
+    if (@$jefesUnoDiex[$row['cedula']]) {
+      $jefesParticiparon++;
+    }
+  }
+}
+$stmt->close();
 ?>
 
 
@@ -189,180 +250,6 @@ function abrev($nombre)
     <!-- Navbar -->
     <?php echo $navbar;
 
-
-
-    $jefesUnoDiex = [];
-    $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcedula) FROM unox10");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-      while ($row = $result->fetch_assoc()) {
-        $jefesUnoDiex[$row['jfcedula']] = true;
-      }
-    }
-    $stmt->close();
-
-
-    $jefesParticiparon = 0;
-    $stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral $extraCondicionW");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
-      while ($row = $result->fetch_assoc()) {
-        if (@$jefesUnoDiex[$row['cedula']]) {
-          $jefesParticiparon++;
-        }
-      }
-    }
-    $stmt->close();
-
-
-
-    ////////////////////////////// Contar el total de jefes de ubch registrados//////////////////////////
-
-
-
-    $edadPsuv_20 = 0;
-    $edadPsuv_30 = 0;
-    $edadPsuv_40 = 0;
-    $edadPsuv_50 = 0;
-    $edadPsuv_60 = 0;
-    $edadPsuv_70 = 0;
-    $edadPsuv_80 = 0;
-    $edadPsuv_90 = 0;
-    $edadPsuv_100 = 0;
-    $edadOp_20 = 0;
-    $edadOp_30 = 0;
-    $edadOp_40 = 0;
-    $edadOp_50 = 0;
-    $edadOp_60 = 0;
-    $edadOp_70 = 0;
-    $edadOp_80 = 0;
-    $edadOp_90 = 0;
-    $edadOp_100 = 0;
-
-
-
-    $hoy = time();
-
-    $masculinos = 0;
-    $femeninas = 0;
-    ////////////////////////////// Contar el total de votos y la distribucion //////////////////////////
-    try {
-      $sql = "SELECT voto, fecha_nac, sexo FROM padronelectoral WHERE voto= ?";
-
-      $resultado = $base->prepare($sql);
-      $resultado->execute(array('VD'));
-
-
-      while ($registro = $resultado->fetch(PDO::FETCH_ASSOC)) {
-
-
-        switch ($registro['sexo']) {
-          case ('M'):
-            $masculinos += 1;
-            break;
-          case ('F'):
-            $femeninas += 1;
-            break;
-        }
-
-
-        if ($registro['fecha_nac'] != 'NO REP') {
-          $fNacimiento = $registro['fecha_nac'];
-          $fNacimiento = explode("_", $fNacimiento);
-          @$fechaNacimiento = $fNacimiento[0] . "/" . $fNacimiento[1] . "/" . $fNacimiento[2];
-          $Fecha_Unix = strtotime($fechaNacimiento);
-          $resultadoEdad = $hoy - $Fecha_Unix;
-          $resultadoEdad = $resultadoEdad / 86400;
-          $edad = $resultadoEdad / 365;
-
-
-          if ($edad < 30) {
-            $edadPsuv_30 += 1;
-          } elseif ($edad < 40) {
-            $edadPsuv_40 += 1;
-          } elseif ($edad < 50) {
-
-            $edadPsuv_50 += 1;
-          } elseif ($edad < 60) {
-            $edadPsuv_60 += 1;
-          } elseif ($edad < 70) {
-            $edadPsuv_70 += 1;
-          } elseif ($edad < 80) {
-            $edadPsuv_80 += 1;
-          } elseif ($edad < 150) {
-            $edadPsuv_90 += 1;
-          }
-        }
-      }
-
-      $resultado->execute(array('OP'));
-      while ($registro = $resultado->fetch(PDO::FETCH_ASSOC)) {
-        if ($registro['fecha_nac'] != 'NO REP') {
-          $fNacimiento = $registro['fecha_nac'];
-          $fNacimiento = explode("_", $fNacimiento);
-          @$fechaNacimiento = $fNacimiento[0] . "/" . $fNacimiento[1] . "/" . $fNacimiento[2];
-          $Fecha_Unix = strtotime($fechaNacimiento);
-          $resultadoEdad = $hoy - $Fecha_Unix;
-          $resultadoEdad = $resultadoEdad / 86400;
-          $edad = $resultadoEdad / 365;
-
-
-          if ($edad < 30) {
-            $edadOp_30 += 1;
-          } elseif ($edad < 40) {
-            $edadOp_40 += 1;
-          } elseif ($edad < 50) {
-            $edadOp_50 += 1;
-          } elseif ($edad < 60) {
-            $edadOp_60 += 1;
-          } elseif ($edad < 70) {
-            $edadOp_70 += 1;
-          } elseif ($edad < 80) {
-            $edadOp_80 += 1;
-          } elseif ($edad < 150) {
-            $edadOp_90 += 1;
-          }
-        }
-      }
-
-
-
-
-      $resultado->closeCursor();
-    } catch (Exception $e) {
-      // die('Error: ' . $e->GetMessage());
-    }
-
-
-    /*
-
-    $sql = "SELECT cedula, jefe, telefono
-    FROM unox107
-    UNION
-    SELECT cdula AS cedula, jefe, telefono
-    FROM unox10";
-
-    $stmt = $conexion_app->prepare($sql);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-
-    $data110 = array();
-    $votos_uno_dies = $result->num_rows;
-    if ($votos_uno_dies > 0) {
-    // Obtener los datos y convertirlos en un arreglo asociativo
-    while($row = $result->fetch_assoc()) {
-        $data110[$row['cedula']] = [$row['jefe'], $row['telefono']];
-    }
-    }
-
-
-
-
-    */
-
     $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0' $extraCondicion");
 
 
@@ -380,65 +267,6 @@ function abrev($nombre)
     $porcetanjeVotosB = $vb * 100 / $totalVotos;
     $porcetanjeVotosO = $vo * 100 / $totalVotos;
     $porcetanjeVotosN = $nc * 100 / $totalVotos;
-
-
-
-    $divisorPsuv = $edadPsuv_20 + $edadPsuv_30 + $edadPsuv_40 + $edadPsuv_50 + $edadPsuv_60 + $edadPsuv_70 + $edadPsuv_80 + $edadPsuv_90 + $edadPsuv_100;
-    $divisorOpos = $edadOp_20 + $edadOp_30 + $edadOp_40 + $edadOp_50 + $edadOp_60 + $edadOp_70 + $edadOp_80 + $edadOp_90 + $edadOp_100;
-
-
-    $edadPsuv_30 = $edadPsuv_30 * 100 / $divisorPsuv;
-    $edadPsuv_40 = $edadPsuv_40 * 100 / $divisorPsuv;
-    $edadPsuv_50 = $edadPsuv_50 * 100 / $divisorPsuv;
-    $edadPsuv_60 = $edadPsuv_60 * 100 / $divisorPsuv;
-    $edadPsuv_70 = $edadPsuv_70 * 100 / $divisorPsuv;
-    $edadPsuv_80 = $edadPsuv_80 * 100 / $divisorPsuv;
-    $edadPsuv_90 = $edadPsuv_90 * 100 / $divisorPsuv;
-
-    $edadPsuv_30 = number_format($edadPsuv_30, '0', '.', '.');
-    $edadPsuv_40 = number_format($edadPsuv_40, '0', '.', '.');
-    $edadPsuv_50 = number_format($edadPsuv_50, '0', '.', '.');
-    $edadPsuv_60 = number_format($edadPsuv_60, '0', '.', '.');
-    $edadPsuv_70 = number_format($edadPsuv_70, '0', '.', '.');
-    $edadPsuv_80 = number_format($edadPsuv_80, '0', '.', '.');
-    $edadPsuv_90 = number_format($edadPsuv_90, '0', '.', '.');
-
-    $edadOp_30 = $edadOp_30 * 100 / $divisorOpos;
-    $edadOp_40 = $edadOp_40 * 100 / $divisorOpos;
-    $edadOp_50 = $edadOp_50 * 100 / $divisorOpos;
-    $edadOp_60 = $edadOp_60 * 100 / $divisorOpos;
-    $edadOp_70 = $edadOp_70 * 100 / $divisorOpos;
-    $edadOp_80 = $edadOp_80 * 100 / $divisorOpos;
-    $edadOp_90 = $edadOp_90 * 100 / $divisorOpos;
-
-    $edadOp_30 = number_format($edadOp_30, '0', '.', '.');
-    $edadOp_40 = number_format($edadOp_40, '0', '.', '.');
-    $edadOp_50 = number_format($edadOp_50, '0', '.', '.');
-    $edadOp_60 = number_format($edadOp_60, '0', '.', '.');
-    $edadOp_70 = number_format($edadOp_70, '0', '.', '.');
-    $edadOp_80 = number_format($edadOp_80, '0', '.', '.');
-    $edadOp_90 = number_format($edadOp_90, '0', '.', '.');
-
-
-    $query55555 = "SELECT * FROM inf_mcp WHERE pq='edo'";
-    $buscarAlumnos55555 = $conexion->query($query55555);
-    if ($buscarAlumnos55555->num_rows > 0) {
-      while ($filavalor = $buscarAlumnos55555->fetch_assoc()) {
-
-        $cantidadestrubch = $filavalor['estr_ubch'];
-        $cantidadestrraas = $filavalor['estr_raas'];
-        $cantidadestrpatrulla = $filavalor['estr_patrulla'];
-
-        $calles = $filavalor['calles'];
-        $comunidades = $filavalor['comunidades'];
-        $ubch = $filavalor['ubch'];
-      }
-    }
-
-
-    $cantidadestrubch = $cantidadestrubch * $ubch;
-    $cantidadestrraas = $cantidadestrraas * $comunidades;
-
 
 
 
@@ -625,51 +453,11 @@ function abrev($nombre)
                       </tr>
                     </thead>
                     <tbody>
-
-                            <?php 
-                           
-
-
-$reportes_unodiex = [];
-$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(unodiez), COUNT(*) as reportes FROM `flujo_electoral` WHERE unodiez!='' GROUP BY unodiez");
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-  while ($row = $result->fetch_assoc()) {
-    $reportes_unodiex[$row['unodiez']] = $row['reportes'];
-}
-}
-
-
-
-$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM ( 
-  SELECT cdula_jf, telefono, jefe  FROM unox107
-  UNION ALL SELECT 
-  jfcedula, telefono, jefe FROM unox10) AS combined
-  GROUP BY cdula_jf");
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-  while ($row = $result->fetch_assoc()) {
-    if(@$reportes_unodiex[$row['cdula_jf']]){
-      $reportes = $reportes_unodiex[$row['cdula_jf']];
-      $porcentaje = $reportes * 100 / $row['cantidad'];
-    }else {
-      $reportes = 0;
-      $porcentaje = 0;
-    }
-    echo '<tr>
-    <td>' . $row['cdula_jf'] . '</td>
-    <td>' . $row['jefe'] . '</td>
-    <td class="text-center">' . $row['telefono'] . '</td>
-    <td class="text-center">' . $reportes.' / '.$row['cantidad'] . '</td>
-    <td class="text-center">' . number_format($porcentaje, '2', '.', ',') . '%</td>
-  </tr>';
-
-}
-}
-$stmt->close();
-                            ?>
+                          <?php 
+                          foreach ($tabla_reportes_110 as $item) {
+                            echo $item;
+                          }
+                          ?>
                     </tbody>
                   </table>
                             </div>
@@ -898,7 +686,7 @@ $stmt->close();
                       $result = $stmt->get_result();
                       if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
-                          $nombres["$row[cedula]"] = [$row['nombre'], $row['centro']];
+                          $nombres["$row[cedula]"] = [$row['nombre'], $row['centro'], ];
                         }
                       }
                       $stmt->close();
@@ -975,6 +763,15 @@ $stmt->close();
       </div>
 
       <?php
+
+        $cedulas_jefe = [];
+        foreach ($jefesUnoDiex as $key => $item) {
+          array_push($cedulas_jefe, $key);
+        }
+        $cedulas_jefe_list = implode("','", $cedulas_jefe);
+        $cedulas_jefe_list = "'" . $cedulas_jefe_list . "'";
+
+
       $municipios = array(
         '1' => ['MP. ATURES'],
         '2' => ['MP. ATABAPO'],
@@ -990,7 +787,26 @@ $stmt->close();
         $cantidadFlujo = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key'");
         $cantidadFlujoUnod = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key' AND unodiez!=0 AND unodiez!=''");
 
-        array_push($municipios[$key], $cantidadFlujo, $cantidadFlujoUnod);
+
+        $sql = "SELECT COUNT(*) AS count 
+        FROM flujo_electoral 
+        WHERE cedula IN ($cedulas_jefe_list) AND  mcp='$key'";
+
+        $result = $conexion_app->query($sql);
+
+        if ($result->num_rows > 0) {
+            // Obtener el resultado
+            $row = $result->fetch_assoc();
+            $cantidadJefesParticiparon = $row['count'];
+        } else {
+          $cantidadJefesParticiparon = 0;
+        }
+
+
+
+
+
+        array_push($municipios[$key], $cantidadFlujo, $cantidadFlujoUnod,  $cantidadJefesParticiparon);
       }
 
 
@@ -1186,30 +1002,7 @@ var root = am5.Root.new("chartdivHora");
 root.setThemes([
   am5themes_Animated.new(root)
 ]);
-/*
 
-var data = [
-  { x: 5, value: 11 },
-  { x: 6, value: 11 },
-  { x: 7, value: 12 },
-  { x: 8, value: 12 },
-  { x: 9, value: 13 },
-  { x: 10, value: 15 },
-  { x: 11, value: 19 },
-  { x: 12, value: 21 },
-  { x: 13, value: 22 },
-  { x: 14, value: 20 },
-  { x: 15, value: 18 },
-  { x: 16, value: 14 },
-  { x: 17, value: 16 },
-  { x: 18, value: 18 },
-  { x: 19, value: 17 },
-  { x: 20, value: 15 },
-  { x: 21, value: 12 },
-  { x: 22, value: 8 },
-  { x: 23, value: 11 }
-];
-*/
 
 
 var data = [
@@ -1395,7 +1188,7 @@ graficoHora()
           "Municipio": "' . $value[0] . '",
           "total": ' . $value[1] . ',
           "avance": ' . $value[2] . ',
-          "unoxdiez": 12
+          "unoxdiez": ' . $value[3] . '
         });';
         }
         ?>
