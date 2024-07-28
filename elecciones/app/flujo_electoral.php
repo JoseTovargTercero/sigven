@@ -1,6 +1,6 @@
 <?php
 
-echo 'Tu cédula sera bloqueada';
+echo 'Tu cédula sera bloqueada, comunícate con los administradores';
 exit();
 
 require('../configuracion/conexion.php');
