@@ -286,12 +286,26 @@ while($row = $result->fetch_assoc()) {
                             <th class="text-center">Empleados</th>
                             <th class="text-center">Participación general</th>
                             <th class="text-center">1*10/7</th>
+                            <th class="text-center">Tendencia 110/7</th>
                           </tr>
                         </thead>
                         <tbody>
                           
 
                         <?php
+                        
+                      function getTendencia($favor, $total)
+                      {
+                        $result = $favor - ($total - $favor);
+                        if ($result > 0) {
+                          return '<span class="text-success"> + ' . $result . '</span>';
+                        } elseif ($result < 0) {
+                          return '<span class="text-danger"> - ' . abs($result) . '</span>';
+                        } else {
+                          return '<span class="text-warning">0</span>';
+                        }
+                      }
+
 
                           function getRendimientoInst($ins) {
                             global $conexion_app;
@@ -337,6 +351,7 @@ while($row = $result->fetch_assoc()) {
                             <td class="text-center">'.$datos[0].'</td>
                             <td class="text-center">'.$datos[1].'</td>
                             <td class="text-center">'.$datos[2].'</td>
+                            <td class="text-center " style="font-weight: bolder;">'.getTendencia($datos[2], $datos[1]).'</td>
                           </tr>
 ';
                           }
