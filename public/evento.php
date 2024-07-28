@@ -589,7 +589,7 @@ function abrev($nombre)
                                   <td>' . $row['centro'] . '</td>
                                   <td>' .$status . '</td>
                                   <td>' .$hora_apertura . '</td>
-                                  <td class="text-center" style="background-color: #626262;">' . $row['ELECTORES_APERTURA'] . '</td>
+                                  <td class="text-center" >' . $row['ELECTORES_APERTURA'] . '</td>
                                   <td class="text-center">' . $user_reporte . '</td>
                                 </tr>';
                                 }
@@ -618,8 +618,8 @@ function abrev($nombre)
                       <tr>
                         <th class="p-0">Cedula</th>
                         <th class="p-0">Jefe</th>
-                        <th class="text-center p-0" style="background-color: #626262;">Teléfono</th>
-                        <th class="text-center p-0" style="background-color: #626262;">Electores</th>
+                        <th class="text-center p-0" >Teléfono</th>
+                        <th class="text-center p-0" >Electores</th>
                         <th class="text-center p-0">Porcentaje</th>
                       </tr>
                     </thead>
@@ -660,8 +660,8 @@ if ($result->num_rows > 0) {
     echo '<tr>
     <td>' . $row['cdula_jf'] . '</td>
     <td>' . $row['jefe'] . '</td>
-    <td class="text-center" style="background-color: #626262;">' . $row['telefono'] . '</td>
-    <td class="text-center" style="background-color: #626262;">' . $reportes.' / '.$row['cantidad'] . '</td>
+    <td class="text-center">' . $row['telefono'] . '</td>
+    <td class="text-center">' . $reportes.' / '.$row['cantidad'] . '</td>
     <td class="text-center">' . number_format($porcentaje, '2', '.', ',') . '%</td>
   </tr>';
 
