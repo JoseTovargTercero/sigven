@@ -31,10 +31,11 @@ if ($_SESSION["instancia"] == 0) {
 
 
 // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( 
+/*$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( 
   SELECT centro, cedula FROM unox107 
   UNION ALL SELECT 
   cv as centro, cdula AS cedula FROM unox10 ) AS combined GROUP BY centro ORDER BY centro;";
+*/$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( SELECT DISTINCT centro, cedula FROM ( SELECT centro, cedula FROM unox107 UNION ALL SELECT cv as centro, cdula AS cedula FROM unox10 ) AS combined ) AS distinct_combined GROUP BY centro ORDER BY centro;";
 
 $stmt = $conexion_app->prepare($sql);
 $stmt->execute();
