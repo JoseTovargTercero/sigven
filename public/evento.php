@@ -664,7 +664,95 @@ $stmt->close();
         </div>
       </div>
       <div class="row mt-4">
-        <div class="col-lg-6 mb-lg-0 mb-4">
+
+      <div class="col-lg-12 mb-lg-0 mb-4">
+          <div class="card h-100 p-3">
+            <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+              <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                <h6 class="font-weight-bolder mb-4">Operadores</h6>
+                <div class="table-responsive">
+                  <table class="" id="table3">
+                    <thead>
+                      <tr>
+                        <th class="p-0">Centro</th>
+                        <th class="text-center p-0">Operador</th>
+                        <th class="text-center p-0">Tipo</th>
+                        <th class="text-center p-0">Reportes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                            $nombres = array();
+                            $stmt = mysqli_prepare($conexion_app, "SELECT cedula, nombre, centro, sexo FROM rep_24");
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+                            if ($result->num_rows > 0) {
+                              while ($row = $result->fetch_assoc()) {
+                                $nombres["$row[cedula]"] = [$row['nombre'], $row['centro'], ];
+                              }
+                            }
+                            $stmt->close();
+      
+
+
+                            $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(responsable), COUNT(*) AS Nreportes FROM `flujo_electoral` GROUP BY responsable");
+                            $stmt->bind_param('s', $var);
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+                            if ($result->num_rows > 0) {
+                              while ($row = $result->fetch_assoc()) {
+                                $reportes_user[$row['responsable']] = $row['Nreportes'];
+                              }
+                            }
+                            $stmt->close();
+                            
+
+                      $stmt = mysqli_prepare($conexion_app, "SELECT * FROM tablamesa");
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+
+
+
+                        if ($row['OPERADOR'] != '' && $row['OPERADOR'] != 0) {
+                          echo '<tr>
+                          <td>' . $row['centro'] . '</td>
+                          <td>' . $nombres[$row['OPERADOR']][0] . '</td>
+                          <td class="text-center">Operador</td>
+                          <td class="text-center">'.($reportes_user[$row['OPERADOR']] ? $reportes_user[$row['OPERADOR']] : 0).'</td>';
+                        }
+                        if ($row['OPERADOR_PUNTO'] != '' && $row['OPERADOR_PUNTO'] != 0) {
+                          echo '<tr>
+                          <td>' . $row['centro'] . '</td>
+                          <td>' . $nombres[$row['OPERADOR_PUNTO']][0] . '</td>
+                          <td class="text-center">Punto</td>
+                          <td class="text-center">'.($reportes_user[$row['OPERADOR_PUNTO']] ? $reportes_user[$row['OPERADOR_PUNTO']] : 0).'</td>';
+                        }
+                        if ($row['OPERADOR_UBCH'] != '' && $row['OPERADOR_UBCH'] != 0) {
+                          echo '<tr>
+                          <td>' . $row['centro'] . '</td>
+                          <td>' . $nombres[$row['OPERADOR_UBCH']][0] . '</td>
+                          <td class="text-center">Ubch</td>
+                          <td class="text-center">'.($reportes_user[$row['OPERADOR_UBCH']] ? $reportes_user[$row['OPERADOR_UBCH']] : 0).'</td>';
+                        }
+
+                        }
+                      }
+                      $stmt->close();
+                      ?>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div class="col-lg-6 mb-lg-0 mt-4">
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
@@ -680,17 +768,7 @@ $stmt->close();
                     </thead>
                     <tbody>
                       <?php
-                      $nombres = array();
-                      $stmt = mysqli_prepare($conexion_app, "SELECT cedula, nombre, centro, sexo FROM rep_24");
-                      $stmt->execute();
-                      $result = $stmt->get_result();
-                      if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                          $nombres["$row[cedula]"] = [$row['nombre'], $row['centro'], ];
-                        }
-                      }
-                      $stmt->close();
-
+                
                       $stmt = mysqli_prepare($conexion_app, "SELECT responsable, centro, COUNT(*) AS Nrepeticiones
                     FROM flujo_electoral $extraCondicionW
                     GROUP BY responsable
@@ -718,46 +796,7 @@ $stmt->close();
           </div>
         </div>
 
-        <div class="col-lg-6 mb-lg-0 mb-4">
-          <div class="card h-100 p-3">
-            <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
-              <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-                <h6 class="font-weight-bolder mb-4">Movilización de OP</h6>
-                <div class="table-responsive">
-                  <table class="" id="table3">
-                    <thead>
-                      <tr>
-                        <th class="p-0">OP</th>
-                        <th class="text-center p-0">Movilizador</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php
-
-                      $stmt = mysqli_prepare($conexion_app, "SELECT responsable, cedula FROM flujo_electoral
-                    WHERE voto='OP' $extraCondicion ORDER BY responsable");
-                      $stmt->execute();
-                      $result = $stmt->get_result();
-                      if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                          if (@$nombres[$row['responsable']][0]) {
-                            echo '<tr>
-                        <td>' . $nombres[$row['cedula']][0] . '</td>
-                        <td>' . $nombres[$row['responsable']][0] . '</td>
-                      </tr>';
-                          }
-                        }
-                      }
-                      $stmt->close();
-                      ?>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+   
 
 
       </div>
