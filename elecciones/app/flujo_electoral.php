@@ -1,4 +1,8 @@
 <?php
+
+echo 'Tu cédula sera bloqueada';
+exit();
+
 require('../configuracion/conexion.php');
 require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
