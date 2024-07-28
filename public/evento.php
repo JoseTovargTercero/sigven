@@ -752,12 +752,12 @@ $stmt->close();
 
                 </div>
                 <div class="table-responsive">
-                  <table id="table4">
+                  <table id="table44">
                     <thead>
                       <tr>
                         <th class="p-0">Centro</th>
-                        <th class="text-center p-0" style="background-color: #626262;">Asistencia <br> deseada</th>
-                        <th class="text-center p-0" style="background-color: #626262;">Porcentaje</th>
+                        <th class="text-center p-0" style="background-color: #dbdbdb;">Asistencia <br> deseada</th>
+                        <th class="text-center p-0" style="background-color: #dbdbdb;">Porcentaje</th>
                         <th class="text-center p-0">Tendencia 110/7</th>
                         <th class="text-center p-0">Total</th>
                         <th class="text-center p-0"></th>
@@ -824,8 +824,8 @@ $stmt->close();
                               </a>
                               
                               ' . abrev($centroDatos[$row['centro']][0]) . '</td>
-                              <td class="text-center" style="background-color: #626262;">' . $asistencia_1107 . ' / ' . $meta . ' </td>
-                              <td class="text-center" style="background-color: #626262;">' . number_format($asistencia_1107 * 100 / $meta, '1', '.', ',') . '%</td>
+                              <td class="text-center" style="background-color: #dbdbdb;">' . $asistencia_1107 . ' / ' . $meta . ' </td>
+                              <td class="text-center" style="background-color: #dbdbdb;">' . number_format($asistencia_1107 * 100 / $meta, '1', '.', ',') . '%</td>
                               <td class="text-center">' . $tendencia1107 . '</td>
                               <td class="text-center">' . $row['Nrepeticiones'] . '</td>
                               <td class="text-center"><button class="btn btn-sm btn-info" style="padding: 8px;">
@@ -1081,6 +1081,9 @@ $stmt->close();
         language: languageSettings
       });
       $('#table5').DataTable({
+        language: languageSettings
+      });
+      $('#table44').DataTable({
         language: languageSettings
       });
     </script>
