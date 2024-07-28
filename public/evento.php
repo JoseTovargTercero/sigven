@@ -250,7 +250,7 @@ $stmt->close();
     <!-- Navbar -->
     <?php echo $navbar;
 
-    $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0' $extraCondicion");
+    $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!=0 $extraCondicion OR unodiez!='' $extraCondicion");
 
 
     $vd = contar("SELECT count(*) FROM flujo_electoral WHERE voto='VD' $extraCondicion");
@@ -259,8 +259,7 @@ $stmt->close();
     $nc = contar("SELECT count(*) FROM flujo_electoral WHERE voto='NC' $extraCondicion");
 
 
-
-    $totalVotos = $vd + $vb + $vo + $nc;
+    $totalVotos = contar("SELECT count(*) FROM flujo_electoral $extraCondicionW");
 
 
     $porcetanjeVotosD = $vd * 100 / $totalVotos;
