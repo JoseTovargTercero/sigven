@@ -127,11 +127,12 @@ function verificarElector($elector, $responsable, $tipo_user) {
     }
 }
 
-//if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
-if (true) {
-    //$electores = json_decode($_POST["electores"], true);
-    $electores = array('14565280', '27640176');
-    $responsable = '27640176';
+if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
+//if (true) {
+    $electores = json_decode($_POST["electores"], true);
+   // $electores = array('14565280', '27640176');
+    $responsable = $_POST["responsable"];
+   // $responsable = '27640176';
     
     $resp_verificado = getOperador($responsable);
 
