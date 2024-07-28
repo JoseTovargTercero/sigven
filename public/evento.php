@@ -715,9 +715,7 @@ $stmt->close();
               $datetime = $row['hora_reporte'];
               $timestamp = strtotime($datetime);
               $time = date("H", $timestamp);
-              if ($time == 9) {
-                echo $row['cedula'];
-              }
+             
                 $votos_por_hora[$time] += 1;
              
           }
@@ -990,10 +988,9 @@ $stmt->close();
 
       foreach ($municipios as $key => $value) {
         $cantidadFlujo = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key'");
-        $cantidadFlujoUnod = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key' AND unodiez!='0'");
-        $cantidadRep = contar("SELECT count(*) FROM rep_24 WHERE mcp='$key'");
+        $cantidadFlujoUnod = contar("SELECT count(*) FROM flujo_electoral WHERE mcp='$key' AND unodiez!=0 AND unodiez!=''");
 
-        array_push($municipios[$key], $cantidadFlujo, $cantidadRep, $cantidadFlujoUnod);
+        array_push($municipios[$key], $cantidadFlujo, $cantidadFlujoUnod);
       }
 
 
@@ -1386,15 +1383,19 @@ graficoHora()
         // jefes de ubch //
 
         var data = []
+/*
 
+        array_push($municipios[$key], $cantidadFlujo, $cantidadFlujoUnod);
+
+*/
 
         <?php
         foreach ($municipios as $key => $value) {
           echo 'data.push({
           "Municipio": "' . $value[0] . '",
-          "total": ' . $value[2] . ',
-          "avance": ' . $value[1] . ',
-          "unoxdiez": ' . $value[3] . '
+          "total": ' . $value[1] . ',
+          "avance": ' . $value[2] . ',
+          "unoxdiez": 12
         });';
         }
         ?>
