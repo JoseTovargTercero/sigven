@@ -50,6 +50,30 @@ if ($result->num_rows > 0) {
 }
 
 
+
+function abrev($nombre)
+{
+  // Lista de sustituciones
+  $sustituciones = [
+    'UNIDAD EDUCATIVA' => 'UE',
+    'CENTRO EDUCATIVO INTEGRAL BOLIVARIANO' => 'CEIB',
+    'ESCUELA BASICA' => 'EB',
+    'LICEO BOLIVARIANO' => 'LB',
+    'CENTRO MOVIL' => 'CM'
+  ];
+
+  // Reemplazar cada coincidencia en la lista de sustituciones
+  foreach ($sustituciones as $original => $abreviado) {
+    $nombre = str_replace($original, $abreviado, $nombre);
+  }
+
+  return $nombre;
+}
+
+
+
+
+
 ?>
 
 
@@ -505,6 +529,10 @@ if ($result->num_rows > 0) {
 
 
       <div class="row mt-4">
+   
+
+
+
 
         <?php if ($_SESSION["instancia"] == 0) { ?>
 
@@ -521,6 +549,137 @@ if ($result->num_rows > 0) {
             </div>
           </div>
         <?php } ?>
+
+
+
+        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+                    <div class="card h-100">
+                      <div class="card-body p-3">
+                        <div class="row">
+                          <div class="d-flex flex-column h-100">
+                            <h6 class="font-weight-bolder mb-4 pt-2">Reportes de apertura</h6>
+                            <div class="table-responsive">
+                  <table id="table5">
+                    <thead>
+                      <tr>
+                        <th class="">Centro</th>
+                        <th class="">Status</th>
+                        <th class="">Hora apertura</th>
+                        <th class="text-center" style="background-color: #626262;">Cantidad de electores</th>
+                        <th class="" style="background-color: #626262;">Reporte</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                            <?php 
+                              $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa`");
+                              $stmt->execute();
+                              $result = $stmt->get_result();
+                              if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                  if ($row['USER_REPORTE'] == '0') {
+                                    $status = '<span class="badge bg-info">CERRADO</span>';
+                                    $user_reporte = '';
+                                    $hora_apertura = '';
+                                  }else {
+                                    $status = '<span class="badge bg-danger">ABIERTO</span>';
+                                    $user_reporte = $row['USER_REPORTE'];
+                                    $hora_apertura = $row['HORA_APERTURA'];
+                                  }
+                                  echo '<tr>
+                                  <td>' . $row['centro'] . '</td>
+                                  <td>' .$status . '</td>
+                                  <td>' .$hora_apertura . '</td>
+                                  <td class="text-center" style="background-color: #626262;">' . $row['ELECTORES_APERTURA'] . '</td>
+                                  <td class="text-center">' . $user_reporte . '</td>
+                                </tr>';
+                                }
+                              }
+                              $stmt->close();
+                            ?>
+                    </tbody>
+                  </table>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+                    <div class="card h-100">
+                      <div class="card-body p-3">
+                        <div class="row">
+                          <div class="d-flex flex-column h-100" >
+                            <h6 class="font-weight-bolder mb-4 pt-2">Reportes por 1*10/7</h6>
+
+                            <div class="table-responsive">
+                  <table id="table4">
+                    <thead>
+                      <tr>
+                        <th class="p-0">Cedula</th>
+                        <th class="p-0">Jefe</th>
+                        <th class="text-center p-0" style="background-color: #626262;">Teléfono</th>
+                        <th class="text-center p-0" style="background-color: #626262;">Electores</th>
+                        <th class="text-center p-0">Porcentaje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+
+                            <?php 
+                           
+
+
+$reportes_unodiex = [];
+$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(unodiez), COUNT(*) as reportes FROM `flujo_electoral` WHERE unodiez!='' GROUP BY unodiez");
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+  while ($row = $result->fetch_assoc()) {
+    $reportes_unodiex[$row['unodiez']] = $row['reportes'];
+}
+}
+
+
+
+$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM ( 
+  SELECT cdula_jf, telefono, jefe  FROM unox107
+  UNION ALL SELECT 
+  jfcedula, telefono, jefe FROM unox10) AS combined
+  GROUP BY cdula_jf");
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+  while ($row = $result->fetch_assoc()) {
+    if(@$reportes_unodiex[$row['cdula_jf']]){
+      $reportes = $reportes_unodiex[$row['cdula_jf']];
+      $porcentaje = $reportes * 100 / $row['cantidad'];
+    }else {
+      $reportes = 0;
+      $porcentaje = 0;
+    }
+    echo '<tr>
+    <td>' . $row['cdula_jf'] . '</td>
+    <td>' . $row['jefe'] . '</td>
+    <td class="text-center" style="background-color: #626262;">' . $row['telefono'] . '</td>
+    <td class="text-center" style="background-color: #626262;">' . $reportes.' / '.$row['cantidad'] . '</td>
+    <td class="text-center">' . number_format($porcentaje, '2', '.', ',') . '%</td>
+  </tr>';
+
+}
+}
+$stmt->close();
+                            ?>
+                    </tbody>
+                  </table>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
 
         <?php 
         $votos_por_hora = array(
@@ -593,7 +752,7 @@ if ($result->num_rows > 0) {
 
                 </div>
                 <div class="table-responsive">
-                  <table id="table1">
+                  <table id="table4">
                     <thead>
                       <tr>
                         <th class="p-0">Centro</th>
@@ -609,42 +768,6 @@ if ($result->num_rows > 0) {
                       <?php
 
 
-
-
-                      /*
-                    $unoX107 = [];
-
-                    $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(centro), COUNT(*) AS Nrepeticiones FROM unox107 GROUP BY centro");
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    if ($result->num_rows > 0) {
-                      while ($row = $result->fetch_assoc()) {
-                        $unoX107[$row['centro']] = $row['Nrepeticiones'];
-                      }
-                    }
-                    $stmt->close();
-*/
-
-
-
-                      function abrev($nombre)
-                      {
-                        // Lista de sustituciones
-                        $sustituciones = [
-                          'UNIDAD EDUCATIVA' => 'UE',
-                          'CENTRO EDUCATIVO INTEGRAL BOLIVARIANO' => 'CEIB',
-                          'ESCUELA BASICA' => 'EB',
-                          'LICEO BOLIVARIANO' => 'LB',
-                          'CENTRO MOVIL' => 'CM'
-                        ];
-
-                        // Reemplazar cada coincidencia en la lista de sustituciones
-                        foreach ($sustituciones as $original => $abreviado) {
-                          $nombre = str_replace($original, $abreviado, $nombre);
-                        }
-
-                        return $nombre;
-                      }
                       $centroDatos = array();
 
                       $stmt = mysqli_prepare($conexion_app, "SELECT centro, CODIGO, ELECTORES FROM tablamesa");
@@ -672,7 +795,8 @@ if ($result->num_rows > 0) {
                         }
                       }
                       //SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral GROUP BY centro ORDER BY `unodiez_diferente_de_cero` DESC
-
+                      $favor_total = 0;
+                      $contra_total = 0;
                       $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral  $extraCondicionW GROUP BY centro ORDER BY `Nrepeticiones` ASC");
                       $stmt->execute();
                       $result = $stmt->get_result();
@@ -946,11 +1070,17 @@ if ($result->num_rows > 0) {
       $('#table1').DataTable({
         language: languageSettings
       });
+      $('#table4').DataTable({
+        language: languageSettings
+      });
 
       $('#table2').DataTable({
         language: languageSettings
       });
       $('#table3').DataTable({
+        language: languageSettings
+      });
+      $('#table5').DataTable({
         language: languageSettings
       });
     </script>
