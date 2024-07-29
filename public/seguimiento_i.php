@@ -62,7 +62,7 @@ if ($result->num_rows > 0) {
     <td>'.$row['nombre'].'</td>
     <td>'.$row['cedula'].'</td>
     <td>'.$row['institucion'].'</td>
-    <td>'.($row['responsable'] != 'NO'?'SI':'').'</td>
+    <td>'.($row['responsable'] != ''?'SI':'NO').'</td>
     <td>';
     
     if ($row['unodiez'] != '') {
