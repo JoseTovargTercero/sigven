@@ -4,6 +4,26 @@ include('../elecciones/configuracion/conexion.php'); // CONEXION A LA BASE DE DA
 
 
 
+$jefesUnoDiex = [];
+
+$tabla_reportes_110 = [];
+$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM ( 
+SELECT cdula_jf, telefono, jefe  FROM unox107
+UNION ALL SELECT 
+jfcedula, telefono, jefe FROM unox10) AS combined
+GROUP BY cdula_jf");
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+while ($row = $result->fetch_assoc()) {
+
+$jefesUnoDiex[$row['cdula_jf']] = true;
+
+
+
+}
+}
+$stmt->close();
 
 
 
@@ -43,7 +63,17 @@ if ($result->num_rows > 0) {
     <td>'.$row['cedula'].'</td>
     <td>'.$row['institucion'].'</td>
     <td>'.($row['responsable'] != 'NO'?'SI':'').'</td>
-    <td>'.($row['unodiez'] == '' ? 'NO':$row['unodiez']).'</td>
+    <td>';
+    
+    if ($row['unodiez'] != '') {
+      echo $row['unodiez'];
+    }elseif (@$jefesUnoDiex[$row['cedula']]) {
+      echo 'JEFE';
+    }else {
+      echo 'NO';
+    }
+  
+    echo '</td>
     </tr>
     ';
 }
