@@ -3,7 +3,7 @@ include('../configurar/configuracion.php');
 include('../elecciones/configuracion/conexion.php'); // CONEXION A LA BASE DE DATOS DE LAS ELECCIONES
 
 
-
+/*
 $jefesUnoDiex = [];
 
 $tabla_reportes_110 = [];
@@ -93,6 +93,7 @@ echo '</tbody>
 
 
 exit();
+*/
 include('includes/navbar.php');
 
 
