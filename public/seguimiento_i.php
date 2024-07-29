@@ -2,6 +2,67 @@
 include('../configurar/configuracion.php');
 include('../elecciones/configuracion/conexion.php'); // CONEXION A LA BASE DE DATOS DE LAS ELECCIONES
 
+
+
+
+
+
+
+
+
+
+echo '<table>
+<thead>
+<tr>
+<th>cedula</th>
+<th>nombre</th>
+<th>ente</th>
+<th>voto</th>
+<th>uno10</th>
+</tr>
+</thead>
+<tbody>
+
+';
+
+
+
+
+
+$stmt = mysqli_prepare($conexion_app, "SELECT e.*, f.responsable, f.unodiez FROM `empleados_instituciones` AS e
+LEFT JOIN flujo_electoral AS f ON f.cedula = e.cedula
+");
+$stmt->bind_param('s', $var);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+  while ($row = $result->fetch_assoc()) {
+    echo '
+    <tr>
+    <td>'.$row['nombre'].'</td>
+    <td>'.$row['cedula'].'</td>
+    <td>'.$row['institucion'].'</td>
+    <td>'.($row['responsable'] != ''?'SI':'').'</td>
+    <td>'.$row['unodiez'].'</td>
+    </tr>
+    ';
+}
+}
+$stmt->close();
+
+
+echo '</tbody>
+</table>';
+
+
+
+
+
+
+
+
+
+exit();
 include('includes/navbar.php');
 
 
@@ -352,8 +413,7 @@ while($row = $result->fetch_assoc()) {
                             <td class="text-center">'.$datos[1].'</td>
                             <td class="text-center">'.$datos[2].'</td>
                             <td class="text-center " style="font-weight: bolder;">'.getTendencia($datos[2], $datos[1]).'</td>
-                          </tr>
-';
+                          </tr>';
                           }
                         }
                         $stmt->close();
