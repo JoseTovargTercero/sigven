@@ -42,8 +42,8 @@ if ($result->num_rows > 0) {
     <td>'.$row['nombre'].'</td>
     <td>'.$row['cedula'].'</td>
     <td>'.$row['institucion'].'</td>
-    <td>'.($row['responsable'] != ''?'SI':'').'</td>
-    <td>'.$row['unodiez'].'</td>
+    <td>'.($row['responsable'] != 'NO'?'SI':'').'</td>
+    <td>'.($row['unodiez'] == '' ? 'NO':$row['unodiez']).'</td>
     </tr>
     ';
 }
