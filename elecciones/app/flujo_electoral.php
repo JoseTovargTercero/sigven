@@ -49,8 +49,9 @@ if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
 
 
     if ($nombre == '' || $centro == 'NDP' || $centro == false) {
-      echo 'NE';
-      exit();
+      /*echo 'NE';
+      exit();*/
+      
     }
 
 
