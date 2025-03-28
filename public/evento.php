@@ -24,7 +24,6 @@ if ($_SESSION["instancia"] == 0) {
 //instancia - $_SESSION['id_instancia']
 
 
-
 // sacar las metas por centro
 
 
@@ -35,7 +34,8 @@ if ($_SESSION["instancia"] == 0) {
   SELECT centro, cedula FROM unox107 
   UNION ALL SELECT 
   cv as centro, cdula AS cedula FROM unox10 ) AS combined GROUP BY centro ORDER BY centro;";
-*/$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( SELECT DISTINCT centro, cedula FROM ( SELECT centro, cedula FROM unox107 UNION ALL SELECT cv as centro, cdula AS cedula FROM unox10 ) AS combined ) AS distinct_combined GROUP BY centro ORDER BY centro;";
+*/
+$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( SELECT DISTINCT centro, cedula FROM ( SELECT centro, cedula FROM unox107 UNION ALL SELECT cv as centro, cdula AS cedula FROM unox10 ) AS combined ) AS distinct_combined GROUP BY centro ORDER BY centro;";
 
 $stmt = $conexion_app->prepare($sql);
 $stmt->execute();
@@ -83,9 +83,9 @@ $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(unodiez), COUNT(*) as rep
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
-while ($row = $result->fetch_assoc()) {
-$reportes_unodiex[$row['unodiez']] = $row['reportes'];
-}
+  while ($row = $result->fetch_assoc()) {
+    $reportes_unodiex[$row['unodiez']] = $row['reportes'];
+  }
 }
 
 
@@ -100,25 +100,24 @@ GROUP BY cdula_jf");
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
-while ($row = $result->fetch_assoc()) {
-if(@$reportes_unodiex[$row['cdula_jf']]){
-$reportes = $reportes_unodiex[$row['cdula_jf']];
-$porcentaje = $reportes * 100 / $row['cantidad'];
-}else {
-$reportes = 0;
-$porcentaje = 0;
-}
-$jefesUnoDiex[$row['cdula_jf']] = true;
+  while ($row = $result->fetch_assoc()) {
+    if (@$reportes_unodiex[$row['cdula_jf']]) {
+      $reportes = $reportes_unodiex[$row['cdula_jf']];
+      $porcentaje = $reportes * 100 / $row['cantidad'];
+    } else {
+      $reportes = 0;
+      $porcentaje = 0;
+    }
+    $jefesUnoDiex[$row['cdula_jf']] = true;
 
-$tabla_reportes_110[] = '<tr>
+    $tabla_reportes_110[] = '<tr>
 <td>' . $row['cdula_jf'] . '</td>
 <td>' . $row['jefe'] . '</td>
 <td class="text-center">' . $row['telefono'] . '</td>
-<td class="text-center">' . $reportes.' / '.$row['cantidad'] . '</td>
+<td class="text-center">' . $reportes . ' / ' . $row['cantidad'] . '</td>
 <td class="text-center">' . number_format($porcentaje, '2', '.', ',') . '%</td>
 </tr>';
-
-}
+  }
 }
 $stmt->close();
 
@@ -162,6 +161,7 @@ $stmt->close();
   <script type="text/javascript" src="jquery.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.dataTables.css" />
   <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     .text-center {
       text-align: center !important;
@@ -357,7 +357,7 @@ $stmt->close();
 
 
       <div class="row mt-4">
-   
+
 
 
 
@@ -381,95 +381,95 @@ $stmt->close();
 
 
         <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
-                    <div class="card h-100">
-                      <div class="card-body p-3">
-                        <div class="row">
-                          <div class="d-flex flex-column h-100">
-                            <h6 class="font-weight-bolder mb-4 pt-2">Reportes de apertura</h6>
-                            <div class="table-responsive">
-                  <table id="table5">
-                    <thead>
-                      <tr>
-                        <th class="">Centro</th>
-                        <th class="">Status</th>
-                        <th class="">Hora apertura</th>
-                        <th class="text-center" >Cantidad de electores</th>
-                        <th class="" >Reporte</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                            <?php 
-                              $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa`");
-                              $stmt->execute();
-                              $result = $stmt->get_result();
-                              if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                  if ($row['USER_REPORTE'] == '0') {
-                                    $status = '<span class="badge bg-info">CERRADO</span>';
-                                    $user_reporte = '';
-                                    $hora_apertura = '';
-                                  }else {
-                                    $status = '<span class="badge bg-danger">ABIERTO</span>';
-                                    $user_reporte = $row['USER_REPORTE'];
-                                    $hora_apertura = $row['HORA_APERTURA'];
-                                  }
-                                  echo '<tr>
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="d-flex flex-column h-100">
+                  <h6 class="font-weight-bolder mb-4 pt-2">Reportes de apertura</h6>
+                  <div class="table-responsive">
+                    <table id="table5">
+                      <thead>
+                        <tr>
+                          <th class="">Centro</th>
+                          <th class="">Status</th>
+                          <th class="">Hora apertura</th>
+                          <th class="text-center">Cantidad de electores</th>
+                          <th class="">Reporte</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php
+                        $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa`");
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        if ($result->num_rows > 0) {
+                          while ($row = $result->fetch_assoc()) {
+                            if ($row['USER_REPORTE'] == '0') {
+                              $status = '<span class="badge bg-info">CERRADO</span>';
+                              $user_reporte = '';
+                              $hora_apertura = '';
+                            } else {
+                              $status = '<span class="badge bg-danger">ABIERTO</span>';
+                              $user_reporte = $row['USER_REPORTE'];
+                              $hora_apertura = $row['HORA_APERTURA'];
+                            }
+                            echo '<tr>
                                   <td>' . $row['centro'] . '</td>
-                                  <td>' .$status . '</td>
-                                  <td>' .$hora_apertura . '</td>
+                                  <td>' . $status . '</td>
+                                  <td>' . $hora_apertura . '</td>
                                   <td class="text-center" >' . $row['ELECTORES_APERTURA'] . '</td>
                                   <td class="text-center">' . $user_reporte . '</td>
                                 </tr>';
-                                }
-                              }
-                              $stmt->close();
-                            ?>
-                    </tbody>
-                  </table>
-                            </div>
-
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
-                    <div class="card h-100">
-                      <div class="card-body p-3">
-                        <div class="row">
-                          <div class="d-flex flex-column h-100" >
-                            <h6 class="font-weight-bolder mb-4 pt-2">Reportes por 1*10/7</h6>
-
-                            <div class="table-responsive">
-                  <table id="table4">
-                    <thead>
-                      <tr>
-                        <th class="p-0">Cedula</th>
-                        <th class="p-0">Jefe</th>
-                        <th class="text-center p-0" >Teléfono</th>
-                        <th class="text-center p-0" >Electores</th>
-                        <th class="text-center p-0">Porcentaje</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                          <?php 
-                          foreach ($tabla_reportes_110 as $item) {
-                            echo $item;
                           }
-                          ?>
-                    </tbody>
-                  </table>
-                            </div>
-
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                        }
+                        $stmt->close();
+                        ?>
+                      </tbody>
+                    </table>
                   </div>
 
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="d-flex flex-column h-100">
+                  <h6 class="font-weight-bolder mb-4 pt-2">Reportes por 1*10/7</h6>
+
+                  <div class="table-responsive">
+                    <table id="table4">
+                      <thead>
+                        <tr>
+                          <th class="p-0">Cedula</th>
+                          <th class="p-0">Jefe</th>
+                          <th class="text-center p-0">Teléfono</th>
+                          <th class="text-center p-0">Electores</th>
+                          <th class="text-center p-0">Porcentaje</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php
+                        foreach ($tabla_reportes_110 as $item) {
+                          echo $item;
+                        }
+                        ?>
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
 
-        <?php 
+
+        <?php
         $votos_por_hora = array(
           '05' => 0,
           '06' => 0,
@@ -497,33 +497,32 @@ $stmt->close();
         $stmt = mysqli_prepare($conexion_app, "SELECT cedula, hora_reporte FROM `flujo_electoral` ORDER BY id ASC");
         $stmt->execute();
         $result = $stmt->get_result();
-          if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-              $datetime = $row['hora_reporte'];
-              $timestamp = strtotime($datetime);
-              $time = date("H", $timestamp);
-             
-                $votos_por_hora[$time] += 1;
-             
+        if ($result->num_rows > 0) {
+          while ($row = $result->fetch_assoc()) {
+            $datetime = $row['hora_reporte'];
+            $timestamp = strtotime($datetime);
+            $time = date("H", $timestamp);
+
+            $votos_por_hora[$time] += 1;
           }
         }
         $stmt->close();
-        
+
         ?>
 
 
         <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
-            <div class="card h-100">
-              <div class="card-body p-3">
-                <div class="row">
-                  <div class="d-flex flex-column h-100">
-                    <h6 class="font-weight-bolder mb-4 pt-2">Flujo de electores por hora</h6>
-                    <div id="chartdivHora" style="height: 30vh;"></div>
-                  </div>
+          <div class="card h-100">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="d-flex flex-column h-100">
+                  <h6 class="font-weight-bolder mb-4 pt-2">Flujo de electores por hora</h6>
+                  <div id="chartdivHora" style="height: 30vh;"></div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
 
 
@@ -604,7 +603,7 @@ $stmt->close();
                             echo '<tr>
                               <td>
   
-                              <a href="reportes/estado_ubch.php?c='.$row['centro'].'">
+                              <a href="reportes/estado_ubch.php?c=' . $row['centro'] . '">
                               <i style="margin-right: 15px;font-size: 17px;" class="line icon-cloud-download"></i>
                               
                               </a>
@@ -664,7 +663,7 @@ $stmt->close();
       </div>
       <div class="row mt-4">
 
-      <div class="col-lg-12 mb-lg-0 mb-4">
+        <div class="col-lg-12 mb-lg-0 mb-4">
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
@@ -681,30 +680,30 @@ $stmt->close();
                     </thead>
                     <tbody>
                       <?php
-                            $nombres = array();
-                            $stmt = mysqli_prepare($conexion_app, "SELECT cedula, nombre, centro, sexo FROM rep_24");
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            if ($result->num_rows > 0) {
-                              while ($row = $result->fetch_assoc()) {
-                                $nombres["$row[cedula]"] = [$row['nombre'], $row['centro'], ];
-                              }
-                            }
-                            $stmt->close();
-      
+                      $nombres = array();
+                      $stmt = mysqli_prepare($conexion_app, "SELECT cedula, nombre, centro, sexo FROM rep_24");
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                          $nombres["$row[cedula]"] = [$row['nombre'], $row['centro'],];
+                        }
+                      }
+                      $stmt->close();
 
 
-                            $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(responsable), COUNT(*) AS Nreportes FROM `flujo_electoral` GROUP BY responsable");
-                            $stmt->bind_param('s', $var);
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            if ($result->num_rows > 0) {
-                              while ($row = $result->fetch_assoc()) {
-                                $reportes_user[$row['responsable']] = $row['Nreportes'];
-                              }
-                            }
-                            $stmt->close();
-                            
+
+                      $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(responsable), COUNT(*) AS Nreportes FROM `flujo_electoral` GROUP BY responsable");
+                      $stmt->bind_param('s', $var);
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                          $reportes_user[$row['responsable']] = $row['Nreportes'];
+                        }
+                      }
+                      $stmt->close();
+
 
                       $stmt = mysqli_prepare($conexion_app, "SELECT * FROM tablamesa");
                       $stmt->execute();
@@ -714,28 +713,27 @@ $stmt->close();
 
 
 
-                        if ($row['OPERADOR'] != '' && $row['OPERADOR'] != 0) {
-                          echo '<tr>
+                          if ($row['OPERADOR'] != '' && $row['OPERADOR'] != 0) {
+                            echo '<tr>
                           <td>' . $row['centro'] . '</td>
                           <td>' . $nombres[$row['OPERADOR']][0] . '</td>
                           <td class="text-center">Operador</td>
-                          <td class="text-center">'.($reportes_user[$row['OPERADOR']] ? $reportes_user[$row['OPERADOR']] : 0).'</td>';
-                        }
-                        if ($row['OPERADOR_PUNTO'] != '' && $row['OPERADOR_PUNTO'] != 0) {
-                          echo '<tr>
+                          <td class="text-center">' . ($reportes_user[$row['OPERADOR']] ? $reportes_user[$row['OPERADOR']] : 0) . '</td>';
+                          }
+                          if ($row['OPERADOR_PUNTO'] != '' && $row['OPERADOR_PUNTO'] != 0) {
+                            echo '<tr>
                           <td>' . $row['centro'] . '</td>
                           <td>' . $nombres[$row['OPERADOR_PUNTO']][0] . '</td>
                           <td class="text-center">Punto</td>
-                          <td class="text-center">'.($reportes_user[$row['OPERADOR_PUNTO']] ? $reportes_user[$row['OPERADOR_PUNTO']] : 0).'</td>';
-                        }
-                        if ($row['OPERADOR_UBCH'] != '' && $row['OPERADOR_UBCH'] != 0) {
-                          echo '<tr>
+                          <td class="text-center">' . ($reportes_user[$row['OPERADOR_PUNTO']] ? $reportes_user[$row['OPERADOR_PUNTO']] : 0) . '</td>';
+                          }
+                          if ($row['OPERADOR_UBCH'] != '' && $row['OPERADOR_UBCH'] != 0) {
+                            echo '<tr>
                           <td>' . $row['centro'] . '</td>
                           <td>' . $nombres[$row['OPERADOR_UBCH']][0] . '</td>
                           <td class="text-center">Ubch</td>
-                          <td class="text-center">'.($reportes_user[$row['OPERADOR_UBCH']] ? $reportes_user[$row['OPERADOR_UBCH']] : 0).'</td>';
-                        }
-
+                          <td class="text-center">' . ($reportes_user[$row['OPERADOR_UBCH']] ? $reportes_user[$row['OPERADOR_UBCH']] : 0) . '</td>';
+                          }
                         }
                       }
                       $stmt->close();
@@ -767,7 +765,7 @@ $stmt->close();
                     </thead>
                     <tbody>
                       <?php
-                
+
                       $stmt = mysqli_prepare($conexion_app, "SELECT responsable, centro, COUNT(*) AS Nrepeticiones
                     FROM flujo_electoral $extraCondicionW
                     GROUP BY responsable
@@ -795,19 +793,98 @@ $stmt->close();
           </div>
         </div>
 
-   
+        <?php
+        $users = ['500', '540'];
+        $id_user = $_SESSION['id'];
+
+        if (in_array($id_user, $users)) {
+
+        ?>
+
+          <div class="col-lg-6 mb-lg-0 mt-4">
+            <div class="card h-100 p-3">
+              <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+                <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                  <h6 class="font-weight-bolder mb-4">Resetear sistema</h6>
+
+
+                  <div class="d-flex h-100">
+                    <button id="btnDescargar" class="btn btn-info m-auto">Descargar información y borrar datos</button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <script>
+            function descargarArchivos() {
+              fetch('../elecciones/configuracion/d3l3t_e13.php', {
+                  method: 'GET',
+                })
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error(`Error en la respuesta del servidor: ${response.status} ${response.statusText}`);
+                  }
+                  return response.blob();
+                })
+                .then(blob => {
+                  if (blob.size === 0) {
+                    throw new Error('El archivo ZIP está vacío o no se generó correctamente.');
+                  }
+
+                  const link = document.createElement('a');
+                  link.href = window.URL.createObjectURL(blob);
+                  link.download = "archivos_exportados.zip";
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                })
+                .catch(error => {
+                  console.error('Error al descargar el archivo:', error);
+                  alert(`Hubo un error al descargar el archivo: ${error.message}`);
+                });
+            }
+
+            // Llamar la función cuando se haga clic en un botón
+            document.getElementById('btnDescargar').addEventListener('click', function() {
+
+              Swal.fire({
+                title: "<strong>ATENCIÓN</strong>",
+                icon: "warning",
+                html: `Se borraran los datos del proceso, <b>esta acción no se puede revertir</b>`,
+                showCloseButton: true,
+                showCancelButton: true,
+                focusConfirm: false,
+                confirmButtonText: `Borrar!`,
+                cancelButtonText: `Cancelar`
+              }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                  descargarArchivos()
+                }
+              });
+
+            });
+          </script>
+
+        <?php
+        }
+        ?>
+
 
 
       </div>
 
       <?php
 
-        $cedulas_jefe = [];
-        foreach ($jefesUnoDiex as $key => $item) {
-          array_push($cedulas_jefe, $key);
-        }
-        $cedulas_jefe_list = implode("','", $cedulas_jefe);
-        $cedulas_jefe_list = "'" . $cedulas_jefe_list . "'";
+      $cedulas_jefe = [];
+      foreach ($jefesUnoDiex as $key => $item) {
+        array_push($cedulas_jefe, $key);
+      }
+      $cedulas_jefe_list = implode("','", $cedulas_jefe);
+      $cedulas_jefe_list = "'" . $cedulas_jefe_list . "'";
 
 
       $municipios = array(
@@ -833,9 +910,9 @@ $stmt->close();
         $result = $conexion_app->query($sql);
 
         if ($result->num_rows > 0) {
-            // Obtener el resultado
-            $row = $result->fetch_assoc();
-            $cantidadJefesParticiparon = $row['count'];
+          // Obtener el resultado
+          $row = $result->fetch_assoc();
+          $cantidadJefesParticiparon = $row['count'];
         } else {
           $cantidadJefesParticiparon = 0;
         }
@@ -861,6 +938,7 @@ $stmt->close();
         width: 100%;
         height: 500px;
       }
+
       #chartdivHora {
         width: 100%;
         height: 600px;
@@ -1028,177 +1106,232 @@ $stmt->close();
       grafico_tendencias();
 
 
-function graficoHora(){
-  am5.ready(function() {
+      function graficoHora() {
+        am5.ready(function() {
 
-// Create root element
-// https://www.amcharts.com/docs/v5/getting-started/#Root_element
-var root = am5.Root.new("chartdivHora");
+          // Create root element
+          // https://www.amcharts.com/docs/v5/getting-started/#Root_element
+          var root = am5.Root.new("chartdivHora");
 
-// Set themes
-// https://www.amcharts.com/docs/v5/concepts/themes/
-root.setThemes([
-  am5themes_Animated.new(root)
-]);
-
-
-
-var data = [
-  { x: 5, value: <?php echo $votos_por_hora['05'] ?> },
-  { x: 6, value: <?php echo $votos_por_hora['06'] ?> },
-  { x: 7, value: <?php echo $votos_por_hora['07'] ?> },
-  { x: 8, value: <?php echo $votos_por_hora['08'] ?> },
-  { x: 9, value: <?php echo $votos_por_hora['09'] ?> },
-  { x: 10, value: <?php echo $votos_por_hora['10'] ?> },
-  { x: 11, value: <?php echo $votos_por_hora['11'] ?> },
-  { x: 12, value: <?php echo $votos_por_hora['12'] ?> },
-  { x: 13, value: <?php echo $votos_por_hora['13'] ?> },
-  { x: 14, value: <?php echo $votos_por_hora['14'] ?> },
-  { x: 15, value: <?php echo $votos_por_hora['15'] ?> },
-  { x: 16, value: <?php echo $votos_por_hora['16'] ?> },
-  { x: 17, value: <?php echo $votos_por_hora['17'] ?> },
-  { x: 18, value: <?php echo $votos_por_hora['18'] ?> },
-  { x: 19, value: <?php echo $votos_por_hora['19'] ?> },
-  { x: 20, value: <?php echo $votos_por_hora['20'] ?> },
-  { x: 21, value: <?php echo $votos_por_hora['21'] ?> },
-  { x: 22, value: <?php echo $votos_por_hora['22'] ?> },
-  { x: 23, value: <?php echo $votos_por_hora['23'] ?> }
-];
-
-
-// Create chart
-// https://www.amcharts.com/docs/v5/charts/xy-chart/
-var chart = root.container.children.push(
-  am5xy.XYChart.new(root, {
-    panX: true,
-    panY: true,
-    wheelX: "panX",
-    wheelY: "zoomX"
-  })
-);
-
-// Create axes
-// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-var xAxis = chart.xAxes.push(
-  am5xy.ValueAxis.new(root, {
-    renderer: am5xy.AxisRendererX.new(root, {
-      minGridDistance: 50
-    }),
-    tooltip: am5.Tooltip.new(root, {})
-  })
-);
-
-var yAxis = chart.yAxes.push(
-  am5xy.ValueAxis.new(root, {
-    renderer: am5xy.AxisRendererY.new(root, {})
-  })
-);
-
-// Add series
-// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-var series = chart.series.push(
-  am5xy.LineSeries.new(root, {
-    minBulletDistance: 10,
-    xAxis: xAxis,
-    yAxis: yAxis,
-    valueYField: "value",
-    valueXField: "x",
-    tooltip: am5.Tooltip.new(root, {
-      pointerOrientation: "horizontal",
-      labelText: "{valueY}"
-    })
-  })
-);
-
-series.strokes.template.setAll({
-  strokeWidth: 3
-});
-
-series.data.setAll(data);
-
-series.bullets.push(function () {
-  return am5.Bullet.new(root, {
-    sprite: am5.Circle.new(root, {
-      radius: 6,
-      fill: series.get("fill"),
-      stroke: root.interfaceColors.get("background"),
-      strokeWidth: 2
-    })
-  });
-});
-
-// Add cursor
-// https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
-var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-  xAxis: xAxis
-}));
-cursor.lineY.set("visible", false);
+          // Set themes
+          // https://www.amcharts.com/docs/v5/concepts/themes/
+          root.setThemes([
+            am5themes_Animated.new(root)
+          ]);
 
 
 
-// Make stuff animate on load
-// https://www.amcharts.com/docs/v5/concepts/animations/
-series.appear(1000, 100);
-chart.appear(1000, 100);
+          var data = [{
+              x: 5,
+              value: <?php echo $votos_por_hora['05'] ?>
+            },
+            {
+              x: 6,
+              value: <?php echo $votos_por_hora['06'] ?>
+            },
+            {
+              x: 7,
+              value: <?php echo $votos_por_hora['07'] ?>
+            },
+            {
+              x: 8,
+              value: <?php echo $votos_por_hora['08'] ?>
+            },
+            {
+              x: 9,
+              value: <?php echo $votos_por_hora['09'] ?>
+            },
+            {
+              x: 10,
+              value: <?php echo $votos_por_hora['10'] ?>
+            },
+            {
+              x: 11,
+              value: <?php echo $votos_por_hora['11'] ?>
+            },
+            {
+              x: 12,
+              value: <?php echo $votos_por_hora['12'] ?>
+            },
+            {
+              x: 13,
+              value: <?php echo $votos_por_hora['13'] ?>
+            },
+            {
+              x: 14,
+              value: <?php echo $votos_por_hora['14'] ?>
+            },
+            {
+              x: 15,
+              value: <?php echo $votos_por_hora['15'] ?>
+            },
+            {
+              x: 16,
+              value: <?php echo $votos_por_hora['16'] ?>
+            },
+            {
+              x: 17,
+              value: <?php echo $votos_por_hora['17'] ?>
+            },
+            {
+              x: 18,
+              value: <?php echo $votos_por_hora['18'] ?>
+            },
+            {
+              x: 19,
+              value: <?php echo $votos_por_hora['19'] ?>
+            },
+            {
+              x: 20,
+              value: <?php echo $votos_por_hora['20'] ?>
+            },
+            {
+              x: 21,
+              value: <?php echo $votos_por_hora['21'] ?>
+            },
+            {
+              x: 22,
+              value: <?php echo $votos_por_hora['22'] ?>
+            },
+            {
+              x: 23,
+              value: <?php echo $votos_por_hora['23'] ?>
+            }
+          ];
 
-// Function to add process control ranges
-function addLimits(lower, upper) {
-  // Add range fill
-  createRange(lower, upper, undefined, am5.color(0xff8484));
-  
-  // Add upper/average/lower lines
-  createRange(lower, undefined, "Baja participación", am5.color(0xc71f1f));
-  createRange(upper, undefined, "Participación optima", am5.color(0xc71f1f));
-  createRange(lower + (upper - lower) / 2, undefined, "Participación aceptable", am5.color(0xc71f1f), true);
-  
-}
 
-//addLimits(10, 20)
+          // Create chart
+          // https://www.amcharts.com/docs/v5/charts/xy-chart/
+          var chart = root.container.children.push(
+            am5xy.XYChart.new(root, {
+              panX: true,
+              panY: true,
+              wheelX: "panX",
+              wheelY: "zoomX"
+            })
+          );
 
-function createRange(value, endValue, label, color, dashed) {
-  var rangeDataItem = yAxis.makeDataItem({
-    value: value,
-    endValue: endValue
-  });
-  
-  var range = yAxis.createAxisRange(rangeDataItem);
-  
-  if (endValue) {
-    range.get("axisFill").setAll({
-      fill: color,
-      fillOpacity: 0.2,
-      visible: true
-    });
-  }
-  else {
-    range.get("grid").setAll({
-      stroke: color,
-      strokeOpacity: 1,
-      strokeWidth: 2,
-      location: 1
-    });
-    
-    if (dashed) {
-      range.get("grid").set("strokeDasharray", [5, 3]);
-    }
-  }
+          // Create axes
+          // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+          var xAxis = chart.xAxes.push(
+            am5xy.ValueAxis.new(root, {
+              renderer: am5xy.AxisRendererX.new(root, {
+                minGridDistance: 50
+              }),
+              tooltip: am5.Tooltip.new(root, {})
+            })
+          );
 
-  if (label) {
-    range.get("label").setAll({
-      text: label,
-      location: 1,
-      fontSize: 19,
-      inside: true,
-      centerX: am5.p0,
-      centerY: am5.p100
-    });
-  }
-}
+          var yAxis = chart.yAxes.push(
+            am5xy.ValueAxis.new(root, {
+              renderer: am5xy.AxisRendererY.new(root, {})
+            })
+          );
 
-}); // end am5.ready()
-}
+          // Add series
+          // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+          var series = chart.series.push(
+            am5xy.LineSeries.new(root, {
+              minBulletDistance: 10,
+              xAxis: xAxis,
+              yAxis: yAxis,
+              valueYField: "value",
+              valueXField: "x",
+              tooltip: am5.Tooltip.new(root, {
+                pointerOrientation: "horizontal",
+                labelText: "{valueY}"
+              })
+            })
+          );
 
-graficoHora()
+          series.strokes.template.setAll({
+            strokeWidth: 3
+          });
+
+          series.data.setAll(data);
+
+          series.bullets.push(function() {
+            return am5.Bullet.new(root, {
+              sprite: am5.Circle.new(root, {
+                radius: 6,
+                fill: series.get("fill"),
+                stroke: root.interfaceColors.get("background"),
+                strokeWidth: 2
+              })
+            });
+          });
+
+          // Add cursor
+          // https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
+          var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+            xAxis: xAxis
+          }));
+          cursor.lineY.set("visible", false);
+
+
+
+          // Make stuff animate on load
+          // https://www.amcharts.com/docs/v5/concepts/animations/
+          series.appear(1000, 100);
+          chart.appear(1000, 100);
+
+          // Function to add process control ranges
+          function addLimits(lower, upper) {
+            // Add range fill
+            createRange(lower, upper, undefined, am5.color(0xff8484));
+
+            // Add upper/average/lower lines
+            createRange(lower, undefined, "Baja participación", am5.color(0xc71f1f));
+            createRange(upper, undefined, "Participación optima", am5.color(0xc71f1f));
+            createRange(lower + (upper - lower) / 2, undefined, "Participación aceptable", am5.color(0xc71f1f), true);
+
+          }
+
+          //addLimits(10, 20)
+
+          function createRange(value, endValue, label, color, dashed) {
+            var rangeDataItem = yAxis.makeDataItem({
+              value: value,
+              endValue: endValue
+            });
+
+            var range = yAxis.createAxisRange(rangeDataItem);
+
+            if (endValue) {
+              range.get("axisFill").setAll({
+                fill: color,
+                fillOpacity: 0.2,
+                visible: true
+              });
+            } else {
+              range.get("grid").setAll({
+                stroke: color,
+                strokeOpacity: 1,
+                strokeWidth: 2,
+                location: 1
+              });
+
+              if (dashed) {
+                range.get("grid").set("strokeDasharray", [5, 3]);
+              }
+            }
+
+            if (label) {
+              range.get("label").setAll({
+                text: label,
+                location: 1,
+                fontSize: 19,
+                inside: true,
+                centerX: am5.p0,
+                centerY: am5.p100
+              });
+            }
+          }
+
+        }); // end am5.ready()
+      }
+
+      graficoHora()
 
 
 
@@ -1214,11 +1347,11 @@ graficoHora()
         // jefes de ubch //
 
         var data = []
-/*
+        /*
 
-        array_push($municipios[$key], $cantidadFlujo, $cantidadFlujoUnod);
+                array_push($municipios[$key], $cantidadFlujo, $cantidadFlujoUnod);
 
-*/
+        */
 
         <?php
         foreach ($municipios as $key => $value) {

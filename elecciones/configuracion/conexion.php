@@ -6,28 +6,30 @@ $conexion_app = new mysqli(constant('HOST'), constant('USER'), constant('PASSWOR
 $conexion_app->set_charset(constant('CHARSET'));
 
 if ($conexion_app->connect_error) {
-	die('Error de conexion_app: ' . $conexion_app->connect_error);
+    die('Error de conexion_app: ' . $conexion_app->connect_error);
 }
 
 date_default_timezone_set('America/Manaus');
 
 
 /* LIMPIAR DATOS */
-function clear($campo){
-	$campo = strip_tags($campo);
-	$campo = filter_var($campo, FILTER_UNSAFE_RAW);
-	$campo = htmlspecialchars($campo);
-	return $campo;
+function clear($campo)
+{
+    $campo = strip_tags($campo);
+    $campo = filter_var($campo, FILTER_UNSAFE_RAW);
+    $campo = htmlspecialchars($campo);
+    return $campo;
 }
 
 
 
-function getOperador($cedula){
+function getOperador($cedula)
+{
     global $conexion_app;
 
     // Preparar la consulta
     $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa` WHERE OPERADOR = ? OR OPERADOR_PUNTO = ? OR OPERADOR_UBCH = ?");
-    
+
     // Verificar si la preparación de la consulta falló
     if (!$stmt) {
         die('Error en mysqli_prepare: ' . mysqli_error($conexion_app));
@@ -57,17 +59,13 @@ function getOperador($cedula){
 
 function contar($condicion)
 {
-  global $conexion_app;
+    global $conexion_app;
 
-  //$condicion = "SELECT count(*) FROM $table WHERE $condicion";
-  $stmt = $conexion_app->prepare($condicion);
-  $stmt->execute();
-  $row = $stmt->get_result()->fetch_row();
-  $galTotal = $row[0];
+    //$condicion = "SELECT count(*) FROM $table WHERE $condicion";
+    $stmt = $conexion_app->prepare($condicion);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_row();
+    $galTotal = $row[0];
 
-  return $galTotal;
+    return $galTotal;
 }
-
-
-
-?>
