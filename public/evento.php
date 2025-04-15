@@ -794,7 +794,7 @@ $stmt->close();
         </div>
 
         <?php
-        $users = ['500', '540'];
+        $users = ['500', '540', '539'];
         $id_user = $_SESSION['id'];
 
         if (in_array($id_user, $users)) {
