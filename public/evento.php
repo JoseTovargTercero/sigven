@@ -76,8 +76,6 @@ function abrev($nombre)
 
 
 
-
-
 $reportes_unodiex = [];
 $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(unodiez), COUNT(*) as reportes FROM `flujo_electoral` WHERE unodiez!='' GROUP BY unodiez");
 $stmt->execute();
@@ -663,6 +661,12 @@ $stmt->close();
       </div>
       <div class="row mt-4">
 
+
+
+
+
+
+
         <div class="col-lg-12 mb-lg-0 mb-4">
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
@@ -703,6 +707,8 @@ $stmt->close();
                         }
                       }
                       $stmt->close();
+
+
 
 
                       $stmt = mysqli_prepare($conexion_app, "SELECT * FROM tablamesa");
@@ -747,7 +753,54 @@ $stmt->close();
         </div>
 
 
+        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+          <div class="card h-100 p-3">
+            <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+              <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                <h6 class="font-weight-bolder mb-4">Reportes por comunidad</h6>
+                <div class="table-responsive">
+                  <table class="" id="table45">
+                    <thead>
+                      <tr>
+                        <th class="text-center p-0">Parroquia</th>
+                        <th class="text-center p-0">Ubch</th>
+                        <th class="text-center p-0">Comunidad</th>
+                        <th class="text-center p-0">Jefe de comunidad</th>
+                        <th class="text-center p-0">Reportes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php
+                      //here
+                      $reportes_por_comunidad = $reportes_user;
 
+                      $nombres = array();
+                      $stmt = mysqli_prepare($conexion, "SELECT * FROM jefes_comunidad");
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                          $cantidad_reportes = $reportes_por_comunidad[$row['cedula']] ?? 0;
+                          echo '<tr>
+                          <td>' . $row['pq'] . '</td>
+                          <td>' . $row['ubch'] . '</td>
+                          <td>' . $row['comunidad'] . '</td>
+                          <td>' . $row['jefe'] . '</td>
+                          <td>' . $cantidad_reportes . '</td>
+
+                          </tr>';
+                        }
+                      }
+                      $stmt->close();
+
+                      ?>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="col-lg-6 mb-lg-0 mt-4">
           <div class="card h-100 p-3">
@@ -1008,6 +1061,9 @@ $stmt->close();
         language: languageSettings
       });
       $('#table3').DataTable({
+        language: languageSettings
+      });
+      $('#table45').DataTable({
         language: languageSettings
       });
       $('#table5').DataTable({
