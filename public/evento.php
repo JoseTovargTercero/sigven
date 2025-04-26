@@ -781,17 +781,33 @@ $stmt->close();
                       if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
                           $cantidad_reportes = $reportes_por_comunidad[$row['cedula']] ?? 0;
+                          if (@$reportes_por_comunidad[$row['cedula']]) {
+                            // CHATGPT: eliminalo
+                            unset($reportes_por_comunidad[$row['cedula']]);
+                          }
+
                           echo '<tr>
                           <td>' . $row['pq'] . '</td>
                           <td>' . $row['ubch'] . '</td>
                           <td>' . $row['comunidad'] . '</td>
-                          <td>' . $row['jefe'] . '</td>
+                          <td><a onclick="listado(\'' . $row['cedula'] . '\', \'' . $row['jefe'] . '\')">' . $row['jefe'] . '</a></td>
                           <td>' . $cantidad_reportes . '</td>
-
                           </tr>';
                         }
                       }
                       $stmt->close();
+
+
+                      // print_r($cantidad_reportes);
+                      foreach ($reportes_por_comunidad as $key => $value) {
+                        echo '<tr>
+                        <td><span class="text-info">No encontrado</span></td>
+                        <td><span class="text-info">No encontrado</span></td>
+                        <td><span class="text-info">No encontrado</span></td>
+                        <td><a onclick="listado(\'' . $key . '\', \'' . $key . '\')">' . $key . '</a></td>
+                        <td>' . $value . '</td>
+                        </tr>';
+                      }
 
                       ?>
                     </tbody>
@@ -801,6 +817,40 @@ $stmt->close();
             </div>
           </div>
         </div>
+
+        <script>
+          function listado(cedula, jefe) {
+            fetch('../configurar/listados.php', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  cedula: cedula
+                })
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Error en la respuesta');
+                }
+                return response.blob();
+              })
+              .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'listado_' + jefe + '.xls'; // Nombre del archivo descargado
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+              })
+              .catch(error => {
+                console.error('Error al descargar:', error);
+              });
+
+          }
+        </script>
 
         <div class="col-lg-6 mb-lg-0 mt-4">
           <div class="card h-100 p-3">
