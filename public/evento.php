@@ -798,16 +798,6 @@ $stmt->close();
                       $stmt->close();
 
 
-                      // print_r($cantidad_reportes);
-                      foreach ($reportes_por_comunidad as $key => $value) {
-                        echo '<tr>
-                        <td><span class="text-info">No encontrado</span></td>
-                        <td><span class="text-info">No encontrado</span></td>
-                        <td><span class="text-info">No encontrado</span></td>
-                        <td><a onclick="listado(\'' . $key . '\', \'' . $key . '\')">' . $key . '</a></td>
-                        <td>' . $value . '</td>
-                        </tr>';
-                      }
 
                       ?>
                     </tbody>
@@ -819,6 +809,48 @@ $stmt->close();
         </div>
 
         <script>
+          // Mostrar el objeto original en la consola para debug
+          const reportesPorComunidad = <?php echo json_encode($reportes_por_comunidad, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE); ?>;
+          document.addEventListener("DOMContentLoaded", function() {
+            const reportesPorComunidad = <?php echo json_encode($reportes_por_comunidad, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE); ?>;
+            const tabla = $('#table45').DataTable();
+
+            fetch('consultar_rep.php', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reportesPorComunidad)
+              })
+              .then(response => response.text())
+              .then(rawText => {
+                console.log("⚠️ Respuesta cruda del backend (texto):", rawText);
+
+                let data;
+                try {
+                  data = JSON.parse(rawText);
+                } catch (e) {
+                  console.error("❌ Error al parsear JSON:", e);
+                  return;
+                }
+
+                data.forEach(item => {
+                  tabla.row.add([
+                    '<span class="text-info">No encontrado</span>',
+                    '<span class="text-info">No encontrado</span>',
+                    '<span class="text-info">No encontrado</span>',
+                    `<a onclick="listado('${item.key}', '${item.key}')">${item.key} - ${item.nombre}</a>`,
+                    item.value
+                  ]).draw();
+                });
+              })
+              .catch(error => console.error('❌ Error en la solicitud:', error));
+          });
+
+
+
+
+
           function listado(cedula, jefe) {
             fetch('../configurar/listados.php', {
                 method: 'POST',
