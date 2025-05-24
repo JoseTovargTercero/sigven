@@ -6,13 +6,10 @@ require('../configuracion/datos_cne.php');
 header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 $hora = date('H_s_a');
-//$cedula = $_POST["responsable"];
-//$nombre = $_POST["nombre"];
-//$token = $_POST["token"];
+$cedula = $_POST["responsable"];
+$nombre = $_POST["nombre"];
+$token = $_POST["token"];
 
-$cedula = '27640176';
-$nombre = '276401766546546';
-$token = '27640176asdasd';
 
 $result = getOperador($cedula);
 
