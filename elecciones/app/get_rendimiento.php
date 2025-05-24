@@ -17,7 +17,7 @@ $token = '27640176asdasd';
 $result = getOperador($cedula);
 
 // Registrar token
-
+/*
 if ($token) {
   // Verificar si el usuario ya existe
   $stmt = $conexion_app->prepare("SELECT token FROM tokens_fcm WHERE user = ?");
@@ -52,7 +52,7 @@ if ($token) {
 
   $conexion_app->close();
 }
-
+*/
 // Registrar token
 
 
