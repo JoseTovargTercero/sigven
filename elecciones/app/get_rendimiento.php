@@ -14,7 +14,6 @@ $token = $_POST["token"];
 $result = getOperador($cedula);
 
 // Registrar token
-/*
 if ($token) {
   // Verificar si el usuario ya existe
   $stmt = $conexion_app->prepare("SELECT token FROM tokens_fcm WHERE user = ?");
@@ -46,10 +45,7 @@ if ($token) {
     $stmt_insert->execute();
     $stmt_insert->close();
   }
-
-  $conexion_app->close();
 }
-*/
 // Registrar token
 
 
@@ -59,7 +55,7 @@ if ($token) {
 if (!$result) {
   echo json_encode(
     [
-      'centro' => 'No disponibles' . $token,
+      'centro' => 'No disponibles',
       'reportes_del_centro' => '0',
       'electores_centro' => '0',
       'total_1x10_centro' => '0',
