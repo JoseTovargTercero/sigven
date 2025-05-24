@@ -18,10 +18,10 @@ if ($result) {
 
 
 
-  
 
-// Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-$sql = "SELECT DISTINCT cedula, nombre, jefe, telefono
+
+  // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
+  $sql = "SELECT DISTINCT cedula, nombre, jefe, telefono
 FROM (
     SELECT cedula, nombre, jefe, telefono
     FROM unox107
@@ -36,38 +36,38 @@ WHERE cedula NOT IN (
     FROM flujo_electoral
 )";
 
-$stmt = $conexion_app->prepare($sql);
-$stmt->bind_param("ss", $centro, $centro);
-$stmt->execute();
+  $stmt = $conexion_app->prepare($sql);
+  $stmt->bind_param("ss", $centro, $centro);
+  $stmt->execute();
 
-$result = $stmt->get_result();
+  $result = $stmt->get_result();
 
-$data = array();
-if ($result->num_rows > 0) {
-// Obtener los datos y convertirlos en un arreglo asociativo
-while($row = $result->fetch_assoc()) {
-    $data[] = array(
+  $data = array();
+  if ($result->num_rows > 0) {
+    // Obtener los datos y convertirlos en un arreglo asociativo
+    while ($row = $result->fetch_assoc()) {
+      $data[] = array(
         'cedula' => $row['cedula'],
         'nombre' => $row['nombre'],
         'jefe' => $row['jefe'],
         'telefono' => $row['telefono']
+      );
+    }
+  } else {
+    $data = array(
+      'cedula' => 'Participación alcanzada',
+      'nombre' => '',
+      'jefe' => '',
+      'telefono' => ''
     );
-}
+  }
+
+  // Cerrar la conexión a la base de datos
+  $conexion_app->close();
+
+  // Imprimir los resultados en formato JSON
+
 } else {
-  $data = array(
-    'cedula' => 'Participación alcanzada',
-    'nombre' => '',
-    'jefe' => '',
-    'telefono' => ''
-  );
-}
-
-// Cerrar la conexión a la base de datos
-$conexion_app->close();
-
-// Imprimir los resultados en formato JSON
-
-}else {
   $data = array(
     'cedula' => 'No Disponible',
     'nombre' => 'No Disponible',
