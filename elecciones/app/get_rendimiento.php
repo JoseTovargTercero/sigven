@@ -58,7 +58,7 @@ if ($token) {
 if (!$result) {
   echo json_encode(
     [
-      'centro' => 'No disponibles',
+      'centro' => 'No disponibles' . $token,
       'reportes_del_centro' => '0',
       'electores_centro' => '0',
       'total_1x10_centro' => '0',
