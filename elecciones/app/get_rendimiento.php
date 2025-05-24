@@ -7,33 +7,83 @@ header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 $hora = date('H_s_a');
 $cedula = $_POST["responsable"];
+$nombre = $_POST["nombre"];
+$token = $_POST["token"];
+
 $result = getOperador($cedula);
+
+// Registrar token
+
+if ($token) {
+  // Verificar si el usuario ya existe
+  $stmt = $conexion_app->prepare("SELECT token FROM tokens_fcm WHERE user = ?");
+  $stmt->bind_param("s", $cedula);
+  $stmt->execute();
+  $stmt->store_result();
+
+  // Si el usuario existe
+  if ($stmt->num_rows > 0) {
+    $stmt->bind_result($token_existente);
+    $stmt->fetch();
+
+    // Si el token es diferente, actualizar
+    if ($token_existente !== $token) {
+      $stmt->close();
+      $stmt_update = $conexion_app->prepare("UPDATE tokens_fcm SET token = ?, nombre = ? WHERE user = ?");
+      $stmt_update->bind_param("sss", $token, $nombre, $cedula);
+      $stmt_update->execute();
+      $stmt_update->close();
+    } else {
+      // Token igual, no hacer nada
+      $stmt->close();
+    }
+  } else {
+    // Si el usuario no existe, insertar
+    $stmt->close();
+    $stmt_insert = $conexion_app->prepare("INSERT INTO tokens_fcm (token, user, nombre) VALUES (?, ?, ?)");
+    $stmt_insert->bind_param("sss", $token, $cedula, $nombre);
+    $stmt_insert->execute();
+    $stmt_insert->close();
+  }
+
+  $conexion_app->close();
+}
+
+// Registrar token
+
+
+
 
 
 if (!$result) {
-  echo json_encode([
-    'centro' => 'No disponibles', 
-    'reportes_del_centro' => '0', 
-    'electores_centro' => '0', 
-    'total_1x10_centro'=> '0', 
-    'total_asistencia_1x10' => '0',
-    'meta_inicial' => '0',
-    'hora' => "$hora"]
+  echo json_encode(
+    [
+      'centro' => 'No disponibles',
+      'reportes_del_centro' => '0',
+      'electores_centro' => '0',
+      'total_1x10_centro' => '0',
+      'total_asistencia_1x10' => '0',
+      'meta_inicial' => '0',
+      'hora' => "$hora"
+    ]
   );
 }
 
-if ($cedula=='') {
-  echo json_encode([
-    'centro' => 'La información no esta disponible', 
-    'reportes_del_centro' => '0', 
-    'electores_centro' => '0', 
-    'total_1x10_centro'=> '0', 
-    'total_asistencia_1x10' => '0',
-    'meta_inicial' => '0',
-    'hora' => "$hora"]
+if ($cedula == '') {
+  echo json_encode(
+    [
+      'centro' => 'La información no esta disponible',
+      'reportes_del_centro' => '0',
+      'electores_centro' => '0',
+      'total_1x10_centro' => '0',
+      'total_asistencia_1x10' => '0',
+      'meta_inicial' => '0',
+      'hora' => "$hora"
+    ]
   );
 }
-function abrev($nombre){
+function abrev($nombre)
+{
   // Lista de sustituciones
   $sustituciones = [
     'UNIDAD EDUCATIVA INTEGRAL BOLIVARIANA' => 'U.E.I.B',
@@ -87,26 +137,26 @@ $stmt->execute();
 $result = $stmt->get_result();
 $total_1107 = $result->num_rows;
 if ($total_1107 > 0) {
-  while($row = $result->fetch_assoc()) {
-      $cedulas[$row['cedula']] = true;
+  while ($row = $result->fetch_assoc()) {
+    $cedulas[$row['cedula']] = true;
+  }
+}
+$stmt->close();
+
+
+// Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
+$sql = "SELECT cdula FROM unox10 WHERE cv = ?";
+$stmt = $conexion_app->prepare($sql);
+$stmt->bind_param("s", $centro);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+  while ($row = $result->fetch_assoc()) {
+    if ($row['cdula'] != '') {
+      $cedulas[$row['cdula']] = true;
     }
   }
-  $stmt->close();
-
-
-  // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-  $sql = "SELECT cdula FROM unox10 WHERE cv = ?";
-  $stmt = $conexion_app->prepare($sql);
-  $stmt->bind_param("s", $centro);
-  $stmt->execute();
-  $result = $stmt->get_result();
-  if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-      if ($row['cdula']!='') {
-        $cedulas[$row['cdula']] = true;
-      }
-      }
-    }
+}
 
 if (count($cedulas) > $meta_inicial) {
   $meta_inicial = count($cedulas);
@@ -137,14 +187,11 @@ $stmt->close();
 
 
 echo json_encode([
-  'centro' => abrev($centro_nombre), 
-  'reportes_del_centro' => $cantidad_remportes, 
-  'electores_centro' => "$cantidad_elecotores", 
-  'total_1x10_centro'=> count($cedulas), 
+  'centro' => abrev($centro_nombre),
+  'reportes_del_centro' => $cantidad_remportes,
+  'electores_centro' => "$cantidad_elecotores",
+  'total_1x10_centro' => count($cedulas),
   'total_asistencia_1x10' => $asistentes1x10,
   'meta_inicial' => ($cantidad_110 > $meta_inicial ? $cantidad_110 : $meta_inicial),
   'hora' => "$hora"
 ]);
-
-
-?>
