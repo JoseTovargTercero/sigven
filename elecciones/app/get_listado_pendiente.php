@@ -12,21 +12,9 @@ $result = getOperador($cedula);
 if ($result) {
   $centro = $result[2];
 
-
-
-
-
-
-
-
-
   // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
   $sql = "SELECT DISTINCT cedula, nombre, jefe, telefono
 FROM (
-    SELECT cedula, nombre, jefe, telefono
-    FROM unox107
-    WHERE centro = ?
-    UNION
     SELECT cdula AS cedula, nombre, jefe, telefono
     FROM unox10
     WHERE cv = ?

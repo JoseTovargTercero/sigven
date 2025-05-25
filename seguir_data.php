@@ -13,12 +13,8 @@ $institucion = $_POST["param_1"];
 
 // OBTENER TODOS LOS 1*10
 
-
 // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-$sql = "SELECT cedula, jefe, telefono
-FROM unox107
-UNION
-SELECT cdula AS cedula, jefe, telefono
+$sql = "SELECT cdula AS cedula, jefe, telefono
 FROM unox10";
 
 $stmt = $conexion_app->prepare($sql);
@@ -28,10 +24,10 @@ $result = $stmt->get_result();
 
 $data110 = array();
 if ($result->num_rows > 0) {
-// Obtener los datos y convertirlos en un arreglo asociativo
-while($row = $result->fetch_assoc()) {
+  // Obtener los datos y convertirlos en un arreglo asociativo
+  while ($row = $result->fetch_assoc()) {
     $data110[$row['cedula']] = [$row['jefe'], $row['telefono']];
-}
+  }
 }
 
 // OBTENER TODOS LOS 1*10
@@ -266,7 +262,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                   </div>
                   <div class="card bg-success p-2 text-center text-white " style="width: 126px;">
                     <div class="counter">
-                    <?php echo $avance + $pendiente ?>
+                      <?php echo $avance + $pendiente ?>
                     </div>
                     <span>Total</span>
                   </div>
@@ -287,12 +283,12 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                         <small class="text-muted">Listado de reportes por ubicaciones</small>
                       </div>
                     </div>
-                    <div  style="max-height: 100vh; overflow-y: auto;">
+                    <div style="max-height: 100vh; overflow-y: auto;">
 
 
-                    <?php
-                    foreach ($avanceUbicacion as $key => $value) {
-                      echo '
+                      <?php
+                      foreach ($avanceUbicacion as $key => $value) {
+                        echo '
                           <div class="d-flex justify-content-between mb-2 bg-white p-2 corner">
                           ' . substr($key, 0, 45) . '
                               <div class="d-flex ms-2">
@@ -300,8 +296,8 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
                                 <span class="badge bg-info counter-p p-0">' . (@$value[1] ? $value[1] : 0) . '</span=>
                               </div>
                           </div>';
-                    }
-                    ?>
+                      }
+                      ?>
                     </div>
 
                   </div>
@@ -456,7 +452,7 @@ $porc_pendiente = ($pendiente == 0 ? 0 : number_format($pendiente * 100 / $total
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Datos Filtrados');
 
-      let nombre = ($('#dt-search-0').val() == '' ? 'Reporte de flujo electoral' :  $('#dt-search-0').val())
+      let nombre = ($('#dt-search-0').val() == '' ? 'Reporte de flujo electoral' : $('#dt-search-0').val())
       // Generar el archivo Excel y descargarlo
       XLSX.writeFile(wb, nombre + '.xlsx');
     });

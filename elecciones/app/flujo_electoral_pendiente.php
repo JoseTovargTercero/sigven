@@ -69,31 +69,11 @@ function verificarElector($elector, $responsable, $tipo_user) {
       $voto = 'VD';
       $idUnoX10 = $row['jfcedula'];
     }else {
-      $stmt = mysqli_prepare($conexion_app, "SELECT cdula_jf FROM `unox107` WHERE cedula = ?");
-      $stmt->bind_param('s', $elector);
-      $stmt->execute();
-      $result = $stmt->get_result();
-      if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-          $voto = 'VD';
-          $idUnoX10 = $row['cdula_jf'];
-        }
-        }else {
-          $voto = 'NC';
-          $idUnoX10 = '';
-      }
-      $stmt->close();
+      $voto = 'NC';
+      $idUnoX10 = '';
     }
 
     $stmt_unox10->close();
-
-
-
-
-
-
-
-
 
 
 

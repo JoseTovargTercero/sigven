@@ -30,12 +30,8 @@ if ($_SESSION["instancia"] == 0) {
 
 
 // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-/*$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( 
-  SELECT centro, cedula FROM unox107 
-  UNION ALL SELECT 
-  cv as centro, cdula AS cedula FROM unox10 ) AS combined GROUP BY centro ORDER BY centro;";
-*/
-$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( SELECT DISTINCT centro, cedula FROM ( SELECT centro, cedula FROM unox107 UNION ALL SELECT cv as centro, cdula AS cedula FROM unox10 ) AS combined ) AS distinct_combined GROUP BY centro ORDER BY centro;";
+
+$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( SELECT DISTINCT centro, cedula FROM ( SELECT cv as centro, cdula AS cedula FROM unox10 ) AS combined ) AS distinct_combined GROUP BY centro ORDER BY centro;";
 
 $stmt = $conexion_app->prepare($sql);
 $stmt->execute();
@@ -90,9 +86,7 @@ if ($result->num_rows > 0) {
 $jefesUnoDiex = [];
 
 $tabla_reportes_110 = [];
-$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM ( 
-SELECT cdula_jf, telefono, jefe  FROM unox107
-UNION ALL SELECT 
+$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM (SELECT 
 jfcedula, telefono, jefe FROM unox10) AS combined
 GROUP BY cdula_jf");
 $stmt->execute();

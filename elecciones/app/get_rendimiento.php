@@ -127,21 +127,6 @@ $meta_inicial = $row['META'];
 
 
 // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-$sql = "SELECT cedula FROM unox107 WHERE centro = ?";
-$stmt = $conexion_app->prepare($sql);
-$stmt->bind_param("s", $centro);
-$stmt->execute();
-$result = $stmt->get_result();
-$total_1107 = $result->num_rows;
-if ($total_1107 > 0) {
-  while ($row = $result->fetch_assoc()) {
-    $cedulas[$row['cedula']] = true;
-  }
-}
-$stmt->close();
-
-
-// Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
 $sql = "SELECT cdula FROM unox10 WHERE cv = ?";
 $stmt = $conexion_app->prepare($sql);
 $stmt->bind_param("s", $centro);

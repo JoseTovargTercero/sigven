@@ -3,97 +3,6 @@ include('../configurar/configuracion.php');
 include('../elecciones/configuracion/conexion.php'); // CONEXION A LA BASE DE DATOS DE LAS ELECCIONES
 
 
-/*
-$jefesUnoDiex = [];
-
-$tabla_reportes_110 = [];
-$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM ( 
-SELECT cdula_jf, telefono, jefe  FROM unox107
-UNION ALL SELECT 
-jfcedula, telefono, jefe FROM unox10) AS combined
-GROUP BY cdula_jf");
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-while ($row = $result->fetch_assoc()) {
-
-$jefesUnoDiex[$row['cdula_jf']] = true;
-
-
-
-}
-}
-$stmt->close();
-
-
-
-
-
-
-
-echo '<table>
-<thead>
-<tr>
-<th>cedula</th>
-<th>nombre</th>
-<th>ente</th>
-<th>voto</th>
-<th>uno10</th>
-</tr>
-</thead>
-<tbody>
-
-';
-
-
-
-
-
-$stmt = mysqli_prepare($conexion_app, "SELECT e.*, f.responsable, f.unodiez FROM `empleados_instituciones` AS e
-LEFT JOIN flujo_electoral AS f ON f.cedula = e.cedula
-");
-$stmt->bind_param('s', $var);
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-  while ($row = $result->fetch_assoc()) {
-    echo '
-    <tr>
-    <td>'.$row['nombre'].'</td>
-    <td>'.$row['cedula'].'</td>
-    <td>'.$row['institucion'].'</td>
-    <td>'.($row['responsable'] != ''?'SI':'NO').'</td>
-    <td>';
-    
-    if ($row['unodiez'] != '') {
-      echo $row['unodiez'];
-    }elseif (@$jefesUnoDiex[$row['cedula']]) {
-      echo 'JEFE';
-    }else {
-      echo 'NO';
-    }
-  
-    echo '</td>
-    </tr>
-    ';
-}
-}
-$stmt->close();
-
-
-echo '</tbody>
-</table>';
-
-
-
-
-
-
-
-
-
-exit();
-*/
 include('includes/navbar.php');
 
 
@@ -110,31 +19,28 @@ if ($_SESSION["instancia"] != 0) {
 
 if (isset($_POST['instituciones'])) {
 
-  
-// OBTENER TODOS LOS 1*10
+
+  // OBTENER TODOS LOS 1*10
 
 
-// Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-$sql = "SELECT cedula, jefe, telefono
-FROM unox107
-UNION
-SELECT cdula AS cedula, jefe, telefono
+  // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
+  $sql = "SELECT cdula AS cedula, jefe, telefono
 FROM unox10";
 
-$stmt = $conexion_app->prepare($sql);
-$stmt->execute();
+  $stmt = $conexion_app->prepare($sql);
+  $stmt->execute();
 
-$result = $stmt->get_result();
+  $result = $stmt->get_result();
 
-$data110 = array();
-if ($result->num_rows > 0) {
-// Obtener los datos y convertirlos en un arreglo asociativo
-while($row = $result->fetch_assoc()) {
-    $data110[$row['cedula']] = [$row['jefe'], $row['telefono']];
-}
-}
+  $data110 = array();
+  if ($result->num_rows > 0) {
+    // Obtener los datos y convertirlos en un arreglo asociativo
+    while ($row = $result->fetch_assoc()) {
+      $data110[$row['cedula']] = [$row['jefe'], $row['telefono']];
+    }
+  }
 
-// OBTENER TODOS LOS 1*10
+  // OBTENER TODOS LOS 1*10
 
 
   $instituciones_string = $_POST['instituciones'];
@@ -241,12 +147,9 @@ while($row = $result->fetch_assoc()) {
 
 
 
-  
+
 
   $votos_uno_dies = contar("SELECT count(*) FROM flujo_electoral WHERE unodiez!='0'");
-
-
-
 }
 
 ?>
@@ -382,24 +285,25 @@ while($row = $result->fetch_assoc()) {
                           </tr>
                         </thead>
                         <tbody>
-                          
-
-                        <?php
-                        
-                      function getTendencia($favor, $total)
-                      {
-                        $result = $favor - ($total - $favor);
-                        if ($result > 0) {
-                          return '<span class="text-success"> + ' . $result . '</span>';
-                        } elseif ($result < 0) {
-                          return '<span class="text-danger"> - ' . abs($result) . '</span>';
-                        } else {
-                          return '<span class="text-warning">0</span>';
-                        }
-                      }
 
 
-                          function getRendimientoInst($ins) {
+                          <?php
+
+                          function getTendencia($favor, $total)
+                          {
+                            $result = $favor - ($total - $favor);
+                            if ($result > 0) {
+                              return '<span class="text-success"> + ' . $result . '</span>';
+                            } elseif ($result < 0) {
+                              return '<span class="text-danger"> - ' . abs($result) . '</span>';
+                            } else {
+                              return '<span class="text-warning">0</span>';
+                            }
+                          }
+
+
+                          function getRendimientoInst($ins)
+                          {
                             global $conexion_app;
                             $votantes = 0;
                             $unod = 0;
@@ -412,13 +316,13 @@ while($row = $result->fetch_assoc()) {
                             $total = $result->num_rows;
                             if ($total > 0) {
                               while ($row = $result->fetch_assoc()) {
-                              if ($row['centro'] != '') {
-                                $votantes++;
+                                if ($row['centro'] != '') {
+                                  $votantes++;
+                                }
+                                if ($row['unodiez'] != '' || $row['unodiez'] != 0) {
+                                  $unod++;
+                                }
                               }
-                              if ($row['unodiez'] != '' || $row['unodiez'] != 0) {
-                                $unod++;
-                              }
-                            }
                             }
                             $stmt->close();
 
@@ -426,31 +330,31 @@ while($row = $result->fetch_assoc()) {
                           }
 
 
-                        $stmt = mysqli_prepare($conexion_app, "SELECT * FROM jefes_instituciones");
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-                        if ($result->num_rows > 0) {
-                          while ($row = $result->fetch_assoc()) {
-                            //echo '<li><span>'.$row['institucion'].'</span> <span>HOla</span></li>';
-                            // imprime con un li, el nombre la institucion y a la derecha un checbox con una clase que se pueda recorrer des jquery y que tenga como valor el nombre de la institucion
+                          $stmt = mysqli_prepare($conexion_app, "SELECT * FROM jefes_instituciones");
+                          $stmt->execute();
+                          $result = $stmt->get_result();
+                          if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                              //echo '<li><span>'.$row['institucion'].'</span> <span>HOla</span></li>';
+                              // imprime con un li, el nombre la institucion y a la derecha un checbox con una clase que se pueda recorrer des jquery y que tenga como valor el nombre de la institucion
 
-                            $instit = $row['Institucion'];
-                            $datos = getRendimientoInst($instit);
-                            echo '
+                              $instit = $row['Institucion'];
+                              $datos = getRendimientoInst($instit);
+                              echo '
                             <tr>
                             <td><label><input type="checkbox" class="instituciones form-check-input" value="' . $row['id'] . '">
                             <span>' . $instit . '</span> </label></td>
-                            <td class="text-center">'.$datos[0].'</td>
-                            <td class="text-center">'.$datos[1].'</td>
-                            <td class="text-center">'.$datos[2].'</td>
-                            <td class="text-center " style="font-weight: bolder;">'.getTendencia($datos[2], $datos[1]).'</td>
+                            <td class="text-center">' . $datos[0] . '</td>
+                            <td class="text-center">' . $datos[1] . '</td>
+                            <td class="text-center">' . $datos[2] . '</td>
+                            <td class="text-center " style="font-weight: bolder;">' . getTendencia($datos[2], $datos[1]) . '</td>
                           </tr>';
+                            }
                           }
-                        }
-                        $stmt->close();
-                        ?>
-                      
-                      </tbody>
+                          $stmt->close();
+                          ?>
+
+                        </tbody>
                       </table>
                       <button class="btn btn-primary mt-3" onclick="consultar_instituciones()">Seleccionar</button>
 
@@ -558,17 +462,17 @@ while($row = $result->fetch_assoc()) {
 
       <div class="row mt-3">
 
-      <div class="col-lg-12">
+        <div class="col-lg-12">
 
-      <div class="card mb-3">
-                      <div class="card-header">
-                        <h5>Porcentaje de participación por ente</h5>
-                      </div>
-                      <div class="card-body">
-                        <div id="chartdiv" style="height: 40vh;"></div>
-                      </div>
-                    </div>
-                    </div>
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5>Porcentaje de participación por ente</h5>
+            </div>
+            <div class="card-body">
+              <div id="chartdiv" style="height: 40vh;"></div>
+            </div>
+          </div>
+        </div>
 
 
 
@@ -637,7 +541,7 @@ while($row = $result->fetch_assoc()) {
       width: 100%;
       height: 60vh;
     }
-    </style>
+  </style>
 
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/jquery.nanoscroller.min.js"></script>
@@ -719,173 +623,173 @@ while($row = $result->fetch_assoc()) {
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Datos Filtrados');
 
-      let nombre = ($('#dt-search-0').val() == '' ? 'Reporte de flujo electoral' :  $('#dt-search-0').val())
+      let nombre = ($('#dt-search-0').val() == '' ? 'Reporte de flujo electoral' : $('#dt-search-0').val())
       // Generar el archivo Excel y descargarlo
       XLSX.writeFile(wb, nombre + '.xlsx');
     });
 
 
-<?php if(isset($_POST["instituciones"])){ ?>
+    <?php if (isset($_POST["instituciones"])) { ?>
 
 
-    // GRAFICO ENTES
+      // GRAFICO ENTES
 
-    am5.ready(function() {
+      am5.ready(function() {
 
-// Create root element
-// https://www.amcharts.com/docs/v5/getting-started/#Root_element
-var root = am5.Root.new("chartdiv");
+        // Create root element
+        // https://www.amcharts.com/docs/v5/getting-started/#Root_element
+        var root = am5.Root.new("chartdiv");
 
-// Set themes
-// https://www.amcharts.com/docs/v5/concepts/themes/
-root.setThemes([
-  am5themes_Animated.new(root)
-]);
+        // Set themes
+        // https://www.amcharts.com/docs/v5/concepts/themes/
+        root.setThemes([
+          am5themes_Animated.new(root)
+        ]);
 
-// Create chart
-// https://www.amcharts.com/docs/v5/charts/xy-chart/
-var chart = root.container.children.push(am5xy.XYChart.new(root, {
-  panX: true,
-  panY: false,
-  wheelX: "panX",
-  wheelY: "zoomX",
-  paddingLeft: 0,
-  layout: root.verticalLayout
-}));
+        // Create chart
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/
+        var chart = root.container.children.push(am5xy.XYChart.new(root, {
+          panX: true,
+          panY: false,
+          wheelX: "panX",
+          wheelY: "zoomX",
+          paddingLeft: 0,
+          layout: root.verticalLayout
+        }));
 
-// Add scrollbar
-// https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
-chart.set("scrollbarX", am5.Scrollbar.new(root, {
-  orientation: "horizontal"
-}));
+        // Add scrollbar
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
+        chart.set("scrollbarX", am5.Scrollbar.new(root, {
+          orientation: "horizontal"
+        }));
 
-var data = [];
+        var data = [];
 
 
-<?php
-function abreviarIns($nombre)
-{
-  $abr = [
-    'Secretaria ejecutiva' => 'SE',
-    'Unidad educativa nacional' => 'UEN',
-    '<br>' => '',
-  ];
-  // Reemplazar cada coincidencia en la lista de sustituciones
-  foreach ($abr as $original => $abreviado) {
-    $nombre = str_replace($original, $abreviado, $nombre);
-  }
+        <?php
+        function abreviarIns($nombre)
+        {
+          $abr = [
+            'Secretaria ejecutiva' => 'SE',
+            'Unidad educativa nacional' => 'UEN',
+            '<br>' => '',
+          ];
+          // Reemplazar cada coincidencia en la lista de sustituciones
+          foreach ($abr as $original => $abreviado) {
+            $nombre = str_replace($original, $abreviado, $nombre);
+          }
 
-  if (strlen($nombre) > 35) {
-    // nombre sera igual a los primeros 20 caracteres, seguido de 3 puntos mas los ultimos 15 carcateres
-    $nombre = substr($nombre, 0, 15) . '...' . substr($nombre, -10);
-  }
-  return trim($nombre);
-}
-foreach ($avanceUbicacion as $key => $value) {
-  $faltantes = (@$value[1] ? $value[1] : 0) + (@$value[0] ? $value[0] : 0);
-  echo '
+          if (strlen($nombre) > 35) {
+            // nombre sera igual a los primeros 20 caracteres, seguido de 3 puntos mas los ultimos 15 carcateres
+            $nombre = substr($nombre, 0, 15) . '...' . substr($nombre, -10);
+          }
+          return trim($nombre);
+        }
+        foreach ($avanceUbicacion as $key => $value) {
+          $faltantes = (@$value[1] ? $value[1] : 0) + (@$value[0] ? $value[0] : 0);
+          echo '
     data.push({
     "country": "' . abreviarIns($key) . '",
     "year2004": ' . $faltantes . ',
     "year2005": ' . (@$value[0] ? $value[0] : 0) . '
   })';
-}
-?>
+        }
+        ?>
 
-// Create axes
-// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-var xRenderer = am5xy.AxisRendererX.new(root, {
-  minGridDistance: 70,
-  minorGridEnabled: true
-});
+        // Create axes
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+        var xRenderer = am5xy.AxisRendererX.new(root, {
+          minGridDistance: 70,
+          minorGridEnabled: true
+        });
 
-xRenderer.labels.template.setAll({
-  rotation: -90,
-  centerY: am5.p50,
-});
+        xRenderer.labels.template.setAll({
+          rotation: -90,
+          centerY: am5.p50,
+        });
 
-var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-  categoryField: "country",
-  renderer: xRenderer,
+        var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+          categoryField: "country",
+          renderer: xRenderer,
 
-  tooltip: am5.Tooltip.new(root, {
-    themeTags: ["axis"],
+          tooltip: am5.Tooltip.new(root, {
+            themeTags: ["axis"],
 
-    animationDuration: 200
-  })
-}));
+            animationDuration: 200
+          })
+        }));
 
-xRenderer.grid.template.setAll({
-  location: 1
-})
+        xRenderer.grid.template.setAll({
+          location: 1
+        })
 
-xAxis.data.setAll(data);
+        xAxis.data.setAll(data);
 
-var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-  min: 0,
-  renderer: am5xy.AxisRendererY.new(root, {
-    strokeOpacity: 0.1
-  })
-}));
+        var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+          min: 0,
+          renderer: am5xy.AxisRendererY.new(root, {
+            strokeOpacity: 0.1
+          })
+        }));
 
-// Add series
-// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+        // Add series
+        // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
 
-var series0 = chart.series.push(am5xy.ColumnSeries.new(root, {
-  name: "Income",
-  xAxis: xAxis,
-  yAxis: yAxis,
-  valueYField: "year2004",
-  categoryXField: "country",
-  clustered: false,
-  tooltip: am5.Tooltip.new(root, {
-    labelText: "Total: {valueY}"
-  })
-}));
+        var series0 = chart.series.push(am5xy.ColumnSeries.new(root, {
+          name: "Income",
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: "year2004",
+          categoryXField: "country",
+          clustered: false,
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "Total: {valueY}"
+          })
+        }));
 
-series0.columns.template.setAll({
-  width: am5.percent(80),
-  tooltipY: 0,
-  strokeOpacity: 0
-});
-
-
-series0.data.setAll(data);
+        series0.columns.template.setAll({
+          width: am5.percent(80),
+          tooltipY: 0,
+          strokeOpacity: 0
+        });
 
 
-var series1 = chart.series.push(am5xy.ColumnSeries.new(root, {
-  name: "Income",
-  xAxis: xAxis,
-  yAxis: yAxis,
-  valueYField: "year2005",
-  categoryXField: "country",
-  clustered: false,
-  tooltip: am5.Tooltip.new(root, {
-    labelText: "Participación: {valueY}"
-  })
-}));
-
-series1.columns.template.setAll({
-  width: am5.percent(50),
-  tooltipY: 0,
-  strokeOpacity: 0
-});
-
-series1.data.setAll(data);
-
-var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+        series0.data.setAll(data);
 
 
-// Make stuff animate on load
-// https://www.amcharts.com/docs/v5/concepts/animations/
-chart.appear(1000, 100);
-series0.appear();
-series1.appear();
+        var series1 = chart.series.push(am5xy.ColumnSeries.new(root, {
+          name: "Income",
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: "year2005",
+          categoryXField: "country",
+          clustered: false,
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "Participación: {valueY}"
+          })
+        }));
 
-}); // end am5.ready()
+        series1.columns.template.setAll({
+          width: am5.percent(50),
+          tooltipY: 0,
+          strokeOpacity: 0
+        });
 
-console.clear();
-<?php } ?>
+        series1.data.setAll(data);
+
+        var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+
+
+        // Make stuff animate on load
+        // https://www.amcharts.com/docs/v5/concepts/animations/
+        chart.appear(1000, 100);
+        series0.appear();
+        series1.appear();
+
+      }); // end am5.ready()
+
+      console.clear();
+    <?php } ?>
   </script>
 </body>
 

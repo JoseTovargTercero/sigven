@@ -41,24 +41,6 @@ if ($result->num_rows > 0) {
 // Cerrar la conexión
 $stmt->close();
 
-// Declarar la consulta
-$stmt = $conexion_app->prepare("SELECT unox107.*, f.hora_reporte  FROM `unox107`
-LEFT JOIN flujo_electoral AS f ON f.cedula=unox107.cedula
- WHERE unox107.centro = '$centro'");
-// Ejecutar la consulta
-$stmt->execute();
-// Obtener los resultados
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $electores[$row['cedula']] = $row;
-    }
-}
-// Cerrar la conexión
-$stmt->close();
-
-
-
 
 
 // Función para verificar si un valor existe en el array
@@ -100,12 +82,12 @@ $objPHPExcel->setActiveSheetIndex(0)
 
 foreach ($electores as $item) {
     $objPHPExcel->setActiveSheetIndex(0)
-    ->setCellValue('A' . $row, $contador++)
-    ->setCellValue('B' . $row, ucwords(mb_strtolower($item['nombre'])))
-    ->setCellValue('C' . $row, $item['cedula'])
-    ->setCellValue('D' . $row, $item['jefe'])
-    ->setCellValue('E' . $row, $item['telefono'])
-    ->setCellValue('F' . $row, ($item['hora_reporte'] != '' ? '':'PENDIENTE'));
+        ->setCellValue('A' . $row, $contador++)
+        ->setCellValue('B' . $row, ucwords(mb_strtolower($item['nombre'])))
+        ->setCellValue('C' . $row, $item['cedula'])
+        ->setCellValue('D' . $row, $item['jefe'])
+        ->setCellValue('E' . $row, $item['telefono'])
+        ->setCellValue('F' . $row, ($item['hora_reporte'] != '' ? '' : 'PENDIENTE'));
     $row++;
 }
 

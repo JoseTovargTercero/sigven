@@ -44,28 +44,13 @@ if ($result->num_rows > 0) {
 // Cerrar la conexión
 $stmt->close();
 
-// Declarar la consulta
-$stmt = $conexion_app->prepare("SELECT cedula, jefe FROM `unox107`");
-// Ejecutar la consulta
-$stmt->execute();
-// Obtener los resultados
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $cdulas[$row['cedula']] = [$row['jefe']];
-    }
-}
-// Cerrar la conexión
-$stmt->close();
-
-
-
 
 // Función para verificar si un valor existe en el array
-function verificarCdula($valor, $array){
+function verificarCdula($valor, $array)
+{
     if (@$array[$valor]) {
         return $array[$valor][0];
-    }else {
+    } else {
         return '';
     }
     return in_array($valor, $array) ? 'X' : '';
@@ -87,62 +72,60 @@ $objPHPExcel->getProperties()->setCreator("SIGVEN Amazonas")
     ->setCategory("Reportes");
 
 
-    $contador = 1;
-    $rowA = 9;
-    $rowB = 9;
-    $rowC = 9;
-    $rowD = 9;
-    $rowE = 9;
-    $rowF = 9;
-    $rowG = 9;
-    $rowH = 9;
-    $rowI = 9;
+$contador = 1;
+$rowA = 9;
+$rowB = 9;
+$rowC = 9;
+$rowD = 9;
+$rowE = 9;
+$rowF = 9;
+$rowG = 9;
+$rowH = 9;
+$rowI = 9;
 
 
 
-    $objPHPExcel->setActiveSheetIndex(0)
+$objPHPExcel->setActiveSheetIndex(0)
     ->setCellValue('A4', 'Electores del centro')
     ->setCellValue('A6', ucwords(mb_strtolower($nombreUbch)) . ' - ' . ucwords(mb_strtolower($nombrePq)));
 
-        // Declarar la consulta
-        $stmt = $conexion_app->prepare("SELECT * FROM `rep_24` WHERE centro = '$codigo'");
-        // Ejecutar la consulta
-        $stmt->execute();
-        // Obtener los resultados
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $objPHPExcel->setActiveSheetIndex(0)
-                ->setCellValue('A' . $rowA++, $contador++)
-                ->setCellValue('B' . $rowB++, '')
-                ->setCellValue('C' . $rowC++, ucwords(mb_strtolower($row['nombre'])))
-                ->setCellValue('D' . $rowD++, $row['cedula'])
-                ->setCellValue('E' . $rowE++, "")
-                ->setCellValue('F' . $rowF++, "")
-                ->setCellValue('G' . $rowG++, "")
-                ->setCellValue('H' . $rowH++, "")
-                ->setCellValue('I' . $rowI++, verificarCdula($row['cedula'], $cdulas));
-            }
-        }
+// Declarar la consulta
+$stmt = $conexion_app->prepare("SELECT * FROM `rep_24` WHERE centro = '$codigo'");
+// Ejecutar la consulta
+$stmt->execute();
+// Obtener los resultados
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('A' . $rowA++, $contador++)
+            ->setCellValue('B' . $rowB++, '')
+            ->setCellValue('C' . $rowC++, ucwords(mb_strtolower($row['nombre'])))
+            ->setCellValue('D' . $rowD++, $row['cedula'])
+            ->setCellValue('E' . $rowE++, "")
+            ->setCellValue('F' . $rowF++, "")
+            ->setCellValue('G' . $rowG++, "")
+            ->setCellValue('H' . $rowH++, "")
+            ->setCellValue('I' . $rowI++, verificarCdula($row['cedula'], $cdulas));
+    }
+}
 
-        $conexion_app->close();
-
-
-
-        // Rename worksheet
-        $objPHPExcel->getActiveSheet()->setTitle('Electores del centro');
-
-        $contador = 1;
-        $rowA = 9;
-        $rowB = 9;
-        $rowC = 9;
-        $rowD = 9;
-        $rowE = 9;
-        $rowF = 9;
-        $rowG = 9;
-        $rowH = 9;
+$conexion_app->close();
 
 
+
+// Rename worksheet
+$objPHPExcel->getActiveSheet()->setTitle('Electores del centro');
+
+$contador = 1;
+$rowA = 9;
+$rowB = 9;
+$rowC = 9;
+$rowD = 9;
+$rowE = 9;
+$rowF = 9;
+$rowG = 9;
+$rowH = 9;
 
 
 
@@ -155,7 +138,9 @@ $objPHPExcel->getProperties()->setCreator("SIGVEN Amazonas")
 
 
 
-    // SE ENLISTA EL PADRON
+
+
+// SE ENLISTA EL PADRON
 
 $sql2 = "SELECT nombre, cedula, telefono, cv, cargo FROM estructuraraas WHERE comunidad= ? AND tipocargo='1'";
 $jefeCalle = $base->prepare($sql2);
@@ -173,83 +158,83 @@ $comunidades->execute(array());
 while ($idRow = $comunidades->fetch(PDO::FETCH_ASSOC)) {
 
     $idCom = $idRow['id'];
-        // Clone worksheet
-        $clonedSheet = clone $objPHPExcel->getActiveSheet();
-        $clonedSheet->setCellValue('A4', ucwords(mb_strtolower($idRow['name'])))
-            ->setCellValue('A6', ucwords(mb_strtolower($nombreUbch)) . ' - ' . ucwords(mb_strtolower($nombrePq)));
+    // Clone worksheet
+    $clonedSheet = clone $objPHPExcel->getActiveSheet();
+    $clonedSheet->setCellValue('A4', ucwords(mb_strtolower($idRow['name'])))
+        ->setCellValue('A6', ucwords(mb_strtolower($nombreUbch)) . ' - ' . ucwords(mb_strtolower($nombrePq)));
 
-        $jefeCalle->execute(array($idCom));
+    $jefeCalle->execute(array($idCom));
 
-        $jefeCalleRegistrosArray = array();
-        while ($jefeCalleRegistros = $jefeCalle->fetch(PDO::FETCH_ASSOC)) {
-            $jefeCalleRegistrosArray[] = $jefeCalleRegistros;
-        }
+    $jefeCalleRegistrosArray = array();
+    while ($jefeCalleRegistros = $jefeCalle->fetch(PDO::FETCH_ASSOC)) {
+        $jefeCalleRegistrosArray[] = $jefeCalleRegistros;
+    }
 
-        // Añadir fila adicional al final del array
-        $jefeCalleRegistrosArray[] = array(
-            'nombre' => 'No disponible',
-            'cedula' => 'No disponible',
-            'telefono' => 'No disponible',
-            'cv' => 'No disponible',
-            'cargo' => 'Sin calle'
-        );
+    // Añadir fila adicional al final del array
+    $jefeCalleRegistrosArray[] = array(
+        'nombre' => 'No disponible',
+        'cedula' => 'No disponible',
+        'telefono' => 'No disponible',
+        'cv' => 'No disponible',
+        'cargo' => 'Sin calle'
+    );
 
 
-        foreach ($jefeCalleRegistrosArray as $registro) {
+    foreach ($jefeCalleRegistrosArray as $registro) {
+
+
+        $clonedSheet
+            ->setCellValue('A' . $rowA++, $contador++)
+            ->setCellValue('B' . $rowB++, ucwords(mb_strtolower($registro['cargo'])))
+            ->setCellValue('C' . $rowC++, ucwords(mb_strtolower($registro['nombre'])))
+            ->setCellValue('D' . $rowD++, $registro['cedula'])
+            ->setCellValue('E' . $rowE++, $registro['telefono'])
+            ->setCellValue('F' . $rowF++, ucwords(mb_strtolower($registro['cv'])))
+            ->setCellValue('G' . $rowG++, '')
+            ->setCellValue('H' . $rowH++, '')
+            ->setCellValue('I' . $rowI++, verificarCdula($registro['cedula'], $cdulas));
+
+
+
+        $cargo = $registro['cargo'];
+
+
+
+        $padron->execute(array($idCom, $cargo));
+        while ($rowPadron = $padron->fetch(PDO::FETCH_ASSOC)) {
+
+            $cedula = $rowPadron['cedula'];
+
 
 
             $clonedSheet
                 ->setCellValue('A' . $rowA++, $contador++)
-                ->setCellValue('B' . $rowB++, ucwords(mb_strtolower($registro['cargo'])))
-                ->setCellValue('C' . $rowC++, ucwords(mb_strtolower($registro['nombre'])))
-                ->setCellValue('D' . $rowD++, $registro['cedula'])
-                ->setCellValue('E' . $rowE++, $registro['telefono'])
-                ->setCellValue('F' . $rowF++, ucwords(mb_strtolower($registro['cv'])))
-                ->setCellValue('G' . $rowG++, '')
-                ->setCellValue('H' . $rowH++, '')
-                ->setCellValue('I' . $rowI++, verificarCdula($registro['cedula'], $cdulas));
-
-
-
-            $cargo = $registro['cargo'];
-
-
-
-            $padron->execute(array($idCom, $cargo));
-            while ($rowPadron = $padron->fetch(PDO::FETCH_ASSOC)) {
-
-                $cedula = $rowPadron['cedula'];
-
-
-
-                $clonedSheet
-                    ->setCellValue('A' . $rowA++, $contador++)
-                    ->setCellValue('B' . $rowB++, ucwords(mb_strtolower($rowPadron['calle'])))
-                    ->setCellValue('C' . $rowC++, ucwords(mb_strtolower($rowPadron['nombre'])))
-                    ->setCellValue('D' . $rowD++, $rowPadron['cedula'])
-                    ->setCellValue('E' . $rowE++, $rowPadron['telefono'])
-                    ->setCellValue('F' . $rowF++, ucwords(mb_strtolower($rowPadron['cv'])))
-                    ->setCellValue('G' . $rowG++, $rowPadron['voto'])
-                    ->setCellValue('H' . $rowH++, ($rowPadron['act'] == '0' ? '' : '1'))
-                    ->setCellValue('I' . $rowI++, verificarCdula($rowPadron['cedula'], $cdulas));
-            }
+                ->setCellValue('B' . $rowB++, ucwords(mb_strtolower($rowPadron['calle'])))
+                ->setCellValue('C' . $rowC++, ucwords(mb_strtolower($rowPadron['nombre'])))
+                ->setCellValue('D' . $rowD++, $rowPadron['cedula'])
+                ->setCellValue('E' . $rowE++, $rowPadron['telefono'])
+                ->setCellValue('F' . $rowF++, ucwords(mb_strtolower($rowPadron['cv'])))
+                ->setCellValue('G' . $rowG++, $rowPadron['voto'])
+                ->setCellValue('H' . $rowH++, ($rowPadron['act'] == '0' ? '' : '1'))
+                ->setCellValue('I' . $rowI++, verificarCdula($rowPadron['cedula'], $cdulas));
         }
-
-        // Rename cloned worksheet
-        $clonedSheet->setTitle($idRow['name']);
-        $objPHPExcel->addSheet($clonedSheet);
-
-
-        $contador = 1;
-        $rowA = 9;
-        $rowB = 9;
-        $rowC = 9;
-        $rowD = 9;
-        $rowE = 9;
-        $rowF = 9;
-        $rowG = 9;
-        $rowH = 9;
     }
+
+    // Rename cloned worksheet
+    $clonedSheet->setTitle($idRow['name']);
+    $objPHPExcel->addSheet($clonedSheet);
+
+
+    $contador = 1;
+    $rowA = 9;
+    $rowB = 9;
+    $rowC = 9;
+    $rowD = 9;
+    $rowE = 9;
+    $rowF = 9;
+    $rowG = 9;
+    $rowH = 9;
+}
 
 
 
