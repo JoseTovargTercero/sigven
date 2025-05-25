@@ -1,89 +1,29 @@
 <?php
-/*
-require_once 'php-jwt-main/src/JWT.php'; // Asegúrate de incluir correctamente
-
-use \Firebase\JWT\JWT;
-
-// Ruta al archivo JSON
-$serviceAccountPath = __DIR__ . '/service-account.json';
-$serviceAccount = json_decode(file_get_contents($serviceAccountPath), true);
-
-// Crear JWT
-$now = time();
-$header = [
-    'alg' => 'RS256',
-    'typ' => 'JWT'
-];
-
-$payload = [
-    'iss' => $serviceAccount['client_email'],
-    'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
-    'aud' => 'https://oauth2.googleapis.com/token',
-    'iat' => $now,
-    'exp' => $now + 3600
-];
-
-// Generar JWT
-$privateKey = $serviceAccount['private_key'];
-$jwt = JWT::encode($payload, $privateKey, 'RS256');
-
-// Obtener el token de acceso
-$ch = curl_init('https://oauth2.googleapis.com/token');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-    'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-    'assertion' => $jwt,
-]));
-$response = curl_exec($ch);
-$data = json_decode($response, true);
-curl_close($ch);
-
-$accessToken = $data['access_token'];
-
-// Datos de la notificación
-$deviceToken = 'efmJp7YGToWNFTZGUKMniD:APA91bEcYN_RWcrP-23fVTVOYyekZB304XIkN_jB3XSDcR6m8O0wZ7iTCjaa4A3_Hkzwdge84d4cyLne3Hb5Qqk9jqF90hComLja-wZXKMCmC5sKYHIC0O8';
-$projectId = 'participa-v';
-$url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
-
-$body = [
-    'message' => [
-        'token' => $deviceToken,
-        'notification' => [
-            'title' => 'Hola',
-            'body' => 'Mensaje enviado sin Composer'
-        ]
-    ]
-];
-
-// Enviar notificación
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Authorization: Bearer $accessToken",
-    "Content-Type: application/json"
-]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
-
-$result = curl_exec($ch);
-curl_close($ch);
-
-echo $result;
-*/
 
 
 require_once 'php-jwt-main/src/JWT.php';
 require_once '../configuracion.php';
 require_once '../../elecciones/configuracion/conexion.php';
 
+$notifications = [];
 
 /* Selección de tokens */
 $tokens = [];
-$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tokens_fcm`");
+$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tokens_fcm` WHERE user='27640176' OR user='27365357'");
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $tokens[$row['user']] = [$row['nombre'], $row['token']]; // JEFES DE COMUNIDAD
+
+        // mensaje pre elecciones
+        $notificacion = [
+            'token' => $row['token'],
+            'title' => 'ATENCIÓN - ' . $row['nombre'],
+            'body' => "Si realizaste un reporte antes del inicio del evento, debes eliminarlo. Para hacerlo, ingresa al chat dentro de la app y toca el ícono de la papelera ubicado en la parte superior izquierda."
+        ];
+        array_push($notifications, $notificacion);
+        // mensaje pre elecciones
     }
 }
 $stmt->close();
@@ -141,7 +81,6 @@ $notifications = [
     ['token' => 'token2... (prueba de sintaxis)', 'title' => 'Alerta 2', 'body' => 'Mensaje para token 2'],
     ['token' => 'token3... (prueba de sintaxis)', 'title' => 'Notificación 3', 'body' => 'Mensaje para token 3'],
 ];*/
-$notifications = [];
 
 
 function abrv($centro)
@@ -177,14 +116,14 @@ if ($result->num_rows > 0) {
             $meta_electoral = $meta_centro[$row['centro']] ?? '100';
             $name_centro = abrv($row['name_centro']) ?? 'CENTRO DE VOTACIÓN';
 
-
+            /*
             $notificacion = [
                 'token' => $token,
                 'title' => $name_centro,
                 'body' => "Tienes $total_reportes_centro de $meta_electoral reportes en tu centro, ingresa a la app y verifica los avances."
             ];
-
-            array_push($notifications, $notificacion);
+*/
+            //  array_push($notifications, $notificacion);
 
             /*  $operadores[$row['responsable']] = [
                 'centro' => $row['centro'],
@@ -197,54 +136,6 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 /* selección del flujo electoral */
-
-/*
-echo '<pre>';
-print_r($notificacion);
-echo '</pre>';
-
-
-exit;
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tokens_fcm`");
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        array_push(
-            $notifications,
-            ['token' => $row['token'], 'title' => 'Saludo 1', 'body' => 'Mensaje para token 1'],
-        );
-    }
-}
-$stmt->close();
-
-*/
-
-
-
-
-
-
 
 
 use \Firebase\JWT\JWT;
