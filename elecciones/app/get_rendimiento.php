@@ -140,11 +140,6 @@ if ($result->num_rows > 0) {
   }
 }
 
-if (count($cedulas) > $meta_inicial) {
-  $meta_inicial = count($cedulas);
-}
-
-
 // usando $centro cuenta los electores de 'rep_24' por la columna 'centro'
 $sql = "SELECT COUNT(centro) AS cantidad FROM rep_24 WHERE centro = '$centro'";
 $result = $conexion_app->query($sql);
@@ -174,6 +169,6 @@ echo json_encode([
   'electores_centro' => "$cantidad_elecotores",
   'total_1x10_centro' => count($cedulas),
   'total_asistencia_1x10' => $asistentes1x10,
-  'meta_inicial' => ($cantidad_110 > $meta_inicial ? $cantidad_110 : $meta_inicial),
+  'meta_inicial' => $meta_inicial,
   'hora' => "$hora"
 ]);
