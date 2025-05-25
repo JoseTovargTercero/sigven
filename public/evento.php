@@ -3,8 +3,8 @@ include('../configurar/configuracion.php');
 include('../elecciones/configuracion/conexion.php'); // CONEXION A LA BASE DE DATOS DE LAS ELECCIONES
 
 include('includes/navbar.php');
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 if ($_SESSION['nivel'] != 1) {
   define('PAGINA_INICIO', '../index.php');
