@@ -99,10 +99,10 @@ if ($result->num_rows > 0) {
       $reportes = 0;
       $porcentaje = 0;
     }
-    $jefesUnoDiex[$row['cdula_jf']] = true;
+    $jefesUnoDiex[$row['jfcedula']] = true;
 
     $tabla_reportes_110[] = '<tr>
-<td>' . $row['cdula_jf'] . '</td>
+<td>' . $row['jfcedula'] . '</td>
 <td>' . $row['jefe'] . '</td>
 <td class="text-center">' . $row['telefono'] . '</td>
 <td class="text-center">' . $reportes . ' / ' . $row['cantidad'] . '</td>
@@ -691,7 +691,6 @@ $stmt->close();
 
 
                       $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(responsable), COUNT(*) AS Nreportes FROM `flujo_electoral` GROUP BY responsable");
-                      $stmt->bind_param('s', $var);
                       $stmt->execute();
                       $result = $stmt->get_result();
                       if ($result->num_rows > 0) {
@@ -717,7 +716,7 @@ $stmt->close();
                           <td>' . $row['centro'] . '</td>
                           <td>' . $nombres[$row['OPERADOR']][0] . '</td>
                           <td class="text-center">Operador</td>
-                          <td class="text-center">' . ($reportes_user[$row['OPERADOR']] ? $reportes_user[$row['OPERADOR']] : 0) . '</td>';
+                          <td class="text-center">' . ($reportes_user[$row['OPERADOR']] ?? 0) . '</td>';
                           }
                           if ($row['OPERADOR_PUNTO'] != '' && $row['OPERADOR_PUNTO'] != 0) {
                             echo '<tr>
