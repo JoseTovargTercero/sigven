@@ -25,7 +25,7 @@ WHERE cedula NOT IN (
 )";
 
   $stmt = $conexion_app->prepare($sql);
-  $stmt->bind_param("ss", $centro, $centro);
+  $stmt->bind_param("s", $centro);
   $stmt->execute();
 
   $result = $stmt->get_result();
