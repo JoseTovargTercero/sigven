@@ -9,7 +9,7 @@ $notifications = [];
 
 /* Selección de tokens */
 $tokens = [];
-$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tokens_fcm` WHERE user!='27640176' AND user!='27365357'");
+$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tokens_fcm`");
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
@@ -17,12 +17,12 @@ if ($result->num_rows > 0) {
         $tokens[$row['user']] = [$row['nombre'], $row['token']]; // JEFES DE COMUNIDAD
 
         // mensaje pre elecciones
-        $notificacion = [
+        /*  $notificacion = [
             'token' => $row['token'],
             'title' => 'ATENCIÓN - ' . $row['nombre'],
             'body' => "Si realizaste un reporte antes del inicio del evento, debes eliminarlo. Para hacerlo, ingresa al chat dentro de la app y toca el ícono de la papelera ubicado en la parte superior izquierda."
         ];
-        array_push($notifications, $notificacion);
+        array_push($notifications, $notificacion);*/
         // mensaje pre elecciones
     }
 }
@@ -73,14 +73,6 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 /* reportes realizados por centro */
-/*
-
-// Lista de notificaciones personalizadas
-$notifications = [
-    ['token' => 'token1... (prueba de sintaxis)', 'title' => 'Saludo 1', 'body' => 'Mensaje para token 1'],
-    ['token' => 'token2... (prueba de sintaxis)', 'title' => 'Alerta 2', 'body' => 'Mensaje para token 2'],
-    ['token' => 'token3... (prueba de sintaxis)', 'title' => 'Notificación 3', 'body' => 'Mensaje para token 3'],
-];*/
 
 
 function abrv($centro)
@@ -116,21 +108,14 @@ if ($result->num_rows > 0) {
             $meta_electoral = $meta_centro[$row['centro']] ?? '100';
             $name_centro = abrv($row['name_centro']) ?? 'CENTRO DE VOTACIÓN';
 
-            /*
+
             $notificacion = [
                 'token' => $token,
                 'title' => $name_centro,
                 'body' => "Tienes $total_reportes_centro de $meta_electoral reportes en tu centro, ingresa a la app y verifica los avances."
             ];
-*/
-            //  array_push($notifications, $notificacion);
 
-            /*  $operadores[$row['responsable']] = [
-                'centro' => $row['centro'],
-                'Reportes_del_usuario' => $row['cantidad'],
-                'token' => $token,
-                'user' => $user,
-            ];*/
+            array_push($notifications, $notificacion);
         }
     }
 }
