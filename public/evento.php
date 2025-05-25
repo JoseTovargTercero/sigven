@@ -85,9 +85,9 @@ if ($result->num_rows > 0) {
 $jefesUnoDiex = [];
 
 $tabla_reportes_110 = [];
-$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(cdula_jf), jefe, telefono, COUNT(*) AS cantidad FROM (SELECT 
+$stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcedula), jefe, telefono, COUNT(*) AS cantidad FROM (SELECT 
 jfcedula, telefono, jefe FROM unox10) AS combined
-GROUP BY cdula_jf");
+GROUP BY jfcedula");
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
