@@ -28,29 +28,22 @@ function getOperador($cedula)
     global $conexion_app;
 
     // Preparar la consulta
-    $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tablamesa` WHERE OPERADOR = ? OR OPERADOR_PUNTO = ? OR OPERADOR_UBCH = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `operadores` WHERE cedula = ?");
 
     // Verificar si la preparación de la consulta falló
     if (!$stmt) {
         die('Error en mysqli_prepare: ' . mysqli_error($conexion_app));
     }
 
-    $stmt->bind_param('sss', $cedula, $cedula, $cedula);
+    $stmt->bind_param('s', $cedula);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            if ($row['OPERADOR'] == $cedula) {
-                return array('Operador', $row['id'], $row['CODIGO'], $row['centro']);
-            } elseif ($row['OPERADOR_PUNTO'] == $cedula) {
-                return array('Punto', $row['id'], $row['CODIGO'], $row['centro']);
-            } elseif ($row['OPERADOR_UBCH'] == $cedula) {
-                return array('Ubch', $row['id'], $row['CODIGO'], $row['centro']);
-            }
-        }
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        return array('Operador', $row['id'], $row['CODIGO'], $row['centro']);
     }
-
     $stmt->close();
     return false;
 }
