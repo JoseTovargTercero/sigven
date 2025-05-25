@@ -9,7 +9,7 @@ $notifications = [];
 
 /* Selección de tokens */
 $tokens = [];
-$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tokens_fcm` WHERE user='27640176' OR user='27365357'");
+$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `tokens_fcm` WHERE user!='27640176' AND user!='27365357'");
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
