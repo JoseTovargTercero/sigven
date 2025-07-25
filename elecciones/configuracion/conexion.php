@@ -28,7 +28,10 @@ function getOperador($cedula)
     global $conexion_app;
 
     // Preparar la consulta
-    $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `operadores` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT O.id, O.cedula, O.CODIGO, O.centro, O.juventud, T.MUN, T.PAQ
+                            FROM `operadores` AS O
+                            LEFT JOIN tablamesa T ON T.CODIGO=O.CODIGO
+                            WHERE O.cedula = ?");
 
     // Verificar si la preparación de la consulta falló
     if (!$stmt) {
@@ -42,7 +45,7 @@ function getOperador($cedula)
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $stmt->close();
-        return array('Operador', $row['id'], $row['CODIGO'], $row['centro']);
+        return array('Operador', $row['id'], $row['CODIGO'], $row['centro'], $row['juventud'], $row['MUN'], $row['PAQ']);
     }
     $stmt->close();
     return false;

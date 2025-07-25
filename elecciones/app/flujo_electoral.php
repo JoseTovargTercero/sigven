@@ -3,7 +3,8 @@
 require('../configuracion/conexion.php');
 require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
-function getCentro($value, $accion){
+function getCentro($value, $accion)
+{
   global $conexion_app;
   $value = trim($value);
   if ($accion == 1) {
@@ -22,97 +23,116 @@ function getCentro($value, $accion){
   return false;
 }
 
-if (isset($_POST["elector"]) && isset($_POST["responsable"])) {
-//if (true) {
- $elector = $_POST["elector"];
- $responsable = $_POST["responsable"];
 
-  //$elector = '31113897';
-  //$responsable = '27640176';
-
-
-  $resp_verificado = getOperador($responsable);
-
-
-  //if ($resp_verificado) {
-
-    $tipo_user = $resp_verificado[0];
-    
-    $datosCne = getCentro($elector, 1);
-    $centro = trim($datosCne[0]);
-    $nombre = trim($datosCne[1]);
-    $mcp = trim($datosCne[2]);
-    $pq = trim($datosCne[3]);
-
-
-    $voto = 'NC';
-
-
-    if ($nombre == '' || $centro == 'NDP' || $centro == false) {
-      /*echo 'NE';
-      exit();*/
-      
-    }
-
-
-    $stmt_sig = mysqli_prepare($conexion, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
-    $stmt_sig->bind_param('s', $elector);
-    $stmt_sig->execute();
-    $result = $stmt_sig->get_result();
-    if ($result->num_rows > 0) {
-      $row = $result->fetch_assoc();
-      $voto = $row['voto'];
-    }
-    $stmt_sig->close();
-    $conexion->close();
-
-    $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
-    $stmt->bind_param('s', $elector);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($result->num_rows == 0) {
-
-
-
-    $idUnoX10 = '0';
-    $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id, jfcedula FROM `unox10` WHERE cdula = ?");
-    $stmt_unox10->bind_param('s', $elector);
-    $stmt_unox10->execute();
-    $result = $stmt_unox10->get_result();
-    if ($result->num_rows > 0) {
-      $row = $result->fetch_assoc();
-      $voto = 'VD';
-      $idUnoX10 = $row['jfcedula'];
-    }else {
-      $voto = 'NC';
-      $idUnoX10 = '';
-    }
-
-    $stmt_unox10->close();
-
-
-
-      $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-      $stmt_o->bind_param("ssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq);
-      $stmt_o->execute();
-
-
-      if ($tipo_user == 'Punto' && $voto == 'OP') {
-        echo "OP";
-      } else {
-        echo $stmt_o ? 'OK' : 'ERROR';
-      }
-
-      $stmt_o->close();
-    } else {
-
-      if ($tipo_user == 'PUNTO' && $voto == 'OP') {
-        echo "OP";
-      } else {
-        echo 'OK';
-      }
-      // Ya existia el reporte
-    }
-    $stmt->close();
-//  }
+// Si no se reciben datos
+if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
+  echo 'FALTAN DATOS';
+  exit;
 }
+
+$elector =      $_POST["elector"];
+$responsable =  $_POST["responsable"];
+
+
+//$elector = "145652805";      // Cédula del elector (prueba)
+//$responsable = "27640176";  // Cédula del responsable (prueba)
+
+// Obtener datos del operador responsable
+$resp_verificado = getOperador($responsable);
+
+// Verificar si el responsable existe
+if (!$resp_verificado) {
+  exit('RESPONSABLE NO VERIFICADO');
+}
+
+// Extraer datos del operador
+$tipo_user = $resp_verificado[0] ?? 0;
+$operador_juventud = $resp_verificado[4] ?? 0;
+$municipio_resp = $resp_verificado[5] ?? '';
+$parroquia_resp = $resp_verificado[6] ?? '';
+$verificado = $resp_verificado[1] ? 1 : 0;
+// Obtener datos del elector desde el CNE
+$datosCne = getCentro($elector, 1);
+$voto = 'NC'; // Valor por defecto para el voto
+
+// Verificación de centro electoral
+if (!$datosCne) {
+  // Si el elector no está en el centro, y el responsable es operador de juventud
+  if ($operador_juventud == '1') {
+    $centro = $resp_verificado[2];
+    $nombre = 'NO DISPONIBLE';
+    $mcp = trim($municipio_resp);
+    $pq = trim($parroquia_resp);
+  } else {
+    exit('NE'); // No es elector ni operador de juventud
+  }
+} else {
+  // Datos del elector encontrados
+  list($centro, $nombre, $mcp, $pq) = array_map('trim', $datosCne);
+}
+
+echo "Centro: $centro, Nombre: $nombre, MCP: $mcp, PQ: $pq JUVENEET $operador_juventud\n"; // Debugging output
+
+exit;
+
+
+
+$stmt_sig = mysqli_prepare($conexion, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
+$stmt_sig->bind_param('s', $elector);
+$stmt_sig->execute();
+$result = $stmt_sig->get_result();
+if ($result->num_rows > 0) {
+  $row = $result->fetch_assoc();
+  $voto = $row['voto'];
+}
+$stmt_sig->close();
+$conexion->close();
+
+$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
+$stmt->bind_param('s', $elector);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows == 0) {
+
+
+
+  $idUnoX10 = '0';
+  $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id, jfcedula FROM `unox10` WHERE cdula = ?");
+  $stmt_unox10->bind_param('s', $elector);
+  $stmt_unox10->execute();
+  $result = $stmt_unox10->get_result();
+  if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $voto = 'VD';
+    $idUnoX10 = $row['jfcedula'];
+  } else {
+    $voto = 'NC';
+    $idUnoX10 = '';
+  }
+
+  $stmt_unox10->close();
+
+
+
+  $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventud) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  $stmt_o->bind_param("ssssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq, $verificado, $operador_juventud);
+  $stmt_o->execute();
+
+
+  if ($tipo_user == 'Punto' && $voto == 'OP') {
+    echo "OP";
+  } else {
+    echo $stmt_o ? 'OK' : 'ERROR';
+  }
+
+  $stmt_o->close();
+} else {
+
+  if ($tipo_user == 'PUNTO' && $voto == 'OP') {
+    echo "OP";
+  } else {
+    echo 'OK';
+  }
+  // Ya existia el reporte
+}
+$stmt->close();
