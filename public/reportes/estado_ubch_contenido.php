@@ -246,7 +246,7 @@ foreach ($data as $comunidad => $datos) {
 
 
             if (strlen($elector['telefono']) > 5) {
-                $mensaje = '<a href="https://wa.me/58' . $elector['telefono'] . '?text=Hola ' . $nombre_formateado . ', *aun no has votado*, te invitamos a que vayas al centro y participes." target="_blank" class="btn-success">
+                $mensaje = '<a href="https://wa.me/58' . $elector['telefono'] . '?text=Hola ' . $nombre_formateado . ', *aun no has votado*, te invitamos a que te acerques al centro de votación y ejerzas tu derecho. Tu participación es muy importante." target="_blank" class="btn-success">
                 MENSAJE
                 </a>';
             } else {
