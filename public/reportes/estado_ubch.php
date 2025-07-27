@@ -3,7 +3,7 @@
 /** Error reporting */
 include('../../configurar/configuracion.php');
 require '../../elecciones/configuracion/conexion.php';
-require_once __DIR__ . '/lib/vendor/autoload.php';
+//require_once __DIR__ . '/lib/vendor/autoload.php';
 
 
 ini_set('display_errors', 1);
@@ -169,6 +169,22 @@ foreach ($data as $comunidad => $datos) {
     $html .= '</div>';
 }
 
-$mpdf = new \Mpdf\Mpdf();
-$mpdf->WriteHTML($html);
-$mpdf->Output();
+echo $html;
+
+
+//$mpdf = new \Mpdf\Mpdf();
+//$mpdf->WriteHTML($html);
+//$mpdf->Output();
+
+?>
+
+<script>
+    window.addEventListener('load', function() {
+        window.print();
+
+        // Esperar a que se cierre el diálogo de impresión
+        window.onafterprint = function() {
+            window.close();
+        };
+    });
+</script>
