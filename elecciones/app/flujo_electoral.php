@@ -49,10 +49,11 @@ if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
 $resp_verificado = getOperador($responsable);
 
 // Verificar si el responsable existe
+/*
 if (!$resp_verificado) {
   exit('RESPONSABLE NO VERIFICADO');
 }
-
+*/
 // Extraer datos del operador
 $tipo_user = $resp_verificado[0] ?? 0;
 $operador_juventud = $resp_verificado[4] ?? 0;
