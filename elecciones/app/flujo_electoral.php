@@ -23,19 +23,24 @@ function getCentro($value, $accion)
   return false;
 }
 
+//$elector =      $_POST["elector"];
+$elector =      "17105084";
+//$responsable =  $_POST["responsable"];
+$responsable =  "14565280";
+/*
+
 
 if (date('Y-m-d') != '2025-07-27') {
   exit('LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES');
 }
-
+*/
 // Si no se reciben datos
+/*
 if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
   echo 'FALTAN DATOS';
   exit;
-}
+}*/
 
-$elector =      $_POST["elector"];
-$responsable =  $_POST["responsable"];
 
 
 //$elector = "145652805";      // Cédula del elector (prueba)
@@ -75,12 +80,48 @@ if (!$datosCne) {
   list($centro, $nombre, $mcp, $pq) = array_map('trim', $datosCne);
 }
 
-echo "Centro: $centro, Nombre: $nombre, MCP: $mcp, PQ: $pq JUVENEET $operador_juventud\n"; // Debugging output
-
-exit;
 
 
+// VERIFICAR SI EL ELECTOR YA HA VOTADO
+$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
+$stmt->bind_param('s', $elector);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
 
+  if ($tipo_user == 'PUNTO' && $voto == 'OP') {
+    echo "OP";
+  } else {
+    echo 'OK';
+  }
+  exit; // El elector ya ha votado, no se permite votar de nuevo
+}
+$stmt->close();
+
+
+
+// DETERMINAR EL TIPO DE VOTO EN BASE A SI FUE CONTACTADO
+$idUnoX10 = '0';
+$stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id FROM `unificado` WHERE cdula = ?");
+$stmt_unox10->bind_param('s', $elector);
+$stmt_unox10->execute();
+$result = $stmt_unox10->get_result();
+if ($result->num_rows > 0) {
+  $row = $result->fetch_assoc();
+  $voto = 'VD';
+  $idUnoX10 = 1;
+} else {
+  $voto = 'NC';
+  $idUnoX10 = '0';
+}
+
+$stmt_unox10->close();
+
+// organizar para que 
+
+
+
+// DETERMINAR EL TIPO DE VOTO EN BASE AL PADRON
 $stmt_sig = mysqli_prepare($conexion, "SELECT voto FROM `padronelectoral` WHERE cedula = ?");
 $stmt_sig->bind_param('s', $elector);
 $stmt_sig->execute();
@@ -92,51 +133,17 @@ if ($result->num_rows > 0) {
 $stmt_sig->close();
 $conexion->close();
 
-$stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
-$stmt->bind_param('s', $elector);
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows == 0) {
 
 
-
-  $idUnoX10 = '0';
-  $stmt_unox10 = mysqli_prepare($conexion_app, "SELECT id, jfcedula FROM `unox10` WHERE cdula = ?");
-  $stmt_unox10->bind_param('s', $elector);
-  $stmt_unox10->execute();
-  $result = $stmt_unox10->get_result();
-  if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $voto = 'VD';
-    $idUnoX10 = $row['jfcedula'];
-  } else {
-    $voto = 'NC';
-    $idUnoX10 = '';
-  }
-
-  $stmt_unox10->close();
+$stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventud) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt_o->bind_param("ssssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq, $verificado, $operador_juventud);
+$stmt_o->execute();
 
 
-
-  $stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventud) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-  $stmt_o->bind_param("ssssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq, $verificado, $operador_juventud);
-  $stmt_o->execute();
-
-
-  if ($tipo_user == 'Punto' && $voto == 'OP') {
-    echo "OP";
-  } else {
-    echo $stmt_o ? 'OK' : 'ERROR';
-  }
-
-  $stmt_o->close();
+if ($tipo_user == 'Punto' && $voto == 'OP') {
+  echo "OP";
 } else {
-
-  if ($tipo_user == 'PUNTO' && $voto == 'OP') {
-    echo "OP";
-  } else {
-    echo 'OK';
-  }
-  // Ya existia el reporte
+  echo $stmt_o ? 'OK' : 'ERROR';
 }
-$stmt->close();
+
+$stmt_o->close();

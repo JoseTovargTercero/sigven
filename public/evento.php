@@ -30,18 +30,18 @@ if ($_SESSION["instancia"] == 0) {
 
 
 // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-$sql = "SELECT centro, COUNT(*) AS repeticiones FROM ( SELECT DISTINCT centro, cedula FROM ( SELECT cv as centro, cdula AS cedula FROM unox10 ) AS combined ) AS distinct_combined GROUP BY centro ORDER BY centro;";
+$sql = "SELECT * FROM metas_iniciales;";
 
 $stmt = $conexion_app->prepare($sql);
 $stmt->execute();
 
 $result = $stmt->get_result();
 
-$metas_1107 = array();
+$meta_inicial = array();
 if ($result->num_rows > 0) {
   // Obtener los datos y convertirlos en un arreglo asociativo
   while ($row = $result->fetch_assoc()) {
-    $metas_1107[$row['centro']] = $row['repeticiones'];
+    $meta_inicial[$row['CODIGO']] = $row['META'];
   }
 }
 
@@ -83,7 +83,7 @@ if ($result->num_rows > 0) {
 
 
 $jefesUnoDiex = [];
-
+/*
 $tabla_reportes_110 = [];
 $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(jfcedula), jefe, telefono, COUNT(*) AS cantidad FROM (SELECT 
 jfcedula, telefono, jefe FROM unox10) AS combined
@@ -111,21 +111,60 @@ if ($result->num_rows > 0) {
   }
 }
 $stmt->close();
+*/
 
 
 
-$jefesParticiparon = 0;
-$stmt = mysqli_prepare($conexion_app, "SELECT cedula FROM flujo_electoral $extraCondicionW");
+
+// Votos por hora y responsables para el reportes por operador
+
+$votos_por_hora = array(
+  '05' => 0,
+  '06' => 0,
+  '07' => 0,
+  '08' => 0,
+  '09' => 0,
+  '10' => 0,
+  '11' => 0,
+  '12' => 0,
+  '13' => 0,
+  '14' => 0,
+  '15' => 0,
+  '16' => 0,
+  '17' => 0,
+  '18' => 0,
+  '19' => 0,
+  '20' => 0,
+  '21' => 0,
+  '22' => 0,
+  '23' => 0
+);
+
+
+$reportes_user = array();
+
+
+$stmt = mysqli_prepare($conexion_app, "SELECT cedula, hora_reporte, responsable FROM `flujo_electoral` ORDER BY id ASC");
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
-    if (@$jefesUnoDiex[$row['cedula']]) {
-      $jefesParticiparon++;
+    $datetime = $row['hora_reporte'];
+    $timestamp = strtotime($datetime);
+    $time = date("H", $timestamp);
+
+    $votos_por_hora[$time] += 1;
+
+    if (@$reportes_user[$row['responsable']]) {
+      $reportes_user[$row['responsable']] += 1;
+    } else {
+      $reportes_user[$row['responsable']] = 1;
     }
   }
 }
 $stmt->close();
+
+
 ?>
 
 
@@ -264,17 +303,16 @@ $stmt->close();
     <div class="container-fluid">
 
       <div class="row">
-        <div class="col-xl-4 col-sm-6 mb-xl-0 mb-4">
+        <div class="col-xl-4 col-sm-4 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Electores Registrados</p>
+                    <p class="text-sm mb-0 text-capitalize font-weight-bold">REPORTES / CONTACTADOS</p>
                     <h5 class="font-weight-bolder mb-0">
                       <span title="Votos duros"><?php echo number_format($totalVotos, '0', '.', '.'); ?></span> /
-                      <small title="1*10/7"><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?>/</small>
-                      <small title="Jefes de 1*10/7"><?php echo number_format($jefesParticiparon, '0', '.', '.'); ?></small>
+                      <small title="1*10/7"><?php echo number_format($votos_uno_dies, '0', '.', '.'); ?></small>
                     </h5>
                   </div>
                 </div>
@@ -287,7 +325,7 @@ $stmt->close();
             </div>
           </div>
         </div>
-        <div class="col-xl-2 col-sm-6 mb-xl-0 mb-4">
+        <div class="col-xl-2 col-sm-4 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-body p-3">
               <div class="row">
@@ -303,7 +341,7 @@ $stmt->close();
             </div>
           </div>
         </div>
-        <div class="col-xl-2 col-sm-6 mb-xl-0 mb-4">
+        <div class="col-xl-2 col-sm-4 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-body p-3">
               <div class="numbers">
@@ -316,7 +354,7 @@ $stmt->close();
             </div>
           </div>
         </div>
-        <div class="col-xl-2 col-sm-6">
+        <div class="col-xl-2 col-sm-4">
           <div class="card">
             <div class="card-body p-3">
               <div class="numbers">
@@ -329,7 +367,7 @@ $stmt->close();
             </div>
           </div>
         </div>
-        <div class="col-xl-2 col-sm-6">
+        <div class="col-xl-2 col-sm-4">
           <div class="card">
             <div class="card-body p-3">
               <div class="numbers">
@@ -424,82 +462,6 @@ $stmt->close();
             </div>
           </div>
         </div>
-        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
-          <div class="card h-100">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="d-flex flex-column h-100">
-                  <h6 class="font-weight-bolder mb-4 pt-2">Reportes por 1*10/7</h6>
-
-                  <div class="table-responsive">
-                    <table id="table4">
-                      <thead>
-                        <tr>
-                          <th class="p-0">Cedula</th>
-                          <th class="p-0">Jefe</th>
-                          <th class="text-center p-0">Teléfono</th>
-                          <th class="text-center p-0">Electores</th>
-                          <th class="text-center p-0">Porcentaje</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php
-                        foreach ($tabla_reportes_110 as $item) {
-                          echo $item;
-                        }
-                        ?>
-                      </tbody>
-                    </table>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-
-        <?php
-        $votos_por_hora = array(
-          '05' => 0,
-          '06' => 0,
-          '07' => 0,
-          '08' => 0,
-          '09' => 0,
-          '10' => 0,
-          '11' => 0,
-          '12' => 0,
-          '13' => 0,
-          '14' => 0,
-          '15' => 0,
-          '16' => 0,
-          '17' => 0,
-          '18' => 0,
-          '19' => 0,
-          '20' => 0,
-          '21' => 0,
-          '22' => 0,
-          '23' => 0
-        );
-
-
-
-        $stmt = mysqli_prepare($conexion_app, "SELECT cedula, hora_reporte FROM `flujo_electoral` ORDER BY id ASC");
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-          while ($row = $result->fetch_assoc()) {
-            $datetime = $row['hora_reporte'];
-            $timestamp = strtotime($datetime);
-            $time = date("H", $timestamp);
-
-            $votos_por_hora[$time] += 1;
-          }
-        }
-        $stmt->close();
-
-        ?>
 
 
         <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
@@ -514,7 +476,19 @@ $stmt->close();
             </div>
           </div>
         </div>
+        <div class="col-lg-12 mb-4 mt-4">
+          <div class="card h-100 ">
+            <div class="card-body p-3">
+              <div class="row">
+                <div class="d-flex flex-column h-100">
+                  <h6 class="font-weight-bolder mb-4 pt-2">Intencion de voto</h6>
+                  <div id="chartdiv" style="height: 53vh;"></div>
+                </div>
 
+              </div>
+            </div>
+          </div>
+        </div>
 
 
         <div class="col-lg-12 mb-4 mt-4">
@@ -532,9 +506,9 @@ $stmt->close();
                     <thead>
                       <tr>
                         <th class="p-0">Centro</th>
-                        <th class="text-center p-0" style="background-color: #dbdbdb;">Asistencia <br> deseada</th>
+                        <th class="text-center p-0" style="background-color: #dbdbdb;">Meta</th>
                         <th class="text-center p-0" style="background-color: #dbdbdb;">Porcentaje</th>
-                        <th class="text-center p-0">Tendencia 110/7</th>
+                        <th class="text-center p-0">Tendencia</th>
                         <th class="text-center p-0">Total</th>
                         <th class="text-center p-0"></th>
                       </tr>
@@ -573,7 +547,7 @@ $stmt->close();
                       //SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral GROUP BY centro ORDER BY `unodiez_diferente_de_cero` DESC
                       $favor_total = 0;
                       $contra_total = 0;
-                      $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS unodiez_diferente_de_cero FROM flujo_electoral  $extraCondicionW GROUP BY centro ORDER BY `Nrepeticiones` ASC");
+                      $stmt = mysqli_prepare($conexion_app, "SELECT flujo_electoral.centro, COUNT(*) AS Nrepeticiones, SUM(CASE WHEN unodiez != 0 THEN 1 ELSE 0 END) AS asistencia FROM flujo_electoral  $extraCondicionW GROUP BY centro ORDER BY `Nrepeticiones` ASC");
                       $stmt->execute();
                       $result = $stmt->get_result();
                       if ($result->num_rows > 0) {
@@ -582,14 +556,14 @@ $stmt->close();
                           $participacionCentro = [abrev($centroDatos[$row['centro']][0]), number_format($row['Nrepeticiones'] * 100 / $centroDatos[$row['centro']][1], '1', '.', ',')];
 
                           if (abrev($centroDatos[$row['centro']][0]) != '') {
-                            $meta = $metas_1107[$row['centro']];
-                            $asistencia_1107 = $row['unodiez_diferente_de_cero'];
+                            $meta = $meta_inicial[$row['centro']];
+                            $participacion_deseada = $row['asistencia'];
 
 
-                            $tendencia1107 = getTendencia($asistencia_1107, $row['Nrepeticiones']);
+                            $tendencia1107 = getTendencia($participacion_deseada, $row['Nrepeticiones']);
 
-                            $favor_total += $asistencia_1107;
-                            $contra_total += $row['Nrepeticiones'] - $asistencia_1107;
+                            $favor_total += $participacion_deseada;
+                            $contra_total += $row['Nrepeticiones'] - $participacion_deseada;
 
                             echo '<tr>
                               <td>
@@ -600,8 +574,8 @@ $stmt->close();
                               </a>
                               
                               ' . abrev($centroDatos[$row['centro']][0]) . '</td>
-                              <td class="text-center" style="background-color: #dbdbdb;">' . $asistencia_1107 . ' / ' . $meta . ' </td>
-                              <td class="text-center" style="background-color: #dbdbdb;">' . number_format($asistencia_1107 * 100 / $meta, '1', '.', ',') . '%</td>
+                              <td class="text-center" style="background-color: #dbdbdb;">' . $participacion_deseada . ' / ' . $meta . ' </td>
+                              <td class="text-center" style="background-color: #dbdbdb;">' . number_format($participacion_deseada * 100 / $meta, '1', '.', ',') . '%</td>
                               <td class="text-center">' . $tendencia1107 . '</td>
                               <td class="text-center">' . $row['Nrepeticiones'] . '</td>
                               <td class="text-center"><button class="btn btn-sm btn-info" style="padding: 8px;">
@@ -623,34 +597,9 @@ $stmt->close();
 
 
 
-        <div class="col-lg-6 mb-4 mt-4">
-          <div class="card h-100 ">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="d-flex flex-column h-100">
-                  <h6 class="font-weight-bolder mb-4 pt-2">Tendencia 110/7</h6>
-                  <div id="chartdiv3" style="height: 53vh;"></div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
 
 
-        <div class="col-lg-6 mb-4 mt-4">
-          <div class="card h-100 ">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="d-flex flex-column h-100">
-                  <h6 class="font-weight-bolder mb-4 pt-2">Intencion de voto</h6>
-                  <div id="chartdiv" style="height: 53vh;"></div>
-                </div>
 
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="row mt-4">
 
@@ -664,29 +613,22 @@ $stmt->close();
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-                <h6 class="font-weight-bolder mb-4">Operadores</h6>
+                <h6 class="font-weight-bolder mb-4">Operadores de la juventud y Ubch</h6>
                 <div class="table-responsive">
                   <table class="" id="table3">
                     <thead>
                       <tr>
+                        <th class="p-0">Codigo</th>
                         <th class="p-0">Centro</th>
                         <th class="text-center p-0">Operador</th>
+                        <th class="text-center p-0">Telefono</th>
                         <th class="text-center p-0">Tipo</th>
                         <th class="text-center p-0">Reportes</th>
+                        <th class="text-center p-0">Mensaje</th>
                       </tr>
                     </thead>
                     <tbody>
                       <?php
-                      $nombres = array();
-                      $stmt = mysqli_prepare($conexion_app, "SELECT cedula, nombre, centro, sexo FROM rep_24");
-                      $stmt->execute();
-                      $result = $stmt->get_result();
-                      if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                          $nombres["$row[cedula]"] = [$row['nombre'], $row['centro'],];
-                        }
-                      }
-                      $stmt->close();
 
 
 
@@ -703,35 +645,45 @@ $stmt->close();
 
 
 
-                      $stmt = mysqli_prepare($conexion_app, "SELECT * FROM tablamesa");
+                      $stmt = mysqli_prepare($conexion_app, "SELECT * FROM operadores WHERE juventud != 2 ORDER BY CODIGO");
                       $stmt->execute();
                       $result = $stmt->get_result();
                       if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
 
+                          switch ($row['juventud']) {
+                            case '0':
+                              $tipo = 'UBCH';
+                              break;
+                            case '1':
+                              $tipo = 'JUVENTUD';
+                              break;
 
+                            default:
+                              $tipo = 'NO DEFINIDO';
+                              break;
+                          }
 
-                          if ($row['OPERADOR'] != '' && $row['OPERADOR'] != 0) {
-                            echo '<tr>
-                          <td>' . $row['centro'] . '</td>
-                          <td>' . $nombres[$row['OPERADOR']][0] . '</td>
-                          <td class="text-center">Operador</td>
-                          <td class="text-center">' . ($reportes_user[$row['OPERADOR']] ?? 0) . '</td>';
+                          $reportes = $reportes_user[$row['cedula']] ?? 0;
+                          $telefono = $row['telefono'];
+                          if (strlen($telefono) > 5) {
+                            $mensaje = '<a href="https://wa.me/58' . $telefono . '?text=Hola, llevas un total de ' . $reportes . ' reportes." target="_blank">
+                            <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><defs><style>.cls-1,.cls-2{fill-rule:evenodd;}.cls-1{fill:url(#linear-gradient);}.cls-2{fill:#fff;}</style><linearGradient id="linear-gradient" x1="1337.28" y1="518.24" x2="1337.28" y2="-2164.82" gradientTransform="matrix(0.19, 0, 0, -0.19, 0.81, 98.89)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#61fd7d"/><stop offset="1" stop-color="#2bb826"/></linearGradient></defs><title>wa</title><path class="cls-1" d="M512,382.07c0,2.8-.09,8.88-.26,13.58-.41,11.49-1.32,26.32-2.7,33.07a109.76,109.76,0,0,1-9.27,27.71,98.45,98.45,0,0,1-43.43,43.39,110.21,110.21,0,0,1-27.87,9.28c-6.69,1.35-21.41,2.24-32.82,2.65-4.71.17-10.79.25-13.58.25l-252.1,0c-2.8,0-8.88-.09-13.58-.26-11.49-.41-26.32-1.32-33.07-2.69a110.37,110.37,0,0,1-27.72-9.28A98.5,98.5,0,0,1,12.18,456.3,110.21,110.21,0,0,1,2.9,428.43C1.55,421.74.66,407,.25,395.61.08,390.91,0,384.82,0,382l0-252.1c0-2.8.09-8.88.25-13.58C.71,104.86,1.62,90,3,83.28a110.37,110.37,0,0,1,9.27-27.72A98.59,98.59,0,0,1,55.7,12.18,110.21,110.21,0,0,1,83.57,2.9C90.26,1.55,105,.66,116.39.25,121.09.08,127.18,0,130,0l252.1,0c2.8,0,8.88.09,13.58.25C407.14.71,422,1.62,428.72,3a110.37,110.37,0,0,1,27.72,9.27A98.59,98.59,0,0,1,499.82,55.7a110.21,110.21,0,0,1,9.28,27.87c1.35,6.69,2.24,21.41,2.65,32.82.17,4.7.25,10.79.25,13.58Z" transform="translate(0 0)"/><path class="cls-2" d="M379.56,131.67A172.4,172.4,0,0,0,256.67,80.73C161,80.73,83.05,158.64,83.05,254.42a173.47,173.47,0,0,0,23.2,86.82l-24.65,90,92.08-24.17a173.55,173.55,0,0,0,83,21.17h.07c95.73,0,173.69-77.91,173.69-173.69A172.73,172.73,0,0,0,379.53,131.7l0,0ZM256.72,399a144.17,144.17,0,0,1-73.52-20.14l-5.29-3.15L123.27,390l14.59-53.27-3.42-5.47a143.29,143.29,0,0,1-22.11-76.81C112.33,174.81,177.1,110,256.8,110A144.34,144.34,0,0,1,401.12,254.48c-.07,79.67-64.83,144.46-144.41,144.46v0ZM335.87,290.8c-4.32-2.2-25.68-12.67-29.65-14.12s-6.85-2.19-9.8,2.2-11.22,14.11-13.76,17-5.06,3.29-9.37,1.09-18.35-6.77-34.92-21.56c-12.88-11.5-21.61-25.74-24.15-30s-.29-6.71,1.92-8.83c2-1.93,4.32-5.06,6.51-7.6s2.88-4.32,4.32-7.26.74-5.42-.35-7.6-9.8-23.55-13.34-32.25c-3.49-8.51-7.12-7.32-9.79-7.47s-5.42-.13-8.29-.13a16,16,0,0,0-11.57,5.41c-4,4.32-15.2,14.86-15.2,36.22s15.54,42,17.72,44.91,30.61,46.76,74.14,65.54c10.34,4.44,18.42,7.11,24.72,9.18a60,60,0,0,0,27.32,1.71c8.35-1.23,25.68-10.49,29.31-20.62s3.63-18.83,2.55-20.62-3.91-3-8.29-5.22l0,0Z" transform="translate(0 0)"/></svg>
+                            </a>';
+                          } else {
+                            $mensaje = '';
                           }
-                          if ($row['OPERADOR_PUNTO'] != '' && $row['OPERADOR_PUNTO'] != 0) {
-                            echo '<tr>
+
+                          echo '<tr>
+                          <td>' . $row['CODIGO'] . '</td>
                           <td>' . $row['centro'] . '</td>
-                          <td>' . $nombres[$row['OPERADOR_PUNTO']][0] . '</td>
-                          <td class="text-center">Punto</td>
-                          <td class="text-center">' . ($reportes_user[$row['OPERADOR_PUNTO']] ? $reportes_user[$row['OPERADOR_PUNTO']] : 0) . '</td>';
-                          }
-                          if ($row['OPERADOR_UBCH'] != '' && $row['OPERADOR_UBCH'] != 0) {
-                            echo '<tr>
-                          <td>' . $row['centro'] . '</td>
-                          <td>' . $nombres[$row['OPERADOR_UBCH']][0] . '</td>
-                          <td class="text-center">Ubch</td>
-                          <td class="text-center">' . ($reportes_user[$row['OPERADOR_UBCH']] ? $reportes_user[$row['OPERADOR_UBCH']] : 0) . '</td>';
-                          }
+                          <td>' . $row['nombre'] . '</td>
+                          <td>' . $row['telefono'] . '</td>
+                          <td class="text-center">' . $tipo . '</td>
+                          <td class="text-center">' . ($reportes) . '</td>
+                          <td>' . $mensaje . '</td>
+                          
+                          ';
                         }
                       }
                       $stmt->close();
@@ -754,43 +706,62 @@ $stmt->close();
                   <table class="" id="table45">
                     <thead>
                       <tr>
-                        <th class="text-center p-0">Parroquia</th>
-                        <th class="text-center p-0">Ubch</th>
-                        <th class="text-center p-0">Comunidad</th>
-                        <th class="text-center p-0">Jefe de comunidad</th>
+                        <th class="p-0">Codigo</th>
+                        <th class="p-0">Centro</th>
+                        <th class="p-0">Comunidad</th>
+                        <th class="text-center p-0">Operador</th>
+                        <th class="text-center p-0">Telefono</th>
                         <th class="text-center p-0">Reportes</th>
+                        <th class="text-center p-0">Mensaje</th>
                       </tr>
                     </thead>
                     <tbody>
                       <?php
-                      //here
-                      $reportes_por_comunidad = $reportes_user;
 
-                      $nombres = array();
-                      $stmt = mysqli_prepare($conexion, "SELECT * FROM jefes_comunidad");
+
+
+                      $stmt = mysqli_prepare($conexion_app, "SELECT DISTINCT(responsable), COUNT(*) AS Nreportes FROM `flujo_electoral` GROUP BY responsable");
                       $stmt->execute();
                       $result = $stmt->get_result();
                       if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
-                          $cantidad_reportes = $reportes_por_comunidad[$row['cedula']] ?? 0;
-                          if (@$reportes_por_comunidad[$row['cedula']]) {
-                            // CHATGPT: eliminalo
-                            unset($reportes_por_comunidad[$row['cedula']]);
-                          }
-
-                          echo '<tr>
-                          <td>' . $row['pq'] . '</td>
-                          <td>' . $row['ubch'] . '</td>
-                          <td>' . $row['comunidad'] . '</td>
-                          <td><a onclick="listado(\'' . $row['cedula'] . '\', \'' . $row['jefe'] . '\')">' . $row['jefe'] . '</a></td>
-                          <td>' . $cantidad_reportes . '</td>
-                          </tr>';
+                          $reportes_user[$row['responsable']] = $row['Nreportes'];
                         }
                       }
                       $stmt->close();
 
 
 
+
+                      $stmt = mysqli_prepare($conexion_app, "SELECT * FROM operadores WHERE juventud = 2 ORDER BY CODIGO");
+                      $stmt->execute();
+                      $result = $stmt->get_result();
+                      if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+
+                          $reportes = $reportes_user[$row['cedula']] ?? 0;
+                          $telefono = $row['telefono'];
+                          if (strlen($telefono) > 5) {
+                            $mensaje = '<a href="https://wa.me/58' . $telefono . '?text=Hola, llevas un total de ' . $reportes . ' reportes." target="_blank">
+      <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><defs><style>.cls-1,.cls-2{fill-rule:evenodd;}.cls-1{fill:url(#linear-gradient);}.cls-2{fill:#fff;}</style><linearGradient id="linear-gradient" x1="1337.28" y1="518.24" x2="1337.28" y2="-2164.82" gradientTransform="matrix(0.19, 0, 0, -0.19, 0.81, 98.89)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#61fd7d"/><stop offset="1" stop-color="#2bb826"/></linearGradient></defs><title>wa</title><path class="cls-1" d="M512,382.07c0,2.8-.09,8.88-.26,13.58-.41,11.49-1.32,26.32-2.7,33.07a109.76,109.76,0,0,1-9.27,27.71,98.45,98.45,0,0,1-43.43,43.39,110.21,110.21,0,0,1-27.87,9.28c-6.69,1.35-21.41,2.24-32.82,2.65-4.71.17-10.79.25-13.58.25l-252.1,0c-2.8,0-8.88-.09-13.58-.26-11.49-.41-26.32-1.32-33.07-2.69a110.37,110.37,0,0,1-27.72-9.28A98.5,98.5,0,0,1,12.18,456.3,110.21,110.21,0,0,1,2.9,428.43C1.55,421.74.66,407,.25,395.61.08,390.91,0,384.82,0,382l0-252.1c0-2.8.09-8.88.25-13.58C.71,104.86,1.62,90,3,83.28a110.37,110.37,0,0,1,9.27-27.72A98.59,98.59,0,0,1,55.7,12.18,110.21,110.21,0,0,1,83.57,2.9C90.26,1.55,105,.66,116.39.25,121.09.08,127.18,0,130,0l252.1,0c2.8,0,8.88.09,13.58.25C407.14.71,422,1.62,428.72,3a110.37,110.37,0,0,1,27.72,9.27A98.59,98.59,0,0,1,499.82,55.7a110.21,110.21,0,0,1,9.28,27.87c1.35,6.69,2.24,21.41,2.65,32.82.17,4.7.25,10.79.25,13.58Z" transform="translate(0 0)"/><path class="cls-2" d="M379.56,131.67A172.4,172.4,0,0,0,256.67,80.73C161,80.73,83.05,158.64,83.05,254.42a173.47,173.47,0,0,0,23.2,86.82l-24.65,90,92.08-24.17a173.55,173.55,0,0,0,83,21.17h.07c95.73,0,173.69-77.91,173.69-173.69A172.73,172.73,0,0,0,379.53,131.7l0,0ZM256.72,399a144.17,144.17,0,0,1-73.52-20.14l-5.29-3.15L123.27,390l14.59-53.27-3.42-5.47a143.29,143.29,0,0,1-22.11-76.81C112.33,174.81,177.1,110,256.8,110A144.34,144.34,0,0,1,401.12,254.48c-.07,79.67-64.83,144.46-144.41,144.46v0ZM335.87,290.8c-4.32-2.2-25.68-12.67-29.65-14.12s-6.85-2.19-9.8,2.2-11.22,14.11-13.76,17-5.06,3.29-9.37,1.09-18.35-6.77-34.92-21.56c-12.88-11.5-21.61-25.74-24.15-30s-.29-6.71,1.92-8.83c2-1.93,4.32-5.06,6.51-7.6s2.88-4.32,4.32-7.26.74-5.42-.35-7.6-9.8-23.55-13.34-32.25c-3.49-8.51-7.12-7.32-9.79-7.47s-5.42-.13-8.29-.13a16,16,0,0,0-11.57,5.41c-4,4.32-15.2,14.86-15.2,36.22s15.54,42,17.72,44.91,30.61,46.76,74.14,65.54c10.34,4.44,18.42,7.11,24.72,9.18a60,60,0,0,0,27.32,1.71c8.35-1.23,25.68-10.49,29.31-20.62s3.63-18.83,2.55-20.62-3.91-3-8.29-5.22l0,0Z" transform="translate(0 0)"/></svg>
+      </a>';
+                          } else {
+                            $mensaje = '';
+                          }
+
+                          echo '<tr>
+    <td>' . $row['CODIGO'] . '</td>
+    <td>' . $row['centro'] . '</td>
+    <td>' . $row['comunidad'] . '</td>
+    <td>' . $row['nombre'] . '</td>
+    <td>' . $row['telefono'] . '</td>
+    <td class="text-center">' . ($reportes) . '</td>
+    <td>' . $mensaje . '</td>
+    
+    ';
+                        }
+                      }
+                      $stmt->close();
                       ?>
                     </tbody>
                   </table>
@@ -875,7 +846,7 @@ $stmt->close();
 
           }
         </script>
-
+        <!--
         <div class="col-lg-6 mb-lg-0 mt-4">
           <div class="card h-100 p-3">
             <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
@@ -893,7 +864,7 @@ $stmt->close();
                     <tbody>
                       <?php
 
-                      $stmt = mysqli_prepare($conexion_app, "SELECT responsable, centro, COUNT(*) AS Nrepeticiones
+                      /*  $stmt = mysqli_prepare($conexion_app, "SELECT responsable, centro, COUNT(*) AS Nrepeticiones
                     FROM flujo_electoral $extraCondicionW
                     GROUP BY responsable
                     ORDER BY Nrepeticiones ASC");
@@ -910,7 +881,7 @@ $stmt->close();
                           }
                         }
                       }
-                      $stmt->close();
+                      $stmt->close();*/
                       ?>
                     </tbody>
                   </table>
@@ -920,6 +891,8 @@ $stmt->close();
           </div>
         </div>
 
+        -->
+
         <?php
         $users = ['500', '540', '539'];
         $id_user = $_SESSION['id'];
@@ -928,7 +901,7 @@ $stmt->close();
 
         ?>
 
-          <div class="col-lg-6 mb-lg-0 mt-4">
+          <div class="col-lg-6 mb-lg-0 mt-4" style="display: none;">
             <div class="card h-100 p-3">
               <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
                 <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
@@ -1131,9 +1104,9 @@ $stmt->close();
         language: languageSettings
       });
 
-      $('#table2').DataTable({
-        language: languageSettings
-      });
+      /* $('#table2').DataTable({
+         language: languageSettings
+       });*/
       $('#table3').DataTable({
         language: languageSettings
       });
@@ -1150,7 +1123,7 @@ $stmt->close();
 
 
     <script>
-      function grafico_tendencias() {
+      /*  function grafico_tendencias() {
         am5.ready(function() {
 
           // Create root element
@@ -1234,7 +1207,7 @@ $stmt->close();
         }); // end am5.ready()
       }
       grafico_tendencias();
-
+*/
 
       function graficoHora() {
         am5.ready(function() {
@@ -1553,8 +1526,7 @@ $stmt->close();
         }
 
         makeSeries("Total", "total");
-        makeSeries("Avance", "avance");
-        makeSeries("Uno x diez", "unoxdiez");
+        makeSeries("DUROS", "avance");
         // jefes de ubch //
       <?php } ?>
 
