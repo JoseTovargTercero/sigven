@@ -132,9 +132,9 @@ $html .= '<h1 style="text-align: center; margin-bottom: 0">' . $centro_nombre . 
 
 // Imprimir cada comunidad
 foreach ($data as $comunidad => $datos) {
-    $html .= '<div class="comunidad-container">';
-    $html .= '<div class="comunidad-title">COMUNIDAD ' . strtoupper($comunidad) . '</div>';
     if (isset($datos['electores']) && count($datos['electores']) > 0) {
+        $html .= '<div class="comunidad-container">';
+        $html .= '<div class="comunidad-title">COMUNIDAD ' . strtoupper($comunidad) . '</div>';
 
         if (isset($datos['jefe_comnuidad'])) {
             $jefe = $datos['jefe_comnuidad'];
