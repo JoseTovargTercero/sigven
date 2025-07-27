@@ -3,7 +3,7 @@
 /** Error reporting */
 include('../../configurar/configuracion.php');
 require '../../elecciones/configuracion/conexion.php';
-require_once '/lib/vendor/autoload.php';
+require_once __DIR__ . '/lib/vendor/autoload.php';
 
 
 ini_set('display_errors', 1);
