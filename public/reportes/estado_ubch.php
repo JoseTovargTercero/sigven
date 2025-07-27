@@ -7,7 +7,6 @@ require_once __DIR__ . '/lib//vendor/autoload.php';
 
 
 
-error_reporting(0);
 $centro = $_GET['c'];
 
 
