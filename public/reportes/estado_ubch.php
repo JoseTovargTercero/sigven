@@ -134,24 +134,24 @@ $html .= '<h1 style="text-align: center; margin-bottom: 0">' . $centro_nombre . 
 foreach ($data as $comunidad => $datos) {
     $html .= '<div class="comunidad-container">';
     $html .= '<div class="comunidad-title">COMUNIDAD ' . strtoupper($comunidad) . '</div>';
+    if (isset($datos['electores']) && count($datos['electores']) > 0) {
 
-    if (isset($datos['jefe_comnuidad'])) {
-        $jefe = $datos['jefe_comnuidad'];
-        $html .= '<div class="jefe-info">JEFE (A) COMUNIDAD: ' . strtoupper($jefe['nombre']) . '</div>';
-        $html .= '<div class="telefono">TELÉFONO: <span>' . $jefe['telefono'] . '</span></div>';
-    } else {
-        $html .= '<div class="text-muted">Jefe no definido</div>';
-    }
+        if (isset($datos['jefe_comnuidad'])) {
+            $jefe = $datos['jefe_comnuidad'];
+            $html .= '<div class="jefe-info">JEFE (A) COMUNIDAD: ' . strtoupper($jefe['nombre']) . '</div>';
+            $html .= '<div class="telefono">TELÉFONO: <span>' . $jefe['telefono'] . '</span></div>';
+        } else {
+            $html .= '<div class="text-muted">Jefe no definido</div>';
+        }
 
-    $html .= '<table class="electores-table">';
-    $html .= '<tr>
+        $html .= '<table class="electores-table">';
+        $html .= '<tr>
                 <th style="width: 10%">#</th>
                 <th style="width: 20%">Cédula</th>
                 <th style="width: 50%">Apellidos y Nombres</th>
                 <th style="width: 20%">Teléfono</th>
             </tr>';
 
-    if (isset($datos['electores']) && count($datos['electores']) > 0) {
         $i = 1;
         foreach ($datos['electores'] as $elector) {
             $html .= '<tr>';
@@ -161,8 +161,6 @@ foreach ($data as $comunidad => $datos) {
             $html .= '<td>' . (!empty($elector['telefono']) && $elector['telefono'] != '0' ? $elector['telefono'] : '') . '</td>';
             $html .= '</tr>';
         }
-    } else {
-        $html .= '<tr><td colspan="4" class="text-muted">No hay electores</td></tr>';
     }
 
     $html .= '</table>';
