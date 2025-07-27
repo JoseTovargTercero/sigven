@@ -1,188 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGVEN</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+
 <?php
 
-/** Error reporting */
-include('../../configurar/configuracion.php');
-require '../../elecciones/configuracion/conexion.php';
-//require_once __DIR__ . '/lib/vendor/autoload.php';
-
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
 $centro = $_GET['c'];
-
-
-if ($centro == '') {
-    header("Location:" . $_SERVER['HTTP_REFERER']);
-    exit();
-}
-
-$primeraHoja = 1;
-
-
-$query = "SELECT centro FROM tablamesa WHERE CODIGO='$centro' LIMIT 1";
-$result = $conexion_app->query($query);
-$centro_nombre = ($result && $row = $result->fetch_assoc()) ? $row['centro'] : null;
-
-
-$data = array();
-
-// SACAR A LOS JEFES DE COMUNIDAD
-$stmt = $conexion_app->prepare("SELECT * FROM `operadores` 
- WHERE juventud = 2");
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $data[$row['comunidad']]['jefe_comnuidad'] = $row;
-    }
-}
-
-$faltantes = 0;
-// SACAR A LOS ELECTORES
-$stmt = $conexion_app->prepare("SELECT unificado.*, cdula AS cedula, f.hora_reporte FROM `unificado`
-LEFT JOIN flujo_electoral AS f ON f.cedula=unificado.cdula
- WHERE unificado.cv = '$centro' AND f.hora_reporte is null");
-$stmt->execute();
-$result = $stmt->get_result();
-$electores = array();
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $data[$row['comunidad']]['electores'][] = $row;
-        $faltantes++;
-    }
-}
-// Cerrar la conexión
-$stmt->close();
-
-
-// pr con pre para los electores
-/*
-echo "<pre>";
-print_r($data);
-echo "</pre>";
-*/
-
-
-$html = "<style>
-    body {
-        font-family: Arial, sans-serif;
-        font-size: 11px;
-        color: #000;
-    }
-
-    .comunidad-container {
-        margin-bottom: 25px;
-        padding-bottom: 10px;
-    }
-
-    .comunidad-title {
-        font-weight: bold;
-        font-size: 13px;
-        text-transform: uppercase;
-    }
-
-    .jefe-info {
-        font-weight: bold;
-        margin-top: 5px;
-    }
-
-    .telefono {
-        font-weight: bold;
-    }
-
-    .electores-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 5px;
-    }
-
-    .electores-table th,
-    .electores-table td {
-        border: 1px solid #ccc;
-        padding: 3px 5px;
-        text-align: left;
-    }
-
-    .electores-table th {
-        background: #eee;
-    }
-
-    .electores-table td:first-child {
-        width: 30px;
-        text-align: center;
-    }
-
-    .text-muted {
-        color: #666;
-        font-size: 10px;
-    }
-</style>";
-
-
-
-$html .= '<h1 style="text-align: center; margin-bottom: 0">' . $centro_nombre . '</h1>
-<h3  style="text-align: center; margin-top: 0; margin-bottom: 0">Faltan por votar: ' . $faltantes . '</h3>
-<p style="text-align: center;  margin-top: 5px;">' . date('Y-m-d H:i:s') . '</p>
-';
-
-
-
-// Imprimir cada comunidad
-foreach ($data as $comunidad => $datos) {
-    if (isset($datos['electores']) && count($datos['electores']) > 0) {
-        $html .= '<div class="comunidad-container">';
-        $html .= '<div class="comunidad-title">COMUNIDAD ' . strtoupper($comunidad) . '</div>';
-
-        if (isset($datos['jefe_comnuidad'])) {
-            $jefe = $datos['jefe_comnuidad'];
-            $html .= '<div class="jefe-info">JEFE (A) COMUNIDAD: ' . strtoupper($jefe['nombre']) . '</div>';
-            $html .= '<div class="telefono">TELÉFONO: <span>' . $jefe['telefono'] . '</span></div>';
-        } else {
-            $html .= '<div class="text-muted">Jefe no definido</div>';
-        }
-
-        $html .= '<table class="electores-table">';
-        $html .= '<tr>
-                <th style="width: 10%">#</th>
-                <th style="width: 20%">Cédula</th>
-                <th style="width: 50%">Apellidos y Nombres</th>
-                <th style="width: 20%">Teléfono</th>
-            </tr>';
-
-        $i = 1;
-        foreach ($datos['electores'] as $elector) {
-            $html .= '<tr>';
-            $html .= '<td>' . $i++ . '</td>';
-            $html .= '<td>' . $elector['cedula'] . '</td>';
-            $html .= '<td>' . strtoupper($elector['nombre']) . '</td>';
-            $html .= '<td>' . (!empty($elector['telefono']) && $elector['telefono'] != '0' ? $elector['telefono'] : '') . '</td>';
-            $html .= '</tr>';
-        }
-    }
-
-    $html .= '</table>';
-    $html .= '</div>';
-}
-
-echo $html;
-
-
-//$mpdf = new \Mpdf\Mpdf();
-//$mpdf->WriteHTML($html);
-//$mpdf->Output();
 
 ?>
 
 <script>
-    window.addEventListener('load', function() {
-        window.print();
+    function swal() {
+        Swal.fire({
+            title: 'Ingrese su contraseña',
+            input: 'password',
+            inputPlaceholder: 'Contraseña...',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocorrect: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Aceptar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: (password) => {
+                if (!password) {
+                    Swal.showValidationMessage('La contraseña es obligatoria');
+                    return false;
+                }
+                return password;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const password = result.value;
+                getdata(password); // Llama a tu función con la contraseña
+            }
+        });
 
-        // Esperar a que se cierre el diálogo de impresión
-        window.onafterprint = function() {
-            window.close();
-        };
-    });
+
+    }
+    swal()
+
+
+    const centro = <?php echo json_encode($centro); ?>;
+
+    function getdata(pass) {
+        fetch('estado_ubch_contenido.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    pass: pass,
+                    c: centro
+                })
+            })
+            .then(response => response.json()) // ✅ convierte el body en JSON
+            .then(data => {
+                console.log('Respuesta del servidor:', data);
+                if (data.status === 'success') {
+                    document.write(data.html); // ✅ ahora sí puedes usar data.html
+                } else {
+                    swal()
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function imprimirContenido() {
+        window.print();
+    }
 </script>
