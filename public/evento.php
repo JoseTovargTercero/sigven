@@ -568,7 +568,7 @@ $stmt->close();
                             echo '<tr>
                               <td>
   
-                              <a href="reportes/estado_ubch.php?c=' . $row['centro'] . '">
+                              <a target="_blank" href="reportes/estado_ubch.php?c=' . $row['centro'] . '">
                               <i style="margin-right: 15px;font-size: 17px;" class="line icon-cloud-download"></i>
                               
                               </a>
