@@ -3,8 +3,12 @@
 /** Error reporting */
 include('../../configurar/configuracion.php');
 require '../../elecciones/configuracion/conexion.php';
-require_once __DIR__ . '/lib//vendor/autoload.php';
+require_once __DIR__ . '/lib/vendor/autoload.php';
 
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 $centro = $_GET['c'];
