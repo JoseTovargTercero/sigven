@@ -31,7 +31,7 @@ $data = array();
 
 // SACAR A LOS JEFES DE COMUNIDAD
 $stmt = $conexion_app->prepare("SELECT * FROM `operadores` 
- WHERE CODIGO = '$centro' AND juventud = 2");
+ WHERE juventud = 2");
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows > 0) {
