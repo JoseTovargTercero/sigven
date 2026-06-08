@@ -1,7 +1,11 @@
 <?php
 // DATOS DE GITCOM
 $usuario = 'ricardo';
+$usuario = 'root';
 $contrasena = '^ZwYa^.?hT7&';
+$contrasena = '';
+
+
 $baseDeDatos = 'gitcom';
 $conexion_gitcom = new mysqli('localhost', $usuario, $contrasena, $baseDeDatos);
 $conexion_gitcom->set_charset('utf8');
@@ -14,7 +18,7 @@ date_default_timezone_set('America/Manaus');
 
 $gitcom = [];
 
-$qry = $conexion_gitcom->prepare("SELECT cedula, coordenada_este, coordenada_norte, telefono FROM inf_habitantes WHERE cedula != 'N_C'");
+$qry = $conexion_gitcom->prepare("SELECT cedula, coordenada_este, coordenada_norte FROM inf_habitantes WHERE cedula != 'N_C' LIMIT 100");
 $qry->execute();
 $res = $qry->get_result();
 
@@ -25,6 +29,10 @@ if ($res->num_rows > 0) {
     'coordenada_norte' => $row['coordenada_norte']
   ];
 }
+$qry->close();
+
+
+$conexion_gitcom->close();
 
 
 
@@ -36,7 +44,7 @@ require('../configuracion/datos_cne.php');
 
 header('Content-Type: application/json');
 
-$cedula = $_POST["responsable"];
+$cedula = $_GET["responsable"];
 
 $result = getOperador($cedula);
 
