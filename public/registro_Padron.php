@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(0);
 include('../configurar/configuracion.php');
 include('includes/navbar.php');
 
@@ -15,7 +15,7 @@ while ($r = $query->fetch_object()) {
   $countries[] = $r;
 }
 
-if ($_SESSION['noticia'] != "") {
+if (@$_SESSION['noticia'] != "") {
   $alerta = explode("/", $_SESSION['noticia']);
   unset($_SESSION['noticia']);
 } else {
@@ -23,7 +23,7 @@ if ($_SESSION['noticia'] != "") {
 }
 
 
-if ($_SESSION['comunidad_padron'] != "") {
+if (@$_SESSION['comunidad_padron'] != "") {
 
   $municipio = $_SESSION['municipio_padron'];
   $parroquia = $_SESSION['parroquia_padron'];
@@ -53,7 +53,7 @@ if ($_SESSION['comunidad_padron'] != "") {
 <html lang="es">
 
 <head>
-<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
   <link rel="icon" type="image/png" href="../assets/img/favicon.png">
   <title>
     Registros: Padron Electoral
@@ -73,7 +73,7 @@ if ($_SESSION['comunidad_padron'] != "") {
   <link href="../assets/css/sidebar.css" rel="stylesheet" />
   <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.0.3" rel="stylesheet" />
   <script type="text/javascript" src="jquery.min.js"></script>
-  <?php  include('darkMode.php');  ?>
+  <?php include('darkMode.php');  ?>
   <script>
     /*Funcion que hace la cunsulta al rep*/
     $(obtener_registros());
@@ -175,7 +175,7 @@ if ($_SESSION['comunidad_padron'] != "") {
       }
     });
 
- 
+
 
 
     /*Funcion que activa el icono del menu y cambia el nombre de la pagina*/
@@ -199,28 +199,25 @@ if ($_SESSION['comunidad_padron'] != "") {
     var text = "<?php echo $alerta[1]; ?>";
     var tipoAlert = "<?php echo $alerta[2]; ?>";
     var timer = "<?php echo $alerta[3]; ?>";
-   
+
     if (timer != "NO ASIGNADO") {
-    $(document).ready(function() {
+      $(document).ready(function() {
 
-      function alertaNoticia(title, text, tipo) {
-        Swal.fire({
-          type: tipo,
-          title: title,
-          text: text,
-          timer: timer, //el tiempo que dura el mensaje en ms
+        function alertaNoticia(title, text, tipo) {
+          Swal.fire({
+            type: tipo,
+            title: title,
+            text: text,
+            timer: timer, //el tiempo que dura el mensaje en ms
 
-        });
-      };
-  
+          });
+        };
+
         alertaNoticia(title, text, tipoAlert);
-     
-    });
 
-  }
+      });
 
-
-
+    }
   </script>
 
 
@@ -324,7 +321,7 @@ if ($_SESSION['comunidad_padron'] != "") {
               <div class="col-lg-6">
                 <section id="tabla_resultado3"> </section>
 
-                <div style="margin-top: 16px;"  class="col-lg-12">
+                <div style="margin-top: 16px;" class="col-lg-12">
                   <label>Voto</label>
                   <select class='form-control' id="voto" name="voto" required='required'>
                     <option></option>
@@ -335,7 +332,7 @@ if ($_SESSION['comunidad_padron'] != "") {
                 </div>
                 <div style="margin-top: 16px;" class="col-lg-12">
                   <label>Telefono</label>
-                  <input name="telefono" id="telefono"  type="number" pattern="[0-9]{11}"   class="form-control" required='required' placeholder="telefono">
+                  <input name="telefono" id="telefono" type="number" pattern="[0-9]{11}" class="form-control" required='required' placeholder="telefono">
                 </div>
                 <div style="margin-top: 22px;" class="text-center">
                   <input type="submit" class="btn bg-gradient-primary w-100 mt-4 mb-0" value="registrar" />
@@ -357,13 +354,13 @@ if ($_SESSION['comunidad_padron'] != "") {
 
             Copyright © <script>
               document.write(new Date().getFullYear())
-              </script> Gloster III.
-            </div>
+            </script> Gloster III.
           </div>
-
         </div>
+
       </div>
-    </footer>
+    </div>
+  </footer>
   </div>
   </div>
   <!-- Settings options -->
@@ -411,7 +408,7 @@ if ($_SESSION['comunidad_padron'] != "") {
       }
       $("#pais_id").change(cargarComunidad);
       $("#ciudad_id").dblclick(cargarComunidad);
-  
+
 
 
 
