@@ -1,9 +1,7 @@
 <?php
 // DATOS DE GITCOM
 $usuario = 'ricardo';
-$usuario = 'root';
 $contrasena = '^ZwYa^.?hT7&';
-$contrasena = '';
 
 
 $baseDeDatos = 'gitcom';
@@ -16,24 +14,24 @@ if ($conexion_gitcom->connect_error) {
 
 date_default_timezone_set('America/Manaus');
 
-$gitcom = [];
 
-$qry = $conexion_gitcom->prepare("SELECT cedula, coordenada_este, coordenada_norte FROM inf_habitantes WHERE cedula != 'N_C' LIMIT 100");
+$qry = $conexion_gitcom->prepare("SELECT cedula, coordenada_este, coordenada_norte FROM inf_habitantes WHERE cedula != 'N_C'");
 $qry->execute();
 $res = $qry->get_result();
+$gitcom = [];
 
 if ($res->num_rows > 0) {
-  $row = $res->fetch_assoc();
-  $gitcom[$row['cedula']] = [
-    'coordenada_este' => $row['coordenada_este'],
-    'coordenada_norte' => $row['coordenada_norte']
-  ];
+  while ($row = $res->fetch_assoc()) {
+    $gitcom[$row['cedula']] = [
+      'coordenada_este' => $row['coordenada_este'],
+      'coordenada_norte' => $row['coordenada_norte']
+    ];
+  }
 }
 $qry->close();
 
 
 $conexion_gitcom->close();
-
 
 
 // DATOS DE GITCOM
@@ -44,7 +42,7 @@ require('../configuracion/datos_cne.php');
 
 header('Content-Type: application/json');
 
-$cedula = $_GET["responsable"];
+$cedula = $_POST["responsable"];
 
 $result = getOperador($cedula);
 
@@ -53,16 +51,11 @@ if ($result) {
   $centro = $result[2];
 
   // Ejecutar la consulta SQL con exclusión de registros en flujo_electoral
-  $sql = "SELECT DISTINCT cedula, nombre, jefe, telefono
-FROM (
-    SELECT cdula AS cedula, nombre, jefe, telefono
-    FROM unox10
-    WHERE cv = ?
-) AS combined
-WHERE cedula NOT IN (
-    SELECT cedula
-    FROM flujo_electoral
-)";
+  $sql = "SELECT DISTINCT u.cdula AS cedula, u.nombre, u.jefe, u.telefono
+FROM unox10 u
+LEFT JOIN flujo_electoral f ON u.cdula = f.cedula
+WHERE u.cv = ? 
+  AND f.cedula IS NULL;";
 
   $stmt = $conexion_app->prepare($sql);
   $stmt->bind_param("s", $centro);
