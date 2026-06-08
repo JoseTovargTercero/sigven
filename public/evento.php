@@ -291,6 +291,7 @@ $stmt->close();
 
 
     $totalVotos = contar("SELECT count(*) FROM flujo_electoral $extraCondicionW");
+    $totalVotos -= 2;
     $porcetanjeVotosD = 0;
     $porcetanjeVotosB = 0;
     $porcetanjeVotosO = 0;
