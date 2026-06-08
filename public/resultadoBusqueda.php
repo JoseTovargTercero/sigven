@@ -17,7 +17,8 @@ $datosRep = '<ul class="list">';
 
 
 ////// REP FUNCTION //////// 
-function rep(){
+function rep()
+{
   global $cedula;
   global $conexion;
   global $nombre;
@@ -44,11 +45,11 @@ function rep(){
       if ($fila98555['firma_maduro'] == "1") {
         $datosRep = '<li> Firmo en contra</li>';
       }
-   
     }
   }
   return $datosRep;
-}$datosRep .= rep();
+}
+$datosRep .= rep();
 $datosRep .= '</ul>';
 ////// END OF REP FUNCTION//////// 
 
@@ -58,7 +59,8 @@ $datosRep .= '</ul>';
 
 ////// SIGVEN FUNCTION //////// 
 $datosSigven = '<ul class="list">';
-function sigven(){
+function sigven()
+{
   global $cedula;
   global $conexion;
   global  $nombre;
@@ -69,7 +71,7 @@ WHERE padronelectoral.cedula='$cedula'";
   $buscarAlumnos55555 = $conexion->query($query555);
   if ($buscarAlumnos55555->num_rows > 0) {
     while ($fila98555 = $buscarAlumnos55555->fetch_assoc()) {
-     
+
       $datosSigven = '
       <li>Voto:  ' . $fila98555['voto'] . '</li>
       <li>' . ucwords(mb_strtolower($fila98555['telefono'])) . '</li>
@@ -81,6 +83,8 @@ WHERE padronelectoral.cedula='$cedula'";
         $nombre  = $fila98555['nombre'];
       }
     }
+  } else {
+    $datosSigven = '<li>No Encontrado</li>';
   }
 
   return $datosSigven;
@@ -88,7 +92,8 @@ WHERE padronelectoral.cedula='$cedula'";
 
 $datosSigven .= sigven();
 
-function consultaRaas(){
+function consultaRaas()
+{
   global $cedula;
   global $conexion;
   global $nombre;
@@ -107,12 +112,16 @@ function consultaRaas(){
         $nombre  = $fila98555['nombre'];
       }
     }
+  } else {
+    $datosSigven = '<li>No Encontrado</li>';
   }
   return $datosSigven;
-}$datosSigven .= consultaRaas();
+}
+$datosSigven .= consultaRaas();
 
 
-function consultaPatrulla(){
+function consultaPatrulla()
+{
   global $cedula;
   global $conexion;
   global $nombre;
@@ -127,11 +136,15 @@ function consultaPatrulla(){
         $nombre  = $fila98555['nombre'];
       }
     }
+  } else {
+    $datosSigven = '<li>No Encontrado</li>';
   }
   return $datosSigven;
-}$datosSigven .= consultaPatrulla();
+}
+$datosSigven .= consultaPatrulla();
 
-function consultaUbch(){
+function consultaUbch()
+{
   global $cedula;
   global $conexion;
   global $nombre;
@@ -147,9 +160,12 @@ function consultaUbch(){
         $nombre  = $fila98555['nombre'];
       }
     }
+  } else {
+    $datosSigven = '<li>No Encontrado</li>';
   }
   return $datosSigven;
-}$datosSigven .= consultaUbch();
+}
+$datosSigven .= consultaUbch();
 $datosSigven .= '</ul>';
 
 ////// END OF SIGVEN FUNCTION ////////
@@ -167,15 +183,73 @@ $datosSigven .= '</ul>';
   <title>
     Busqueda
   </title>
-  <link rel="stylesheet" href="../vendors/animatedLines/css/animate.css">
   <link rel="stylesheet" href="../vendors/animatedLines/css/simple-line-icons.css">
+
+  <link rel="stylesheet" href="../vendors/animatedLines/css/animate.css">
   <script src="../vendors/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
 
   <link rel="stylesheet" href="../vendors/validator/fv.css" type="text/css" />
   <link href="../assets/css/sidebar.css" rel="stylesheet" />
   <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.0.3" rel="stylesheet" />
   <script type="text/javascript" src="jquery.min.js"></script>
-  <?php  include('darkMode.php');  ?>
+  <script src="https://cdn.jsdelivr.net/npm/ol@v7.3.0/dist/ol.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css">
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .ol-popup {
+      position: absolute;
+      background-color: white;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #cccccc;
+      bottom: 12px;
+      left: -50px;
+      min-width: 280px;
+    }
+
+    .ol-popup:after,
+    .ol-popup:before {
+      top: 100%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .ol-popup:after {
+      border-top-color: white;
+      border-width: 10px;
+      left: 48px;
+      margin-left: -10px;
+    }
+
+    .ol-popup:before {
+      border-top-color: #cccccc;
+      border-width: 11px;
+      left: 48px;
+      margin-left: -11px;
+    }
+
+    .ol-popup-closer {
+      text-decoration: none;
+      position: absolute;
+      top: 2px;
+      right: 8px;
+    }
+
+    .ol-popup-closer:after {
+      content: "✖";
+    }
+  </style>
+  <?php include('darkMode.php');  ?>
   <script>
     function getEdad(dateString) {
       let hoy = new Date()
@@ -311,23 +385,22 @@ $datosSigven .= '</ul>';
                   <h6>1x10</h6>
                   <ul class="list">
 
-                  <?php 
-                  require '../elecciones/configuracion/conexion.php';
+                    <?php
+                    require '../elecciones/configuracion/conexion.php';
 
                     $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `unox10` WHERE cdula = ? LIMIT 1");
                     $stmt->bind_param('s', $cedula);
                     $stmt->execute();
                     $result = $stmt->get_result();
-                      if ($result->num_rows > 0) {
+                    if ($result->num_rows > 0) {
                       while ($row = $result->fetch_assoc()) {
 
                         echo '<li>Encontrado</li>';
-                        echo '<li>Jefe: '.explode(';', $row['jefe'])[0].'</li>';
-                        echo '<li>Cedula Jefe: '.(explode(';', $row['jefe'])[1] == '' ? $row['jfcedula'] : explode(';', $row['jefe'])[1]).'</li>';
-                        
+                        echo '<li>Jefe: ' . explode(';', $row['jefe'])[0] . '</li>';
+                        echo '<li>Cedula Jefe: ' . (explode(';', $row['jefe'])[1] == '' ? $row['jfcedula'] : explode(';', $row['jefe'])[1]) . '</li>';
+                      }
                     }
-                    }
-                  ?>
+                    ?>
 
                   </ul>
 
@@ -342,17 +415,20 @@ $datosSigven .= '</ul>';
       <div class="row">
 
 
-        <div class="col-md-8">
+        <div class="col-md-12">
           <div class="card  h-100">
             <div class="card-header pb-0 p-3">
               <h6 class="mb-0">Posicion Geogtrafica</h6>
             </div>
             <div class="card-body centerDiv">
 
-              <div class="cotenedor">
-                <h6 class="ndp">No Disponible</h6>
-
-                <img src="../assets/img/0203021302-BASE.png" alt="mapa" height="750px" style="    opacity: 0.5;">
+              <div class="cotenedor" style="position: relative;">
+                <h6 class="ndp" id="map-ndp">No Disponible</h6>
+                <div id="map"></div>
+                <div id="popup" class="ol-popup">
+                  <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                  <div id="popup-content"></div>
+                </div>
               </div>
 
 
@@ -360,19 +436,6 @@ $datosSigven .= '</ul>';
           </div>
         </div>
 
-
-
-
-        <div class="col-md-4">
-          <div class="card  h-100">
-            <div class="card-header pb-0 p-3">
-              <h6 class="mb-0">Datos GITCOM</h6>
-            </div>
-            <div class="card-body">
-              <P style="color: lightgray;">No Disponible</P>
-            </div>
-          </div>
-        </div>
 
 
 
@@ -424,46 +487,6 @@ $datosSigven .= '</ul>';
 
 
 
-  <script src="../vendors/amcharts5/index.js"></script>
-  <script src="../vendors/amcharts5/percent.js"></script>
-  <script src="../vendors/amcharts5/themes/Animated.js"></script>
-  <script src="../vendors/amcharts5/themes/Material.js"></script>
-
-
-  <script src="../vendors/amcharts5/examples/pie-donut-chart/index.js"></script>
-  <script>
-    // Set data
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Setting_data
-    series.data.setAll([{
-        value: <?php echo $cantidadDu ?>,
-        category: "VD"
-      },
-      {
-        value: <?php echo $cantidadBd ?>,
-        category: "VB"
-      },
-      {
-        value: <?php echo $cantidadOp ?>,
-        category: "VO"
-      },
-    ]);
-
-
-    // Create legend
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/legend-percent-series/
-    var legend = chart.children.push(am5.Legend.new(root, {
-      centerX: am5.percent(50),
-      x: am5.percent(50),
-      marginTop: 15,
-      marginBottom: 15,
-    }));
-
-    legend.data.setAll(series.dataItems);
-  </script>
-
-
-
-
 
 
   <script src="../assets/js/core/bootstrap.min.js"></script>
@@ -487,7 +510,130 @@ $datosSigven .= '</ul>';
       }
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
+
+
+
+    async function consultarCedulas() {
+      const url = 'https://gitcom-ve.com/back/api_consulta_cedulas.php';
+
+      const cedula = '<?php echo $cedula; ?>'; // Reemplaza con la cédula que deseas consultar
+      const cuerpoPeticion = {
+        token: '123456789-9',
+        cedulas: [cedula]
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(cuerpoPeticion)
+        });
+
+        const resultado = await response.json();
+
+        if (!response.ok) {
+          throw new Error(resultado.error || 'Error desconocido');
+        }
+
+        console.log('Datos recibidos:', resultado);
+
+        if (resultado && resultado.success && resultado.datos && resultado.datos.length > 0) {
+          const dato = resultado.datos[0];
+          const lon = parseFloat(dato.coordenada_este);
+          const lat = parseFloat(dato.coordenada_norte);
+
+          if (!isNaN(lon) && !isNaN(lat)) {
+            const ndpEl = document.getElementById('map-ndp');
+            if (ndpEl) ndpEl.style.display = 'none';
+
+            const mapCenter = ol.proj.fromLonLat([lon, lat]);
+
+            const container = document.getElementById('popup');
+            const content = document.getElementById('popup-content');
+            const closer = document.getElementById('popup-closer');
+
+            const overlay = new ol.Overlay({
+              element: container,
+              autoPan: {
+                animation: {
+                  duration: 250,
+                },
+              },
+            });
+
+            closer.onclick = function() {
+              overlay.setPosition(undefined);
+              closer.blur();
+              return false;
+            };
+
+            const map = new ol.Map({
+              target: 'map',
+              layers: [
+                new ol.layer.Tile({
+                  source: new ol.source.OSM()
+                })
+              ],
+              overlays: [overlay],
+              view: new ol.View({
+                center: mapCenter,
+                zoom: 15
+              })
+            });
+
+            const marker = new ol.Feature({
+              geometry: new ol.geom.Point(mapCenter)
+            });
+
+            const vectorSource = new ol.source.Vector({
+              features: [marker]
+            });
+
+            const markerVectorLayer = new ol.layer.Vector({
+              source: vectorSource,
+              style: new ol.style.Style({
+                image: new ol.style.Circle({
+                  radius: 7,
+                  fill: new ol.style.Fill({
+                    color: 'red'
+                  }),
+                  stroke: new ol.style.Stroke({
+                    color: 'white',
+                    width: 2
+                  })
+                })
+              })
+            });
+
+            map.addLayer(markerVectorLayer);
+
+            // Set popup content and position
+            content.innerHTML = `
+              <p style="margin-bottom: 5px;"><strong>Cédula:</strong> ${dato.cedula}</p>
+              <p style="margin-bottom: 5px;"><strong>Teléfono:</strong> ${dato.telefono}</p>
+              <p style="margin-bottom: 0;"><strong>Coordenadas:</strong> ${lat}, ${lon}</p>
+            `;
+            overlay.setPosition(mapCenter);
+          }
+        }
+
+        return resultado;
+
+      } catch (error) {
+        console.error('Error al consultar:', error.message);
+      }
+    }
+
+    // Para ejecutarla:
+    document.addEventListener('DOMContentLoaded', () => {
+      consultarCedulas();
+      // oculta .loader 
+      document.querySelector('.loader').style.display = 'none';
+    });
   </script>
+
 </body>
 
 </html>

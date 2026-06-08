@@ -290,13 +290,21 @@ $stmt->close();
 
 
     $totalVotos = contar("SELECT count(*) FROM flujo_electoral $extraCondicionW");
+    $porcetanjeVotosD = 0;
+    $porcetanjeVotosB = 0;
+    $porcetanjeVotosO = 0;
+    $porcetanjeVotosN = 0;
 
 
-    $porcetanjeVotosD = $vd * 100 / $totalVotos;
-    $porcetanjeVotosB = $vb * 100 / $totalVotos;
-    $porcetanjeVotosO = $vo * 100 / $totalVotos;
-    $porcetanjeVotosN = $nc * 100 / $totalVotos;
 
+
+    if ($totalVotos > 0) {
+
+      $porcetanjeVotosD = $vd * 100 / $totalVotos;
+      $porcetanjeVotosB = $vb * 100 / $totalVotos;
+      $porcetanjeVotosO = $vo * 100 / $totalVotos;
+      $porcetanjeVotosN = $nc * 100 / $totalVotos;
+    }
 
 
     ?>
