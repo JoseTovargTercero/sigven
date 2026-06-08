@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 include('../configurar/configuracion.php');
 include('../elecciones/configuracion/conexion.php'); // CONEXION A LA BASE DE DATOS DE LAS ELECCIONES
 
@@ -507,6 +508,7 @@ $stmt->close();
                 <div class="   d-flex justify-content-between">
                   <h6 class="font-weight-bolder mb-4">Reportes por Centro</h6>
                   <a href="seguimiento_i.php" class="btn btn-sm btn-danger">Instituciones</a>
+                  <button id="btnPush" class="btn btn-sm btn-success">Enviar Notificaciones</button>
 
                 </div>
                 <div class="table-responsive">
@@ -980,6 +982,32 @@ $stmt->close();
         <?php
         }
         ?>
+
+        <script>
+          document.getElementById('btnPush').addEventListener('click', function() {
+            Swal.fire({
+              title: "Enviar notificaciones",
+              text: "¿Estás seguro de enviar notificaciones push a todos los usuarios?",
+              icon: "question",
+              showCancelButton: true,
+              confirmButtonText: "Enviar",
+              cancelButtonText: "Cancelar"
+            }).then((result) => {
+              if (result.isConfirmed) {
+                fetch('../configurar/push/index.php')
+                  .then(response => response.text())
+                  .then(data => {
+                    Swal.fire("Enviado", "Notificaciones enviadas correctamente", "success");
+                    console.log(data);
+                  })
+                  .catch(error => {
+                    Swal.fire("Error", "Ocurrió un error al enviar las notificaciones", "error");
+                    console.error(error);
+                  });
+              }
+            });
+          });
+        </script>
 
 
 
