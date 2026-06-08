@@ -1,4 +1,36 @@
 <?php
+// DATOS DE GITCOM
+$usuario = 'ricardo';
+$contrasena = '^ZwYa^.?hT7&';
+$baseDeDatos = 'gitcom';
+$conexion_gitcom = new mysqli('localhost', $usuario, $contrasena, $baseDeDatos);
+$conexion_gitcom->set_charset('utf8');
+
+if ($conexion_gitcom->connect_error) {
+  die('Error de conexión: ' . $conexion_gitcom->connect_error);
+}
+
+date_default_timezone_set('America/Manaus');
+
+$gitcom = [];
+
+$qry = $conexion_gitcom->prepare("SELECT cedula, coordenada_este, coordenada_norte, telefono FROM inf_habitantes WHERE cedula != 'N_C'");
+$qry->execute();
+$res = $qry->get_result();
+
+if ($res->num_rows > 0) {
+  $row = $res->fetch_assoc();
+  $gitcom[$row['cedula']] = [
+    'coordenada_este' => $row['coordenada_este'],
+    'coordenada_norte' => $row['coordenada_norte']
+  ];
+}
+
+
+
+// DATOS DE GITCOM
+
+
 require('../configuracion/conexion.php');
 require('../configuracion/datos_cne.php');
 
@@ -38,7 +70,9 @@ WHERE cedula NOT IN (
         'cedula' => $row['cedula'],
         'nombre' => $row['nombre'],
         'jefe' => $row['jefe'],
-        'telefono' => $row['telefono']
+        'telefono' => $row['telefono'],
+        'latitud' => $gitcom[$row['cedula']]['coordenada_norte'] ?? 'NG',
+        'longitud' => $gitcom[$row['cedula']]['coordenada_este'] ?? 'NG'
       );
     }
   } else {
@@ -60,7 +94,9 @@ WHERE cedula NOT IN (
     'cedula' => 'No Disponible',
     'nombre' => 'No Disponible',
     'jefe' => 'No Disponible',
-    'telefono' => 'No Disponible'
+    'telefono' => 'No Disponible',
+    'latitud' => 'No Disponible',
+    'longitud' => 'No Disponible'
   );
 }
 
