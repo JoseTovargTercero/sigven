@@ -28,11 +28,11 @@ $elector =      $_POST["elector"];
 $responsable =  $_POST["responsable"];
 //$responsable =  "14565280";
 
-
+/*
 if (date('Y-m-d') != '2025-07-27') {
   exit('LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES');
 }
-
+*/
 // Si no se reciben datos
 
 if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
