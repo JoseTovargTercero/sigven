@@ -140,7 +140,7 @@ $stmt_o->bind_param("ssssssssss", $elector, $nombre, $centro, $responsable, $vot
 $stmt_o->execute();
 
 
-if ($tipo_user == 'Punto' && $voto == 'OP') {
+if ($voto == 'OP') {
   echo "OP";
 } else {
   echo $stmt_o ? 'OK' : 'ERROR';
