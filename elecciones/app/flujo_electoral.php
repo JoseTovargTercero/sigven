@@ -67,14 +67,14 @@ $voto = 'NC'; // Valor por defecto para el voto
 // Verificación de centro electoral
 if (!$datosCne) {
   // Si el elector no está en el centro, y el responsable es operador de juventud
-  if ($operador_juventud == '1') {
+ // if ($operador_juventud == '1') {
     $centro = $resp_verificado[2];
     $nombre = 'NO DISPONIBLE';
     $mcp = trim($municipio_resp);
     $pq = trim($parroquia_resp);
-  } else {
+  /*} else {
     exit('NE'); // No es elector ni operador de juventud
-  }
+  }*/
 } else {
   // Datos del elector encontrados
   list($centro, $nombre, $mcp, $pq) = array_map('trim', $datosCne);
