@@ -3,6 +3,14 @@
 require_once __DIR__ . '/configuracion/config.php';
 
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: apikey, Content-Type');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 
 if (!isset($_SERVER['HTTP_APIKEY']) || $_SERVER['HTTP_APIKEY'] !== APIKEY) {
     http_response_code(401);
