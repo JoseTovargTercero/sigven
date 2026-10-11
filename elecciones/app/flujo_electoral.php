@@ -128,7 +128,7 @@ $stmt_sig->close();
 $conexion->close();
 
 
-$stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventud) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventudC comunidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 $stmt_o->bind_param("sssssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq, $verificado, $operador_juventud, $comunidad);
 $stmt_o->execute();
 
