@@ -23,10 +23,11 @@ function getCentro($value, $accion)
   return false;
 }
 
-$elector =      $_POST["elector"];
-//$elector =      "17105084";
-$responsable =  $_POST["responsable"];
-//$responsable =  "14565280";
+//$elector =      $_POST["elector"];
+//$responsable =  $_POST["responsable"];
+
+$elector =      "10921393";
+$responsable =  "27640176";
 
 /*
 if (date('Y-m-d') != '2025-07-27') {
