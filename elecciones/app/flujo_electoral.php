@@ -140,10 +140,41 @@ if ($result->num_rows > 0) {
 $stmt_sig->close();
 $conexion->close();
 
+// Query SQL preparada
+$query = "INSERT INTO flujo_electoral 
+            (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventudC, comunidad) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-$stmt_o = $conexion_app->prepare("INSERT INTO flujo_electoral (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventudC comunidad) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt_o->bind_param("sssssssssss", $elector, $nombre, $centro, $responsable, $voto, $idUnoX10, $mcp, $pq, $verificado, $operador_juventud, $comunidad);
-$stmt_o->execute();
+$stmt_o = $conexion_app->prepare($query);
+
+// Validamos que la consulta se haya preparado correctamente
+if ($stmt_o) {
+  // Si unodiez o verificado son enteros, puedes cambiar su 's' por 'i' (ejemplo: "sssssisssis")
+  $stmt_o->bind_param(
+    "sssssssssss",
+    $elector,
+    $nombre,
+    $centro,
+    $responsable,
+    $voto,
+    $idUnoX10,
+    $mcp,
+    $pq,
+    $verificado,
+    $operador_juventud,
+    $comunidad
+  );
+
+  if ($stmt_o->execute()) {
+    // Inserción exitosa
+  } else {
+    echo "Error al insertar: " . $stmt_o->error;
+  }
+
+  $stmt_o->close();
+} else {
+  echo "Error en la preparación SQL: " . $conexion_app->error;
+}
 
 
 if ($voto == 'OP') {
