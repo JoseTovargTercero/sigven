@@ -142,7 +142,7 @@ $conexion->close();
 
 // Query SQL preparada
 $query = "INSERT INTO flujo_electoral 
-            (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventudC, comunidad) 
+            (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventud, comunidad) 
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt_o = $conexion_app->prepare($query);
