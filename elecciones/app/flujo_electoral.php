@@ -46,7 +46,7 @@ if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
 //$responsable =  $_POST["responsable"];
 
 $elector =      "10921393";
-$responsable =  "14258101";
+$responsable =  "26013157";
 
 /* 'LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES'*/
 
