@@ -38,7 +38,7 @@ function getCentro($value, $accion)
 //$responsable =  $_POST["responsable"];
 
 $elector =      "10921393";
-$responsable =  "27640176";
+$responsable =  "14258101";
 
 /*
 if (date('Y-m-d') != '2025-07-27') {
@@ -73,7 +73,7 @@ $municipio_resp = $resp_verificado[5] ?? '';
 $parroquia_resp = $resp_verificado[6] ?? '';
 $verificado = $resp_verificado[1] ? 1 : 0;
 // Obtener datos del elector desde el CNE
-$datosCne = getCentro($elector, 1);
+echo $datosCne = getCentro($elector, 1);
 $voto = 'NC'; // Valor por defecto para el voto
 
 // Verificación de centro electoral
@@ -140,6 +140,10 @@ if ($result->num_rows > 0) {
 $stmt_sig->close();
 $conexion->close();
 
+
+
+
+
 // Query SQL preparada
 $query = "INSERT INTO flujo_electoral 
             (cedula, nombre, centro, responsable, voto, unodiez, mcp, pq, verificado, juventud, comunidad) 
@@ -182,5 +186,3 @@ if ($voto == 'OP') {
 } else {
   echo $stmt_o ? 'OK' : 'ERROR';
 }
-
-$stmt_o->close();
