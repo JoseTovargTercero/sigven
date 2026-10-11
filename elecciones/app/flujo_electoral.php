@@ -35,12 +35,12 @@ if (date('Y-m-d') != '2025-07-27') {
 }
 */
 // Si no se reciben datos
-
+/*
 if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
   echo 'FALTAN DATOS';
   exit;
 }
-
+*/
 
 
 //$elector = "145652805";      // Cédula del elector (prueba)
