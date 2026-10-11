@@ -51,14 +51,29 @@ $responsable =  "14258101";
 /* 'LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES'*/
 
 
-
-
 //$elector = "145652805";      // Cédula del elector (prueba)
 //$responsable = "27640176";  // Cédula del responsable (prueba)
 
+
 // Obtener datos del operador responsable
 $resp_verificado = getOperador($responsable);
-echo 'Prueba ' . $resp_verificado;
+
+if (@$resp_verificado) {
+  $tipo_user = $resp_verificado[0] ?? 0;
+  $operador_juventud = $resp_verificado[4] ?? 0;
+  $municipio_resp = $resp_verificado[5] ?? '';
+  $parroquia_resp = $resp_verificado[6] ?? '';
+  $verificado = $resp_verificado[1] ? 1 : 0;
+} else {
+  $tipo_user = 0;
+  $operador_juventud = 0;
+  $municipio_resp = '';
+  $parroquia_resp = '';
+  $verificado = 0;
+}
+
+print_r($resp_verificado);
+echo 'Prueba';
 // Verificar si el responsable existe
 /*
 if (!$resp_verificado) {
@@ -66,11 +81,11 @@ if (!$resp_verificado) {
 }
 */
 // Extraer datos del operador
-$tipo_user = $resp_verificado[0] ?? 0;
-$operador_juventud = $resp_verificado[4] ?? 0;
-$municipio_resp = $resp_verificado[5] ?? '';
-$parroquia_resp = $resp_verificado[6] ?? '';
-$verificado = $resp_verificado[1] ? 1 : 0;
+
+
+
+
+
 // Obtener datos del elector desde el CNE
 $datosCne = getCentro($elector, 1);
 print_r($datosCne);
