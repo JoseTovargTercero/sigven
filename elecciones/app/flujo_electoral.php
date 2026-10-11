@@ -34,18 +34,6 @@ function getCentro($value, $accion)
   return false;
 }
 
-//$elector =      $_POST["elector"];
-//$responsable =  $_POST["responsable"];
-
-$elector =      "10921393";
-$responsable =  "14258101";
-
-/*
-if (date('Y-m-d') != '2025-07-27') {
-  exit('LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES');
-}
-*/
-// Si no se reciben datos
 /*
 if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
   echo 'FALTAN DATOS';
@@ -54,12 +42,23 @@ if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
 */
 
 
+//$elector =      $_POST["elector"];
+//$responsable =  $_POST["responsable"];
+
+$elector =      "10921393";
+$responsable =  "14258101";
+
+/* 'LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES'*/
+
+
+
+
 //$elector = "145652805";      // Cédula del elector (prueba)
 //$responsable = "27640176";  // Cédula del responsable (prueba)
 
 // Obtener datos del operador responsable
 $resp_verificado = getOperador($responsable);
-
+echo 'Prueba ' . $resp_verificado;
 // Verificar si el responsable existe
 /*
 if (!$resp_verificado) {
@@ -73,20 +72,16 @@ $municipio_resp = $resp_verificado[5] ?? '';
 $parroquia_resp = $resp_verificado[6] ?? '';
 $verificado = $resp_verificado[1] ? 1 : 0;
 // Obtener datos del elector desde el CNE
-echo $datosCne = getCentro($elector, 1);
+$datosCne = getCentro($elector, 1);
+print_r($datosCne);
 $voto = 'NC'; // Valor por defecto para el voto
 
 // Verificación de centro electoral
 if (!$datosCne) {
-  // Si el elector no está en el centro, y el responsable es operador de juventud
-  // if ($operador_juventud == '1') {
   $centro = $resp_verificado[2];
   $nombre = 'NO DISPONIBLE';
   $mcp = trim($municipio_resp);
   $pq = trim($parroquia_resp);
-  /*} else {
-    exit('NE'); // No es elector ni operador de juventud
-  }*/
 } else {
   // Datos del elector encontrados
 }
