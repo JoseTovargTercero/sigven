@@ -3,6 +3,17 @@
 require('../configuracion/conexion.php');
 require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
+
+// Reportar todos los errores de PHP
+error_reporting(E_ALL);
+
+// Mostrar los errores en la pantalla (útil para desarrollo)
+ini_set('display_errors', '1');
+
+// (Opcional) Mostrar también los errores de inicio de activación de PHP
+ini_set('display_startup_errors', '1');
+
+
 function getCentro($value, $accion)
 {
   global $conexion_app;
