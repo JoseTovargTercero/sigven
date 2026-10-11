@@ -109,6 +109,7 @@ if ($result->num_rows > 0) {
 } else {
   $voto = 'NC';
   $idUnoX10 = '0';
+  $comunidad = 'NDP';
 }
 
 $stmt_unox10->close();
