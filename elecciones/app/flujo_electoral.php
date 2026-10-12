@@ -5,7 +5,7 @@ require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
 require('helpers.php');
 
-
+/*
 // Reportar todos los errores de PHP
 error_reporting(E_ALL);
 
@@ -15,7 +15,7 @@ ini_set('display_errors', '1');
 // (Opcional) Mostrar también los errores de inicio de activación de PHP
 ini_set('display_startup_errors', '1');
 
-
+*/
 
 
 if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
