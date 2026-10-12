@@ -13,26 +13,63 @@ ini_set('display_errors', '1');
 // (Opcional) Mostrar también los errores de inicio de activación de PHP
 ini_set('display_startup_errors', '1');
 
-
-function getCentro($value, $accion)
+function getCentro($value, $accion = 1)
 {
   global $conexion_app;
   $value = trim($value);
+
   if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT mcp, centro, nombre, pq FROM `rep_24` WHERE cedula = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT centro, nombre, mcp, pq FROM rep_24 WHERE cedula = ?");
   } else {
-    $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM `tablamesa` WHERE centro = ?");
+    $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM tablamesa WHERE centro = ?");
   }
+
+  if (!$stmt) return false;
+
   $stmt->bind_param('s', $value);
   $stmt->execute();
   $result = $stmt->get_result();
   $stmt->close();
+
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
-    return ($accion == 1) ? array($row['centro'], $row['nombre'], $row['mcp'], $row['pq']) : $row['CODIGO'];
+    return ($accion == 1)
+      ? [$row['centro'], $row['nombre'], $row['mcp'], $row['pq']]
+      : $row['CODIGO'];
   }
+
   return false;
 }
+
+function getCentroElegible($value)
+{
+  global $conexion_app;
+  $value = trim($value);
+
+  // Nota: Verifica si 'cdula' lleva 'e' ('cedula') en tu base de datos
+  $sql = "SELECT T.CODIGO AS centro, T.centro AS nombre, T.MUN AS mcp, T.PAQ AS pq 
+            FROM unox10 AS U 
+            LEFT JOIN tablamesa AS T ON T.CODIGO = U.cv 
+            WHERE U.cdula = ?";
+
+  $stmt = mysqli_prepare($conexion_app, $sql);
+  if (!$stmt) return false;
+
+  $stmt->bind_param('s', $value);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  $stmt->close();
+
+  if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    return [$row['centro'], $row['nombre'], $row['mcp'], $row['pq']];
+  }
+
+  return false;
+}
+
+
+
 
 /*
 if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
@@ -47,12 +84,12 @@ if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
 
 $elector =      "10921393";
 $responsable =  "26013157";
+$voto = 'NC'; // Valor por defecto para el voto
 
-/* 'LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES'*/
 
 
-//$elector = "145652805";      // Cédula del elector (prueba)
-//$responsable = "27640176";  // Cédula del responsable (prueba)
+/* TODO: 'LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES'*/
+
 
 
 // Obtener datos del operador responsable
@@ -72,34 +109,32 @@ if (@$resp_verificado) {
   $verificado = 0;
 }
 
-print_r($resp_verificado);
-echo 'Prueba';
+
 // Verificar si el responsable existe
 /*
 if (!$resp_verificado) {
   exit('RESPONSABLE NO VERIFICADO');
 }
 */
-// Extraer datos del operador
 
 
 
+// Intentamos obtener el centro principal; si falla o está vacío, usamos el elegible
+$datosCne = getCentro($elector, 1) ?: getCentroElegible($elector);
 
+// Inicializamos las variables en null por seguridad
+$centro = $nombre = $mcp = $pq = null;
 
-// Obtener datos del elector desde el CNE
-$datosCne = getCentro($elector, 1);
-print_r($datosCne);
-$voto = 'NC'; // Valor por defecto para el voto
-
-// Verificación de centro electoral
-if (!$datosCne) {
-  $centro = $resp_verificado[2];
-  $nombre = 'NO DISPONIBLE';
-  $mcp = trim($municipio_resp);
-  $pq = trim($parroquia_resp);
+// Verificamos de forma segura que sea un array válido con los 4 elementos
+if (is_array($datosCne) && count($datosCne) >= 4) {
+  [$centro, $nombre, $mcp, $pq] = $datosCne;
 } else {
-  // Datos del elector encontrados
+  $nombre = 'NO DISPONIBLE';
 }
+
+
+
+
 
 // VERIFICAR SI EL ELECTOR YA HA VOTADO
 $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
