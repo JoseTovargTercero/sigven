@@ -3,6 +3,8 @@
 require('../configuracion/conexion.php');
 require('../../configurar/configuracion.php');
 require('../configuracion/datos_cne.php');
+require('helpers.php');
+
 
 // Reportar todos los errores de PHP
 error_reporting(E_ALL);
@@ -13,82 +15,29 @@ ini_set('display_errors', '1');
 // (Opcional) Mostrar también los errores de inicio de activación de PHP
 ini_set('display_startup_errors', '1');
 
-function getCentro($value, $accion = 1)
-{
-  global $conexion_app;
-  $value = trim($value);
-
-  if ($accion == 1) {
-    $stmt = mysqli_prepare($conexion_app, "SELECT centro, nombre, mcp, pq FROM rep_24 WHERE cedula = ?");
-  } else {
-    $stmt = mysqli_prepare($conexion_app, "SELECT CODIGO FROM tablamesa WHERE centro = ?");
-  }
-
-  if (!$stmt) return false;
-
-  $stmt->bind_param('s', $value);
-  $stmt->execute();
-  $result = $stmt->get_result();
-  $stmt->close();
-
-  if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    return ($accion == 1)
-      ? [$row['centro'], $row['nombre'], $row['mcp'], $row['pq']]
-      : $row['CODIGO'];
-  }
-
-  return false;
-}
-
-function getCentroElegible($value)
-{
-  global $conexion_app;
-  $value = trim($value);
-
-  // Nota: Verifica si 'cdula' lleva 'e' ('cedula') en tu base de datos
-  $sql = "SELECT T.CODIGO AS centro, T.centro AS nombre, T.MUN AS mcp, T.PAQ AS pq 
-            FROM unox10 AS U 
-            LEFT JOIN tablamesa AS T ON T.CODIGO = U.cv 
-            WHERE U.cdula = ?";
-
-  $stmt = mysqli_prepare($conexion_app, $sql);
-  if (!$stmt) return false;
-
-  $stmt->bind_param('s', $value);
-  $stmt->execute();
-  $result = $stmt->get_result();
-  $stmt->close();
-
-  if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    return [$row['centro'], $row['nombre'], $row['mcp'], $row['pq']];
-  }
-
-  return false;
-}
 
 
 
-
-/*
 if (!isset($_POST["elector"]) || !isset($_POST["responsable"])) {
   echo 'FALTAN DATOS';
   exit;
 }
-*/
 
 
-//$elector =      $_POST["elector"];
-//$responsable =  $_POST["responsable"];
 
-$elector =      "10921393";
-$responsable =  "26013157";
+$elector =      $_POST["elector"];
+$responsable =  $_POST["responsable"];
+
+$elector = trim($elector);
+$elector = str_replace("-", "", $elector);
+$elector = str_replace(".", "", $elector);
+$elector = str_replace(" ", "", $elector);
+$elector = str_replace("V", "", $elector);
+$elector = str_replace("E", "", $elector);
+
+//$elector =      "10921393";
+//$responsable =  "26013157";
 $voto = 'NC'; // Valor por defecto para el voto
-
-
-
-/* TODO: 'LOS REPORTES SE DEBEN DE REALIZAR EL DIA DE LAS ELECCIONES'*/
 
 
 
@@ -128,12 +77,11 @@ $centro = $nombre = $mcp = $pq = null;
 // Verificamos de forma segura que sea un array válido con los 4 elementos
 if (is_array($datosCne) && count($datosCne) >= 4) {
   [$centro, $nombre, $mcp, $pq] = $datosCne;
-} else {
-  $nombre = 'NO DISPONIBLE';
 }
 
-
-
+if ($nombre == null || $centro == null) {
+  return array("elector" => $elector, "status" => "NE");
+}
 
 
 // VERIFICAR SI EL ELECTOR YA HA VOTADO
@@ -161,11 +109,11 @@ $result = $stmt_unox10->get_result();
 if ($result->num_rows > 0) {
   $row = $result->fetch_assoc();
   $voto = 'VD';
-  $idUnoX10 = 1;
+  $idUnoX10 = $row['jfcedula'];
   $comunidad = $row['comunidad'];
 } else {
   $voto = 'NC';
-  $idUnoX10 = '0';
+  $idUnoX10 = '';
   $comunidad = 'NDP';
 }
 
