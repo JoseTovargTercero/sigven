@@ -49,7 +49,7 @@ function verificarElector($elector, $responsable, $tipo_user, $verificado = 0, $
   } else {
     $voto = 'NC';
     $idUnoX10 = '';
-    $comunidad = 'NDP';
+    $comunidad = 'ND';
   }
 
   $stmt_unox10->close();
