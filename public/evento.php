@@ -291,7 +291,6 @@ $stmt->close();
 
 
     $totalVotos = contar("SELECT count(*) FROM flujo_electoral $extraCondicionW");
-    $totalVotos -= 2;
     $porcetanjeVotosD = 0;
     $porcetanjeVotosB = 0;
     $porcetanjeVotosO = 0;
@@ -617,27 +616,27 @@ $stmt->close();
       </div>
 
 
-        <!-- ===== PARTICIPACIÓN POR COMUNA ===== -->
-        <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
-          <div class="card h-100 p-3">
-            <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
-              <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-                <h6 class="font-weight-bolder mb-4">Participación por Comuna</h6>
-                <div class="table-responsive">
-                  <table id="tableComunas">
-                    <thead>
-                      <tr>
-                        <th class="p-0">Comuna</th>
-                        <th class="p-0">Municipio</th>
-                        <th class="text-center p-0">Participación actual</th>
-                        <th class="text-center p-0">Meta</th>
-                        <th class="text-center p-0">% sobre meta</th>
-                        <th class="p-0">Progreso</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php
-                      /*
+      <!-- ===== PARTICIPACIÓN POR COMUNA ===== -->
+      <div class="col-lg-12 mb-lg-0 mb-4 mt-4">
+        <div class="card h-100 p-3">
+          <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+            <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+              <h6 class="font-weight-bolder mb-4">Participación por Comuna</h6>
+              <div class="table-responsive">
+                <table id="tableComunas">
+                  <thead>
+                    <tr>
+                      <th class="p-0">Comuna</th>
+                      <th class="p-0">Municipio</th>
+                      <th class="text-center p-0">Participación actual</th>
+                      <th class="text-center p-0">Meta</th>
+                      <th class="text-center p-0">% sobre meta</th>
+                      <th class="p-0">Progreso</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    /*
                        * Consulta optimizada en una sola pasada:
                        *  1. Subconsulta inline agrupa flujo_electoral por centro (COUNT).
                        *  2. LEFT JOIN con centrosxcomunas por CODIGO_CENTRO.
@@ -645,7 +644,7 @@ $stmt->close();
                        *     con CONVERT/COLLATE para resolver diferencia de collation entre tablas.
                        *  4. GROUP BY comuna: suma participacion de todos sus centros.
                        */
-                      $sqlComunas = "
+                    $sqlComunas = "
                           SELECT
                               cc.municipio,
                               cc.parroquia,
@@ -665,31 +664,31 @@ $stmt->close();
                           ORDER BY cc.municipio, cc.parroquia, cc.comuna
                       ";
 
-                      $stmtComunas = $conexion_app->query($sqlComunas);
+                    $stmtComunas = $conexion_app->query($sqlComunas);
 
-                      if ($stmtComunas && $stmtComunas->num_rows > 0) {
-                        while ($rowC = $stmtComunas->fetch_assoc()) {
-                          $meta   = (int) $rowC['meta'];
-                          $actual = (int) $rowC['participacion_actual'];
+                    if ($stmtComunas && $stmtComunas->num_rows > 0) {
+                      while ($rowC = $stmtComunas->fetch_assoc()) {
+                        $meta   = (int) $rowC['meta'];
+                        $actual = (int) $rowC['participacion_actual'];
 
-                          // Porcentaje sobre la meta
-                          $porcentaje = ($meta > 0) ? round($actual * 100 / $meta, 1) : 0;
+                        // Porcentaje sobre la meta
+                        $porcentaje = ($meta > 0) ? round($actual * 100 / $meta, 1) : 0;
 
-                          // Color condicional: rojo <50%, amarillo 50-79%, verde >=80%
-                          if ($porcentaje >= 80) {
-                            $badgeClass = 'bg-success';
-                            $barClass   = 'bg-success';
-                          } elseif ($porcentaje >= 50) {
-                            $badgeClass = 'bg-warning';
-                            $barClass   = 'bg-warning';
-                          } else {
-                            $badgeClass = 'bg-danger';
-                            $barClass   = 'bg-danger';
-                          }
+                        // Color condicional: rojo <50%, amarillo 50-79%, verde >=80%
+                        if ($porcentaje >= 80) {
+                          $badgeClass = 'bg-success';
+                          $barClass   = 'bg-success';
+                        } elseif ($porcentaje >= 50) {
+                          $badgeClass = 'bg-warning';
+                          $barClass   = 'bg-warning';
+                        } else {
+                          $badgeClass = 'bg-danger';
+                          $barClass   = 'bg-danger';
+                        }
 
-                          $barWidth = min($porcentaje, 100); // cap visual al 100%
+                        $barWidth = min($porcentaje, 100); // cap visual al 100%
 
-                          echo '<tr>
+                        echo '<tr>
                             <td>' . htmlspecialchars($rowC['nombre_comuna']) . '</td>
                             <td>' . htmlspecialchars($rowC['municipio']) . '</td>
                             <td class="text-center">' . number_format($actual, 0, '.', '.') . '</td>
@@ -709,20 +708,20 @@ $stmt->close();
                               </div>
                             </td>
                           </tr>';
-                        }
-                        $stmtComunas->free();
-                      } else {
-                        echo '<tr><td colspan="6" class="text-center">Sin datos</td></tr>';
                       }
-                      ?>
-                    </tbody>
-                  </table>
-                </div>
+                      $stmtComunas->free();
+                    } else {
+                      echo '<tr><td colspan="6" class="text-center">Sin datos</td></tr>';
+                    }
+                    ?>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
-        <!-- ===== FIN PARTICIPACIÓN POR COMUNA ===== -->
+      </div>
+      <!-- ===== FIN PARTICIPACIÓN POR COMUNA ===== -->
 
       <div class="row mt-4">
 
@@ -1270,7 +1269,9 @@ $stmt->close();
       });
       $('#tableComunas').DataTable({
         language: languageSettings,
-        order: [[4, 'asc']]
+        order: [
+          [4, 'asc']
+        ]
       });
     </script>
 
