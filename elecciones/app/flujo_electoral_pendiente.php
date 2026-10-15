@@ -24,7 +24,7 @@ function verificarElector($elector, $responsable, $tipo_user, $verificado = 0, $
   // Verificamos de forma segura que sea un array válido con los 4 elementos
   if (is_array($datosCne) && count($datosCne) >= 4) {
     [$centro, $nombre, $mcp, $pq] = $datosCne;
-  } 
+  }
 
   $voto = 'NC';
 
@@ -106,6 +106,11 @@ if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
   // $responsable = '27640176';
 
   $resp_verificado = getOperador($responsable);
+
+
+  if (!$resp_verificado) {
+    exit('RESPONSABLE NO VERIFICADO');
+  }
 
   $response = array("results" => array());
 

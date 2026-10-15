@@ -60,11 +60,11 @@ if (@$resp_verificado) {
 
 
 // Verificar si el responsable existe
-/*
+
 if (!$resp_verificado) {
   exit('RESPONSABLE NO VERIFICADO');
 }
-*/
+
 
 
 
