@@ -4,7 +4,7 @@ require('../configuracion/datos_cne.php');
 require('helpers.php');
 
 
-function verificarElector($elector, $responsable, $tipo_user, $verificado = 0, $juventud = 0)
+function verificarElector($elector, $responsable, $tipo_user, $verificado = 0, $juventud = 0, $codigo_operador)
 {
   global $conexion_app;
   require('../../configurar/configuracion.php');
@@ -33,6 +33,7 @@ function verificarElector($elector, $responsable, $tipo_user, $verificado = 0, $
     return array("elector" => $elector, "status" => "NE");
   }
 
+  $centro = $codigo_operador;
 
 
 
@@ -122,6 +123,8 @@ if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
     $verificado = $resp_verificado[1] ? 1 : 0;
     $juventud = $resp_verificado[4] ?? 0;
   }
+  $codigo_operador = $resp_verificado[2];
+
 
   foreach ($electores as $elector) {
     $elector = trim($elector);
@@ -130,7 +133,7 @@ if (isset($_POST["electores"]) && isset($_POST["responsable"])) {
     $elector = str_replace(" ", "", $elector);
     $elector = str_replace("V", "", $elector);
     $elector = str_replace("E", "", $elector);
-    $response["results"][] = verificarElector($elector, $responsable, $tipo_user, $verificado, $juventud);
+    $response["results"][] = verificarElector($elector, $responsable, $tipo_user, $verificado, $juventud, $codigo_operador);
   }
 
   //header('Content-Type: application/json');

@@ -50,6 +50,7 @@ if (@$resp_verificado) {
   $municipio_resp = $resp_verificado[5] ?? '';
   $parroquia_resp = $resp_verificado[6] ?? '';
   $verificado = $resp_verificado[1] ? 1 : 0;
+  $codigo_operador = $resp_verificado[2];
 } else {
   $tipo_user = 0;
   $operador_juventud = 0;
@@ -83,6 +84,7 @@ if ($nombre == null || $centro == null) {
   return array("elector" => $elector, "status" => "NE");
 }
 
+$centro = $codigo_operador;
 
 // VERIFICAR SI EL ELECTOR YA HA VOTADO
 $stmt = mysqli_prepare($conexion_app, "SELECT * FROM `flujo_electoral` WHERE cedula = ?");
