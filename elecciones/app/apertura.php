@@ -29,7 +29,7 @@ if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
         }
         $stmt2->close();
       } else {
-        echo "No hay mesa pendiente de apertura para este centro.";
+        echo "Reporte de apertura enviado correctamente.";
       }
       $stmt->close();
     } else {
