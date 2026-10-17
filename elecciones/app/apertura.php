@@ -24,8 +24,12 @@ if (isset($_POST["cedula"]) && isset($_POST["cantidad"])) {
         $stmt2->bind_param('sssi', $time, $cantidad, $tipo_user, $cod);
         if ($stmt2->execute()) {
           echo "Reporte de apertura enviado correctamente.";
+        } else {
+          echo "No se pudo registrar la apertura.";
         }
         $stmt2->close();
+      } else {
+        echo "No hay mesa pendiente de apertura para este centro.";
       }
       $stmt->close();
     } else {
